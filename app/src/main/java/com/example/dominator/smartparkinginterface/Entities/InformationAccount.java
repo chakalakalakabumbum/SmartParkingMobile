@@ -3,7 +3,9 @@ package com.example.dominator.smartparkinginterface.Entities;
 
 import com.google.gson.annotations.SerializedName;
 
-public class InformationAccount {
+import java.io.Serializable;
+
+public class InformationAccount implements Serializable {
     private Integer accountId;
     private String email;
     private String password;

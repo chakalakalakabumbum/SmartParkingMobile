@@ -16,8 +16,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.ViewFlipper;
 
@@ -44,7 +47,7 @@ public class UserInterfaceActivity extends AppCompatActivity
     private AppValue appValue;
     private String currentUserId = appValue.getTestUser();
     private APIClient apiClient = new APIClient();
-    private APIInterface apiInterface = apiClient.getClient(appValue.getMainLink()).create(APIInterface.class);;
+    private APIInterface apiInterface = apiClient.getClient(appValue.getMainLink()).create(APIInterface.class);
     private InformationAccount account = new InformationAccount();
     List<ParkingLot> parkingLots = new ArrayList<>();
     private int currentCarParkId = 1;
@@ -66,30 +69,18 @@ public class UserInterfaceActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        apiInterface.doGetUser(currentUserId).enqueue(new Callback<ResponseTemplate>() {
-            @Override
-            public void onResponse(Call<ResponseTemplate> call, Response<ResponseTemplate> response) {
-                Log.d("TAG",response.code()+"");
-                Log.d("TAG",response.raw()+"");
-                Log.d("TAG",response.body()+"");
-                Log.d("TAG",appValue.getSuccessMessage());
-                try {
-                    account = (InformationAccount) apiClient.ObjectConverter(response.body().getObjectResponse(), new InformationAccount());
-                    failsafe = true;
-                }
-                catch(Exception e){
-                    Log.d("TAG",appValue.getFailMessage());
-                    Log.d("TAG",e.toString());
-                }
-            }
+        account = (InformationAccount) getIntent().getSerializableExtra("ACCOUNT_INFO");
 
-            @Override
-            public void onFailure(Call<ResponseTemplate> call, Throwable t) {
-                String displayResponse = t.toString();
-                Log.d("TAG",displayResponse);
-                Log.d("TAG",appValue.getFailMessage());
-            }
-        });
+        final ImageView blackScreen = (ImageView)findViewById(R.id.loading_image);
+        final ImageView loadingLogo = (ImageView)findViewById(R.id.loadingLogo);
+
+        final TextView reminder = (TextView) findViewById(R.id.reminder);
+        failsafe = false;
+        blackScreen.setVisibility(View.VISIBLE);
+        loadingLogo.setVisibility(View.VISIBLE);
+        Animation loadAnimation = AnimationUtils.loadAnimation(getApplicationContext(),
+                R.anim.loadinground);
+        loadingLogo.startAnimation(loadAnimation);
 
         apiInterface.doGetAllParkingLot().enqueue(new Callback<ResponseTemplate>() {
             @Override
@@ -105,10 +96,14 @@ public class UserInterfaceActivity extends AppCompatActivity
                         //parkingLots.add((ParkingLot)gson.fromJson(gson.toJson((LinkedTreeMap)(((List)response.body().getObjectResponse()).get(i))), parkingLots.getClass()));
                     }
                     failsafe = true;
+                    blackScreen.setVisibility(View.INVISIBLE);
+                    loadingLogo.setVisibility(View.INVISIBLE);
                 }
                 catch(Exception e){
                     Log.d("TAG",appValue.getFailMessage());
                     Log.d("TAG",e.toString());
+                    blackScreen.setVisibility(View.INVISIBLE);
+                    loadingLogo.setVisibility(View.INVISIBLE);
                 }
             }
 

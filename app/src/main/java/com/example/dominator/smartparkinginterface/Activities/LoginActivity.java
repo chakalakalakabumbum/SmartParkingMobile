@@ -23,6 +23,9 @@ import com.example.dominator.smartparkinginterface.R;
 import com.example.dominator.smartparkinginterface.Retrofit.APIClient;
 import com.example.dominator.smartparkinginterface.Retrofit.APIInterface;
 
+import java.io.IOException;
+import java.io.Serializable;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -31,8 +34,8 @@ public class LoginActivity extends AppCompatActivity {
 
     private View mainActivity;
     private ViewFlipper vf;
-    private APIInterface apiInterface;
     private AppValue appValue;
+    private APIInterface apiInterface = APIClient.getClient(appValue.getMainLink()).create(APIInterface.class);;
     private InformationAccount accountInfo = new InformationAccount();
     private APIClient apiClient = new APIClient();
     private Boolean failsafe;
@@ -65,13 +68,21 @@ public class LoginActivity extends AppCompatActivity {
                 vf.setDisplayedChild(1);
             }
         }, 5000);   //5 seconds
-        apiInterface = APIClient.getClient(appValue.getMainLink()).create(APIInterface.class);
     }
     public void loginInput(View view) {
         TextView emailText = (TextView) findViewById(R.id.email_text);
-        TextView passwordText = (TextView) findViewById(R.id.password_text);
+        final TextView passwordText = (TextView) findViewById(R.id.password_text);
+        final ImageView blackScreen = (ImageView)findViewById(R.id.loading_image);
+        final ImageView loadingLogo = (ImageView)findViewById(R.id.loadingLogo);
+
+
         final TextView reminder = (TextView) findViewById(R.id.reminder);
         failsafe = false;
+        blackScreen.setVisibility(View.VISIBLE);
+        loadingLogo.setVisibility(View.VISIBLE);
+        Animation loadAnimation = AnimationUtils.loadAnimation(getApplicationContext(),
+                R.anim.loadinground);
+        loadingLogo.startAnimation(loadAnimation);
         apiInterface.doCheckLogin(new UserLogin(null, emailText.getText().toString(), passwordText.getText().toString())).enqueue(new Callback<ResponseTemplate>() {
             @Override
             public void onResponse(Call<ResponseTemplate> call, Response<ResponseTemplate> response) {
@@ -79,11 +90,14 @@ public class LoginActivity extends AppCompatActivity {
                 Log.d("TAG",response.raw()+"");
                 Log.d("TAG",response.body()+"");
                 Log.d("TAG",appValue.getSuccessMessage());
+                blackScreen.setVisibility(View.INVISIBLE);
+                loadingLogo.setVisibility(View.INVISIBLE);
                 if(response.body().getObjectResponse() == null){
                     reminder.setText("Invalid email or password");
                 }else{
                     accountInfo = (InformationAccount) apiClient.ObjectConverter(response.body().getObjectResponse(), new InformationAccount());
-                    failsafe = true;
+                    accountInfo.setPassword(passwordText.getText().toString());
+                    nextActivity();
                 }
             }
 
@@ -93,12 +107,16 @@ public class LoginActivity extends AppCompatActivity {
                 Log.d("TAG",displayResponse);
                 Log.d("TAG",appValue.getFailMessage());
                 reminder.setText("Unable to connect to server");
+                blackScreen.setVisibility(View.INVISIBLE);
+                loadingLogo.setVisibility(View.INVISIBLE);
             }
         });
-        if(failsafe == true) {
-            Intent intent = new Intent(this, UserInterfaceActivity.class);
+    }
+
+    public void nextActivity(){
+            Intent intent = new Intent(this, UserInterfaceActivity.class)
+            .putExtra("ACCOUNT_INFO", (Serializable) accountInfo);
             this.startActivity(intent);
-        }
     }
 
     public void forgetPassword(View view) {
