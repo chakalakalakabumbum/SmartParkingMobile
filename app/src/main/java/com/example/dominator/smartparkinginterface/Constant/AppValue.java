@@ -1,4 +1,4 @@
-package com.example.dominator.smartparkinginterface.Cons;
+package com.example.dominator.smartparkinginterface.Constant;
 
 public class AppValue {
     public static final String MAIN_LINK = "http://192.168.1.56:8080/";

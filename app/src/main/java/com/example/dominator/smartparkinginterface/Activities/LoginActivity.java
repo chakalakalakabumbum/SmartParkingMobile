@@ -14,7 +14,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.ViewFlipper;
 
-import com.example.dominator.smartparkinginterface.Cons.AppValue;
+import com.example.dominator.smartparkinginterface.Constant.AppValue;
 import com.example.dominator.smartparkinginterface.Entities.Account;
 import com.example.dominator.smartparkinginterface.Entities.InformationAccount;
 import com.example.dominator.smartparkinginterface.Entities.ResponseTemplate;
