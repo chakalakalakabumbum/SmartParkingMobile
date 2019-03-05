@@ -32,10 +32,10 @@
         app:layout_constraintBottom_toTopOf="@+id/send_email"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/email_text" />
+        app:layout_constraintTop_toBottomOf="@+id/forget_email_text" />
 
     <EditText
-        android:id="@+id/email_text"
+        android:id="@+id/forget_email_text"
         android:layout_width="251dp"
         android:layout_height="38dp"
         android:layout_marginStart="48dp"
@@ -49,7 +49,7 @@
         android:textColorHint="@color/foregroundText"
         android:textSize="15dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/reminder" />
+        app:layout_constraintTop_toBottomOf="@+id/forget_reminder" />
 
     <ImageView
         android:id="@+id/imageView2"
@@ -66,11 +66,11 @@
         android:layout_marginLeft="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
-        app:layout_constraintBottom_toBottomOf="@+id/email_text"
+        app:layout_constraintBottom_toBottomOf="@+id/forget_email_text"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toEndOf="@+id/email_text"
-        app:layout_constraintTop_toTopOf="@+id/email_text"
+        app:layout_constraintStart_toEndOf="@+id/forget_email_text"
+        app:layout_constraintTop_toTopOf="@+id/forget_email_text"
         app:layout_constraintVertical_bias="0.0"
         app:srcCompat="@drawable/email" />
 
@@ -83,6 +83,7 @@
         android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
         android:layout_marginBottom="8dp"
+        android:onClick="confirmForgetPassword"
         android:background="@drawable/button_color"
         android:text="Send"
         android:textColor="@color/foregroundText"
@@ -91,7 +92,7 @@
         app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
-        android:id="@+id/reminder"
+        android:id="@+id/forget_reminder"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"

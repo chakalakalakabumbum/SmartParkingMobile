@@ -32,13 +32,11 @@ import retrofit2.Response;
 
 public class LoginActivity extends AppCompatActivity {
 
-    private View mainActivity;
     private ViewFlipper vf;
     private AppValue appValue;
     private APIInterface apiInterface = APIClient.getClient(appValue.getMainLink()).create(APIInterface.class);;
     private InformationAccount accountInfo = new InformationAccount();
     private APIClient apiClient = new APIClient();
-    private Boolean failsafe;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,7 +46,6 @@ public class LoginActivity extends AppCompatActivity {
         ImageView loadingImage;
         logoImage = findViewById(R.id.logo);
         loadingImage = findViewById(R.id.loadingLogo);
-        mainActivity = findViewById(R.id.my_layout);
         vf = findViewById(R.id.vf);
 
 
@@ -77,7 +74,6 @@ public class LoginActivity extends AppCompatActivity {
 
 
         final TextView reminder = (TextView) findViewById(R.id.reminder);
-        failsafe = false;
         blackScreen.setVisibility(View.VISIBLE);
         loadingLogo.setVisibility(View.VISIBLE);
         Animation loadAnimation = AnimationUtils.loadAnimation(getApplicationContext(),
@@ -185,5 +181,39 @@ public class LoginActivity extends AppCompatActivity {
                 reminder.setText("Password and confirm password mismatch");
          }
 
+    }
+
+    public void confirmForgetPassword(View view) {
+
+        EditText email = (EditText) findViewById(R.id.forget_email_text);
+        final TextView reminder = (TextView) findViewById(R.id.forget_reminder);
+        if (!email.getText().toString().isEmpty()) {
+            apiInterface.doForgetPassword(email.getText().toString()).enqueue(
+                    new Callback<ResponseTemplate>() {
+                      @Override
+                      public void onResponse(Call<ResponseTemplate> call, Response<ResponseTemplate> response) {
+                          Log.d("TAG", response.code() + "");
+                          Log.d("TAG", response.raw() + "");
+                          Log.d("TAG", response.body() + "");
+                          Log.d("TAG", appValue.getSuccessMessage());
+                          if (response.body().isStatus() == false) {
+                              reminder.setText("Invalid email address");
+                          } else {
+                              reminder.setText("Email sent, please check your box");
+                          }
+                      }
+
+                      @Override
+                      public void onFailure(Call<ResponseTemplate> call, Throwable t) {
+                          String displayResponse = t.toString();
+                          Log.d("TAG", displayResponse);
+                          Log.d("TAG", appValue.getFailMessage());
+                          reminder.setText("Unstable network connection, please check");
+                      }
+                  }
+            );
+        }else{
+            reminder.setText("The email address is empty");
+        }
     }
 }

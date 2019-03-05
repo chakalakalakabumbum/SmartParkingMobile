@@ -75,7 +75,6 @@ public class UserInterfaceActivity extends AppCompatActivity
         final ImageView loadingLogo = (ImageView)findViewById(R.id.loadingLogo);
 
         final TextView reminder = (TextView) findViewById(R.id.reminder);
-        failsafe = false;
         blackScreen.setVisibility(View.VISIBLE);
         loadingLogo.setVisibility(View.VISIBLE);
         Animation loadAnimation = AnimationUtils.loadAnimation(getApplicationContext(),
@@ -95,7 +94,6 @@ public class UserInterfaceActivity extends AppCompatActivity
                         parkingLots.add((ParkingLot)apiClient.ObjectConverter(((List)response.body().getObjectResponse()).get(i), new ParkingLot()));
                         //parkingLots.add((ParkingLot)gson.fromJson(gson.toJson((LinkedTreeMap)(((List)response.body().getObjectResponse()).get(i))), parkingLots.getClass()));
                     }
-                    failsafe = true;
                     blackScreen.setVisibility(View.INVISIBLE);
                     loadingLogo.setVisibility(View.INVISIBLE);
                 }
@@ -106,7 +104,6 @@ public class UserInterfaceActivity extends AppCompatActivity
                     loadingLogo.setVisibility(View.INVISIBLE);
                 }
             }
-
             @Override
             public void onFailure(Call<ResponseTemplate> call, Throwable t) {
                 String displayResponse = t.toString();

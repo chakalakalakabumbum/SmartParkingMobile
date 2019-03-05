@@ -10,6 +10,7 @@ import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.HTTP;
 import retrofit2.http.Path;
+import retrofit2.http.Query;
 
 public interface APIInterface {
 
@@ -24,6 +25,9 @@ public interface APIInterface {
 
     @HTTP(method = "POST", path = "/account/login", hasBody = true)
     Call<ResponseTemplate> doCheckLogin(@Body UserLogin userLogin);
+
+    @HTTP(method = "POST", path = "/driver/forget_password", hasBody = true)
+    Call<ResponseTemplate> doForgetPassword(@Query("email") String email);
 
     @HTTP(method = "PUT", path = "/account/update/{id}", hasBody = true)
     Call<ResponseTemplate> doUpdateUser(@Path("id") String id, @Body InformationAccount account);
