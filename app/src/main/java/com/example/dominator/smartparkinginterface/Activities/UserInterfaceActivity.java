@@ -1,6 +1,7 @@
 package com.example.dominator.smartparkinginterface.Activities;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -82,29 +83,49 @@ public class UserInterfaceActivity
             OnMapReadyCallback,
             GoogleMap.OnMarkerClickListener {
 
+    //View
     private ViewFlipper vf;
+    private FloatingActionButton btnShowDirection;
+    private FloatingActionButton btnShowDetail;
+    private TextView header;
+    private TextView ownerText;
+    private TextView addressText;
+    private TextView telText;
+    private TextView slotText;
+    private TextView timeText;
+    private EditText phoneNumberText;
+    private TextView emailText;
+    private EditText firstNameText;
+    private EditText lastNameText;
+    private Button changeButton;
+    private TextView reminder;
+    private EditText oldPass;
+    private EditText newPass;
+    private EditText confirmNewPass;
+
+    //API
     private String currentUserId = AppValue.getTestUser();
     private APIClient apiClient = new APIClient();
     private APIInterface apiInterface = APIClient.getClient(AppValue.getMainLink()).create(APIInterface.class);
     private InformationAccount account = new InformationAccount();
-    List<ParkingLot> parkingLots = new ArrayList<>();
-    private int currentCarParkId = 1;
     private boolean failsafe;
 
+    //Data
+    private List<ParkingLot> parkingLots = new ArrayList<>();
     private static LatLng currentLocation = new LatLng(10.852711, 106.626786);
 
+    //Google Map
     private Polyline directionPolyline;
-
     private GoogleMap map;
+
+    //Flags
     private Marker selectedMarker = null;
-
-    private FloatingActionButton btnShowDirection;
-
+    private ParkingLot selectedLot = null;
     private boolean isLotsReady = false;
     private boolean isMapReady = false;
 
-    public LocationResult locationResult = new LocationResult() {
-
+    //Location Result
+    private LocationResult locationResult = new LocationResult() {
         @Override
         public void gotLocation(Location location) {
             try {
@@ -124,37 +145,14 @@ public class UserInterfaceActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_interface);
 
-        SupportMapFragment mapFragment =
-                (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
+        if (mapFragment != null) {
+            mapFragment.getMapAsync(this);
+        }
 
-        btnShowDirection = findViewById(R.id.btnShowDirection);
-
-//        addMarkers();
-
-        vf = findViewById(R.id.vfu);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        toolbar.setBackgroundColor(Color.parseColor("#4F515C"));
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.addDrawerListener(toggle);
-        toggle.syncState();
-
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
+        bindView();
 
         account = (InformationAccount) getIntent().getSerializableExtra("ACCOUNT_INFO");
-
-//        final ImageView blackScreen = (ImageView) findViewById(R.id.loading_image);
-//        final ImageView loadingLogo = (ImageView) findViewById(R.id.loadingLogo);
-
-        final TextView reminder = (TextView) findViewById(R.id.reminder);
-//        blackScreen.setVisibility(View.VISIBLE);
-//        loadingLogo.setVisibility(View.VISIBLE);
-        Animation loadAnimation = AnimationUtils.loadAnimation(getApplicationContext(),
-                R.anim.loadinground);
-//        loadingLogo.startAnimation(loadAnimation);
 
         apiInterface.doGetAllParkingLot().enqueue(new Callback<ResponseTemplate>() {
             @Override
@@ -167,17 +165,12 @@ public class UserInterfaceActivity
                 try {
                     for (int i = 0; i < ((List) response.body().getObjectResponse()).size(); i++) {
                         parkingLots.add((ParkingLot) apiClient.ObjectConverter(((List) response.body().getObjectResponse()).get(i), new ParkingLot()));
-                        //parkingLots.add((ParkingLot)gson.fromJson(gson.toJson((LinkedTreeMap)(((List)response.body().getObjectResponse()).get(i))), parkingLots.getClass()));
                     }
                     isLotsReady = true;
                     addMarkers();
-//                    blackScreen.setVisibility(View.INVISIBLE);
-//                    loadingLogo.setVisibility(View.INVISIBLE);
                 } catch (Exception e) {
                     Log.d("TAG", AppValue.getFailMessage());
                     Log.d("TAG", e.toString());
-//                    blackScreen.setVisibility(View.INVISIBLE);
-//                    loadingLogo.setVisibility(View.INVISIBLE);
                 }
             }
 
@@ -188,7 +181,76 @@ public class UserInterfaceActivity
                 Log.d("TAG", AppValue.getFailMessage());
             }
         });
+    }
 
+    @Override
+    public boolean onMarkerClick(Marker marker) {
+        LatLng markerPosition = marker.getPosition();
+        for (ParkingLot lot : parkingLots) {
+            if (lot.getLatitude() == markerPosition.latitude && lot.getLongitude() == markerPosition.longitude) {
+                selectedLot = lot;
+            }
+        }
+        selectedMarker = marker;
+        marker.showInfoWindow();
+        btnShowDirection.show();
+        btnShowDetail.show();
+        return true;
+    }
+
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        map = googleMap;
+
+        if (map != null) {
+            map.setContentDescription(getString(R.string.map_description));
+
+            if (ActivityCompat.checkSelfPermission(this,
+                    Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                    && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(this, "Please accept location permission!", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            LocationListener locationListener = new LocationListener() {
+                @Override
+                public void onLocationChanged(Location location) {
+                    currentLocation = new LatLng(location.getLatitude(), location.getLongitude());
+                }
+
+                @Override
+                public void onStatusChanged(String s, int i, Bundle bundle) {
+                    //DO NOTHING
+                }
+
+                @Override
+                public void onProviderEnabled(String s) {
+                    //DO NOTHING
+                }
+
+                @Override
+                public void onProviderDisabled(String s) {
+                    //DO NOTHING
+                }
+            };
+            LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+            if (locationManager != null) {
+                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 10, locationListener);
+            }
+            map.setMyLocationEnabled(true);
+            map.getUiSettings().setMapToolbarEnabled(false);
+
+            MyLocation myLocation = new MyLocation();
+            if (myLocation.getLocation(getApplicationContext(), locationResult)) {
+                SharedPreferences locationPref = getApplication().getSharedPreferences("location", MODE_PRIVATE);
+                currentLocation = new LatLng(Double.parseDouble(locationPref.getString("Latitude", "10.852711")),
+                        Double.parseDouble(locationPref.getString("Longitude", "106.626786")));
+            }
+
+            isMapReady = true;
+            addMarkers();
+
+            map.setOnMarkerClickListener(this);
+        }
     }
 
     @Override
@@ -258,46 +320,29 @@ public class UserInterfaceActivity
 
     public void backButton(View view) {
         vf.setDisplayedChild(0);
-        TextView header = (TextView) findViewById(R.id.toolbar_title);
         header.setText("Home");
     }
 
     public void changePassword(View view) {
-        TextView header = (TextView) findViewById(R.id.toolbar_title);
         header.setText("Change password");
         vf.setDisplayedChild(3);
     }
 
-    public void viewCarpark(View view) {
-        TextView header = (TextView) findViewById(R.id.toolbar_title);
-        header.setText("Car park info");
+    @SuppressLint("DefaultLocale")
+    public void viewParkingLot(ParkingLot parkingLot) {
+        header.setText(parkingLot.getDisplayName());
         vf.setDisplayedChild(2);
-        TextView ownerText = (TextView) findViewById(R.id.owner_text);
-        TextView addressText = (TextView) findViewById(R.id.address_text);
-        TextView telText = (TextView) findViewById(R.id.tel_text);
-        TextView slotText = (TextView) findViewById(R.id.slot_text);
-        TextView timeText = (TextView) findViewById(R.id.time_text);
-        if (!parkingLots.isEmpty()) {
-            Owner owner = parkingLots.get(currentCarParkId).getOwner();
-            ownerText.setText(owner.getFullName());
-            addressText.setText(parkingLots.get(currentCarParkId).getAddress());
-            telText.setText(parkingLots.get(currentCarParkId).getPhoneNumber());
-            slotText.setText(parkingLots.get(currentCarParkId).getTotalSlot());
-            timeText.setText(parkingLots.get(currentCarParkId).getTimeOfOperation());
-        }
-
+        Owner owner = parkingLot.getOwner();
+        ownerText.setText(owner.getFullName());
+        addressText.setText(parkingLot.getAddress());
+        telText.setText(parkingLot.getPhoneNumber());
+        slotText.setText(String.format("%d", parkingLot.getTotalSlot()));
+        timeText.setText(parkingLot.getTimeOfOperation());
     }
 
     public void viewInfo(View view) {
-        TextView header = (TextView) findViewById(R.id.toolbar_title);
         header.setText("User info");
         vf.setDisplayedChild(1);
-        EditText phoneNumberText = (EditText) findViewById(R.id.phone_number);
-        TextView emailText = (TextView) findViewById(R.id.email);
-        EditText firstNameText = (EditText) findViewById(R.id.first_name);
-        EditText lastNameText = (EditText) findViewById(R.id.last_name);
-        Button changeButton = (Button) findViewById(R.id.save_info);
-
         //get info from outer resource
         phoneNumberText.setText(account.getPhoneNumber());
         emailText.setText(account.getEmail());
@@ -314,7 +359,6 @@ public class UserInterfaceActivity
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                Button changeButton = (Button) findViewById(R.id.save_info);
                 changeButton.setEnabled(true);
                 changeButton.setTextColor(Color.parseColor("#ffffff"));
             }
@@ -327,16 +371,9 @@ public class UserInterfaceActivity
         phoneNumberText.addTextChangedListener(textWatcher);
         firstNameText.addTextChangedListener(textWatcher);
         lastNameText.addTextChangedListener(textWatcher);
-
     }
 
     public void saveInfo(View view) {
-        Button changeButton = (Button) findViewById(R.id.save_info);
-        EditText firstNameText = (EditText) findViewById(R.id.first_name);
-        EditText lastNameText = (EditText) findViewById(R.id.last_name);
-        EditText phoneNumberText = (EditText) findViewById(R.id.phone_number);
-        TextView reminder = (TextView) findViewById(R.id.reminder);
-
         if (firstNameText.getText().toString().isEmpty() || lastNameText.getText().toString().isEmpty()
                 || phoneNumberText.getText().toString().isEmpty()) {
             reminder.setText("Some required field is empty");
@@ -377,13 +414,7 @@ public class UserInterfaceActivity
     }
 
     public void confirmChangePassword(View view) {
-        EditText oldPass = (EditText) findViewById(R.id.old_password);
-        EditText newPass = (EditText) findViewById(R.id.new_password);
-        EditText confirmNewPass = (EditText) findViewById(R.id.confirm_password);
-        TextView reminder = (TextView) findViewById(R.id.reminder);
-
         Log.d("TAG", "Old PASS: " + account.getPassword());
-
         if (oldPass.getText().toString().equals(account.getPassword()) && !oldPass.getText().toString().isEmpty()) {
             if (newPass.getText().toString().equals(confirmNewPass.getText().toString()) && !newPass.getText().toString().isEmpty()) {
                 PasswordChanger passwordChanger = new PasswordChanger(
@@ -415,7 +446,6 @@ public class UserInterfaceActivity
                 if (failsafe) {
                     account.setPassword(newPass.getText().toString());
                     vf.setDisplayedChild(0);
-                    TextView header = (TextView) findViewById(R.id.toolbar_title);
                     header.setText("Home");
                 }
             } else {
@@ -496,67 +526,11 @@ public class UserInterfaceActivity
         });
     }
 
-    @Override
-    public boolean onMarkerClick(Marker marker) {
-        selectedMarker = marker;
-        marker.showInfoWindow();
-        btnShowDirection.show();
-        return true;
-    }
-
-    @Override
-    public void onMapReady(GoogleMap googleMap) {
-        map = googleMap;
-
-        if (map != null) {
-            map.setContentDescription(getString(R.string.map_description));
-
-            if (ActivityCompat.checkSelfPermission(this,
-                    Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                    && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                Toast.makeText(this, "Please accept location permission!", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            LocationListener locationListener = new LocationListener() {
-                @Override
-                public void onLocationChanged(Location location) {
-                    currentLocation = new LatLng(location.getLatitude(), location.getLongitude());
-                }
-
-                @Override
-                public void onStatusChanged(String s, int i, Bundle bundle) {
-                    //DO NOTHING
-                }
-
-                @Override
-                public void onProviderEnabled(String s) {
-                    //DO NOTHING
-                }
-
-                @Override
-                public void onProviderDisabled(String s) {
-                    //DO NOTHING
-                }
-            };
-            LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-            if (locationManager != null) {
-                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 10, locationListener);
-            }
-            map.setMyLocationEnabled(true);
-            map.getUiSettings().setMapToolbarEnabled(false);
-
-            MyLocation myLocation = new MyLocation();
-            if (myLocation.getLocation(getApplicationContext(), locationResult)) {
-                SharedPreferences locationPref = getApplication().getSharedPreferences("location", MODE_PRIVATE);
-                currentLocation = new LatLng(Double.parseDouble(locationPref.getString("Latitude", "10.852711")),
-                        Double.parseDouble(locationPref.getString("Longitude", "106.626786")));
-            }
-
-            isMapReady = true;
-            addMarkers();
-
-            map.setOnMarkerClickListener(this);
+    public void showDetail(View view) {
+        if (selectedLot != null) {
+            viewParkingLot(selectedLot);
         }
+        selectedLot = null;
     }
 
     private void addMarkers() {
@@ -566,14 +540,13 @@ public class UserInterfaceActivity
                 LatLng marker = new LatLng(lot.getLatitude(), lot.getLongitude());
                 MarkerOptions option = new MarkerOptions();
                 option.position(marker);
-                if (lot.isActive()) {
-                    option.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
-                } else {
-                    option.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
-                }
-                //TODO: Change number of slots and name
-                option.snippet("Total slots: " + lot.getTotalSlot());
+
+                float color = lot.isActive() ? BitmapDescriptorFactory.HUE_GREEN : BitmapDescriptorFactory.HUE_RED;
+                option.icon(BitmapDescriptorFactory.defaultMarker(color));
+
                 option.title(lot.getDisplayName());
+                option.snippet("Total slots: " + lot.getTotalSlot());
+
                 map.addMarker(option);
                 builder.include(marker);
             }
@@ -594,6 +567,39 @@ public class UserInterfaceActivity
         params.add("key", getResources().getString(R.string.google_maps_key));
         params.add("sensor", "false");
         return params;
+    }
+
+    private void bindView() {
+        btnShowDirection = findViewById(R.id.btnShowDirection);
+        btnShowDetail = findViewById(R.id.btnShowDetail);
+
+        vf = findViewById(R.id.vfu);
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        toolbar.setBackgroundColor(Color.parseColor("#4F515C"));
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawer.addDrawerListener(toggle);
+        toggle.syncState();
+
+        NavigationView navigationView = findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
+
+        header = findViewById(R.id.toolbar_title);
+        ownerText = findViewById(R.id.owner_text);
+        addressText = findViewById(R.id.address_text);
+        telText = findViewById(R.id.tel_text);
+        slotText = findViewById(R.id.slot_text);
+        timeText = findViewById(R.id.time_text);
+        phoneNumberText = findViewById(R.id.phone_number);
+        emailText = findViewById(R.id.email);
+        firstNameText =  findViewById(R.id.first_name);
+        lastNameText = findViewById(R.id.last_name);
+        changeButton = findViewById(R.id.save_info);
+        reminder = findViewById(R.id.reminder);
+        oldPass = findViewById(R.id.old_password);
+        newPass = findViewById(R.id.new_password);
+        confirmNewPass = findViewById(R.id.confirm_password);
+
     }
 
 }

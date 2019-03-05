@@ -8,6 +8,24 @@
     tools:context=".Activities.UserInterfaceActivity">
 
     <android.support.design.widget.FloatingActionButton
+        android:id="@+id/btnShowDetail"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginLeft="40dp"
+        android:layout_marginBottom="40dp"
+        android:backgroundTintMode="multiply"
+        android:onClick="showDetail"
+        android:scaleType="center"
+        android:src="@drawable/ic_help"
+        android:visibility="invisible"
+        app:backgroundTint="#ffffff"
+        app:fabSize="normal"
+        android:layout_marginStart="40dp" />
+
+    <android.support.design.widget.FloatingActionButton
         android:id="@+id/btnShowDirection"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -21,7 +39,9 @@
         android:src="@drawable/ic_baseline_directions_24px"
         android:visibility="invisible"
         app:backgroundTint="#ffffff"
-        app:fabSize="normal" />
+        app:fabSize="normal"
+        android:layout_alignParentEnd="true"
+        android:layout_marginEnd="40dp" />
 
     <fragment
         android:id="@+id/map"
@@ -29,20 +49,20 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <ImageView
-        android:id="@+id/loadingLogo"
-        android:layout_width="95dp"
-        android:layout_height="62dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
-        android:layout_marginBottom="8dp"
-        android:visibility="invisible"
-        app:layout_constraintBottom_toBottomOf="@+id/loading_image"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/loading_image"
-        app:srcCompat="@drawable/loading" />
+    <!--<ImageView-->
+        <!--android:id="@+id/loadingLogo"-->
+        <!--android:layout_width="95dp"-->
+        <!--android:layout_height="62dp"-->
+        <!--android:layout_marginStart="8dp"-->
+        <!--android:layout_marginLeft="8dp"-->
+        <!--android:layout_marginEnd="8dp"-->
+        <!--android:layout_marginRight="8dp"-->
+        <!--android:layout_marginBottom="8dp"-->
+        <!--android:visibility="invisible"-->
+        <!--app:layout_constraintBottom_toBottomOf="@+id/loading_image"-->
+        <!--app:layout_constraintEnd_toEndOf="parent"-->
+        <!--app:layout_constraintStart_toStartOf="parent"-->
+        <!--app:layout_constraintTop_toTopOf="@+id/loading_image"-->
+        <!--app:srcCompat="@drawable/loading" />-->
 
 </RelativeLayout>
