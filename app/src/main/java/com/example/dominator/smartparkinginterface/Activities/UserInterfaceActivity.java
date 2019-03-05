@@ -1,9 +1,18 @@
 package com.example.dominator.smartparkinginterface.Activities;
 
+import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.ActivityCompat;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -23,6 +32,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.ViewFlipper;
 
 import com.example.dominator.smartparkinginterface.Constant.AppValue;
@@ -34,13 +44,33 @@ import com.example.dominator.smartparkinginterface.Entities.ResponseTemplate;
 import com.example.dominator.smartparkinginterface.R;
 import com.example.dominator.smartparkinginterface.Retrofit.APIClient;
 import com.example.dominator.smartparkinginterface.Retrofit.APIInterface;
+import com.example.dominator.smartparkinginterface.utils.DirectionsJSONParser;
+import com.example.dominator.smartparkinginterface.utils.HttpUtils;
+import com.example.dominator.smartparkinginterface.utils.LocationResult;
+import com.example.dominator.smartparkinginterface.utils.MyLocation;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.JointType;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.android.gms.maps.model.RoundCap;
+import com.loopj.android.http.JsonHttpResponseHandler;
+import com.loopj.android.http.RequestParams;
+
+import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
+import cz.msebera.android.httpclient.Header;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -62,10 +92,46 @@ public class UserInterfaceActivity
     private int currentCarParkId = 1;
     private boolean failsafe;
 
+    private static LatLng currentLocation = new LatLng(10.852711, 106.626786);
+
+    private static final List<LatLng> lotsList = new ArrayList<>();
+
+    private Polyline directionPolyline;
+
+    private GoogleMap map;
+    private Marker selectedMarker = null;
+
+    private FloatingActionButton btnShowDirection;
+
+    public LocationResult locationResult = new LocationResult() {
+
+        @Override
+        public void gotLocation(Location location) {
+            try {
+                SharedPreferences locationPref = getApplication().getSharedPreferences("location", MODE_PRIVATE);
+                SharedPreferences.Editor prefsEditor = locationPref.edit();
+                prefsEditor.putString("Longitude", location.getLongitude() + "");
+                prefsEditor.putString("Latitude", location.getLatitude() + "");
+                prefsEditor.apply();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_interface);
+
+        SupportMapFragment mapFragment =
+                (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this);
+
+        btnShowDirection = findViewById(R.id.btnShowDirection);
+
+        addMarkers();
+
         vf = findViewById(R.id.vfu);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setBackgroundColor(Color.parseColor("#4F515C"));
@@ -80,15 +146,15 @@ public class UserInterfaceActivity
 
         account = (InformationAccount) getIntent().getSerializableExtra("ACCOUNT_INFO");
 
-        final ImageView blackScreen = (ImageView) findViewById(R.id.loading_image);
-        final ImageView loadingLogo = (ImageView) findViewById(R.id.loadingLogo);
+//        final ImageView blackScreen = (ImageView) findViewById(R.id.loading_image);
+//        final ImageView loadingLogo = (ImageView) findViewById(R.id.loadingLogo);
 
         final TextView reminder = (TextView) findViewById(R.id.reminder);
-        blackScreen.setVisibility(View.VISIBLE);
-        loadingLogo.setVisibility(View.VISIBLE);
+//        blackScreen.setVisibility(View.VISIBLE);
+//        loadingLogo.setVisibility(View.VISIBLE);
         Animation loadAnimation = AnimationUtils.loadAnimation(getApplicationContext(),
                 R.anim.loadinground);
-        loadingLogo.startAnimation(loadAnimation);
+//        loadingLogo.startAnimation(loadAnimation);
 
         apiInterface.doGetAllParkingLot().enqueue(new Callback<ResponseTemplate>() {
             @Override
@@ -103,13 +169,13 @@ public class UserInterfaceActivity
                         parkingLots.add((ParkingLot) apiClient.ObjectConverter(((List) response.body().getObjectResponse()).get(i), new ParkingLot()));
                         //parkingLots.add((ParkingLot)gson.fromJson(gson.toJson((LinkedTreeMap)(((List)response.body().getObjectResponse()).get(i))), parkingLots.getClass()));
                     }
-                    blackScreen.setVisibility(View.INVISIBLE);
-                    loadingLogo.setVisibility(View.INVISIBLE);
+//                    blackScreen.setVisibility(View.INVISIBLE);
+//                    loadingLogo.setVisibility(View.INVISIBLE);
                 } catch (Exception e) {
                     Log.d("TAG", AppValue.getFailMessage());
                     Log.d("TAG", e.toString());
-                    blackScreen.setVisibility(View.INVISIBLE);
-                    loadingLogo.setVisibility(View.INVISIBLE);
+//                    blackScreen.setVisibility(View.INVISIBLE);
+//                    loadingLogo.setVisibility(View.INVISIBLE);
                 }
             }
 
@@ -307,8 +373,6 @@ public class UserInterfaceActivity
                 account.setPhoneNumber(phoneNumberText.getText().toString());
             }
         }
-
-
     }
 
     public void confirmChangePassword(View view) {
@@ -362,15 +426,171 @@ public class UserInterfaceActivity
     }
 
     public void showDirection(View view) {
+        RequestParams params = getParams(currentLocation, selectedMarker.getPosition());
+
+        HttpUtils.getByUrl("https://maps.googleapis.com/maps/api/directions/json", params, new JsonHttpResponseHandler() {
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+
+                List<List<HashMap<String, String>>> routes = null;
+                try {
+                    DirectionsJSONParser parser = new DirectionsJSONParser();
+                    routes = parser.parse(response);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+                if (routes != null) {
+                    ArrayList<LatLng> points;
+                    PolylineOptions lineOptions = null;
+
+                    LatLngBounds.Builder builder = new LatLngBounds.Builder();
+
+                    // Traversing through all the routes
+                    for (int i = 0; i < routes.size(); i++) {
+                        points = new ArrayList<>();
+                        lineOptions = new PolylineOptions();
+
+                        // Fetching i-th route
+                        List<HashMap<String, String>> path = routes.get(i);
+
+                        // Fetching all the points in i-th route
+                        for (int j = 0; j < path.size(); j++) {
+                            HashMap<String, String> point = path.get(j);
+
+                            double lat = Double.parseDouble(point.get("lat"));
+                            double lng = Double.parseDouble(point.get("lng"));
+                            LatLng position = new LatLng(lat, lng);
+                            builder.include(position);
+
+                            points.add(position);
+                        }
+
+                        // Adding all the points in the route to LineOptions
+                        lineOptions.addAll(points);
+                        lineOptions.width(15);
+                        lineOptions.color(Color.BLUE);
+                    }
+
+                    if (directionPolyline != null) {
+                        directionPolyline.remove();
+                    }
+
+                    // Drawing polyline in the Google Map for the i-th route
+                    directionPolyline = map.addPolyline(lineOptions);
+
+                    directionPolyline.setStartCap(new RoundCap());
+                    directionPolyline.setEndCap(new RoundCap());
+                    directionPolyline.setJointType(JointType.ROUND);
+                    directionPolyline.setPattern(null);
+
+                    LatLngBounds bounds = builder.build();
+                    map.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 100));
+
+                    selectedMarker.hideInfoWindow();
+                    selectedMarker = null;
+                    btnShowDirection.hide();
+                }
+            }
+        });
     }
 
     @Override
     public boolean onMarkerClick(Marker marker) {
-        return false;
+        selectedMarker = marker;
+        marker.showInfoWindow();
+        btnShowDirection.show();
+        return true;
     }
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
+        map = googleMap;
 
+        if (map != null) {
+            map.setContentDescription(getString(R.string.map_description));
+
+            if (ActivityCompat.checkSelfPermission(this,
+                    Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                    && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(this, "Please accept location permission!", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            LocationListener locationListener = new LocationListener() {
+                @Override
+                public void onLocationChanged(Location location) {
+                    currentLocation = new LatLng(location.getLatitude(), location.getLongitude());
+                }
+
+                @Override
+                public void onStatusChanged(String s, int i, Bundle bundle) {
+                    //DO NOTHING
+                }
+
+                @Override
+                public void onProviderEnabled(String s) {
+                    //DO NOTHING
+                }
+
+                @Override
+                public void onProviderDisabled(String s) {
+                    //DO NOTHING
+                }
+            };
+            LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+            if (locationManager != null) {
+                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 10, locationListener);
+            }
+            map.setMyLocationEnabled(true);
+            map.getUiSettings().setMapToolbarEnabled(false);
+
+            MyLocation myLocation = new MyLocation();
+            myLocation.getLocation(getApplicationContext(), locationResult);
+            boolean r = myLocation.getLocation(getApplicationContext(),
+                    locationResult);
+            if (r) {
+                SharedPreferences locationpref = getApplication().getSharedPreferences("location", MODE_PRIVATE);
+                currentLocation = new LatLng(Double.parseDouble(locationpref.getString("Latitude", "10.852711")),
+                        Double.parseDouble(locationpref.getString("Longitude", "106.626786")));
+            }
+
+            LatLngBounds.Builder builder = new LatLngBounds.Builder();
+            int i = 0;
+            for (LatLng lot : lotsList) {
+                MarkerOptions option = new MarkerOptions();
+                option.position(lot);
+                //TODO: RED if busy, GREEN if available
+                option.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+                //TODO: Change number of slots and name
+                option.snippet("Free/Total: 123/512");
+                option.title("LOT #" + (i + 1));
+                i++;
+                map.addMarker(option);
+                builder.include(lot);
+            }
+
+            builder.include(currentLocation);
+            LatLngBounds bounds = builder.build();
+            map.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 100));
+
+            map.setOnMarkerClickListener(this);
+        }
     }
+
+    private void addMarkers() {
+        lotsList.add(new LatLng(10.8671443, 106.6250343));
+        lotsList.add(new LatLng(10.8542203, 106.6119883));
+        lotsList.add(new LatLng(10.8473773, 106.6434973));
+    }
+
+    private RequestParams getParams(LatLng origin, LatLng dest) {
+        RequestParams params = new RequestParams();
+        params.add("origin", origin.latitude + "," + origin.longitude);
+        params.add("destination", dest.latitude + "," + dest.longitude);
+        params.add("lang", "en");
+        params.add("key", getResources().getString(R.string.google_maps_key));
+        params.add("sensor", "false");
+        return params;
+    }
+
 }

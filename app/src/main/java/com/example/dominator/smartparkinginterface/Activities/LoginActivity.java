@@ -5,6 +5,8 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -49,6 +51,9 @@ public class LoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+
+        checkLocationPermission();
+
         ImageView logoImage;
         ImageView loadingImage;
         logoImage = findViewById(R.id.logo);
@@ -86,6 +91,7 @@ public class LoginActivity extends AppCompatActivity {
         Animation loadAnimation = AnimationUtils.loadAnimation(getApplicationContext(),
                 R.anim.loadinground);
         loadingLogo.startAnimation(loadAnimation);
+//        nextActivity();
         apiInterface.doCheckLogin(new UserLogin(null, emailText.getText().toString(), passwordText.getText().toString())).enqueue(new Callback<ResponseTemplate>() {
             @Override
             public void onResponse(Call<ResponseTemplate> call, Response<ResponseTemplate> response) {
