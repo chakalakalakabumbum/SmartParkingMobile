@@ -42,8 +42,7 @@ import retrofit2.Response;
 public class LoginActivity extends AppCompatActivity {
 
     private ViewFlipper vf;
-    private AppValue appValue;
-    private APIInterface apiInterface = APIClient.getClient(appValue.getMainLink()).create(APIInterface.class);;
+    private APIInterface apiInterface = APIClient.getClient(AppValue.getMainLink()).create(APIInterface.class);
     private InformationAccount accountInfo = new InformationAccount();
     private APIClient apiClient = new APIClient();
 
@@ -78,11 +77,12 @@ public class LoginActivity extends AppCompatActivity {
             }
         }, 5000);   //5 seconds
     }
+
     public void loginInput(View view) {
         TextView emailText = (TextView) findViewById(R.id.email_text);
         final TextView passwordText = (TextView) findViewById(R.id.password_text);
-        final ImageView blackScreen = (ImageView)findViewById(R.id.loading_image);
-        final ImageView loadingLogo = (ImageView)findViewById(R.id.loadingLogo);
+        final ImageView blackScreen = (ImageView) findViewById(R.id.loading_image);
+        final ImageView loadingLogo = (ImageView) findViewById(R.id.loadingLogo);
 
 
         final TextView reminder = (TextView) findViewById(R.id.reminder);
@@ -95,15 +95,15 @@ public class LoginActivity extends AppCompatActivity {
         apiInterface.doCheckLogin(new UserLogin(null, emailText.getText().toString(), passwordText.getText().toString())).enqueue(new Callback<ResponseTemplate>() {
             @Override
             public void onResponse(Call<ResponseTemplate> call, Response<ResponseTemplate> response) {
-                Log.d("TAG",response.code()+"");
-                Log.d("TAG",response.raw()+"");
-                Log.d("TAG",response.body()+"");
-                Log.d("TAG",appValue.getSuccessMessage());
+                Log.d("TAG", response.code() + "");
+                Log.d("TAG", response.raw() + "");
+                Log.d("TAG", response.body() + "");
+                Log.d("TAG", AppValue.getSuccessMessage());
                 blackScreen.setVisibility(View.INVISIBLE);
                 loadingLogo.setVisibility(View.INVISIBLE);
-                if(response.body().getObjectResponse() == null){
+                if (response.body().getObjectResponse() == null) {
                     reminder.setText("Invalid email or password");
-                }else{
+                } else {
                     accountInfo = (InformationAccount) apiClient.ObjectConverter(response.body().getObjectResponse(), new InformationAccount());
                     accountInfo.setPassword(passwordText.getText().toString());
                     nextActivity();
@@ -113,8 +113,8 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onFailure(Call<ResponseTemplate> call, Throwable t) {
                 String displayResponse = t.toString();
-                Log.d("TAG",displayResponse);
-                Log.d("TAG",appValue.getFailMessage());
+                Log.d("TAG", displayResponse);
+                Log.d("TAG", AppValue.getFailMessage());
                 reminder.setText("Unable to connect to server");
                 blackScreen.setVisibility(View.INVISIBLE);
                 loadingLogo.setVisibility(View.INVISIBLE);
@@ -122,10 +122,10 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
-    public void nextActivity(){
-            Intent intent = new Intent(this, UserInterfaceActivity.class)
-            .putExtra("ACCOUNT_INFO", (Serializable) accountInfo);
-            this.startActivity(intent);
+    public void nextActivity() {
+        Intent intent = new Intent(this, UserInterfaceActivity.class)
+                .putExtra("ACCOUNT_INFO", (Serializable) accountInfo);
+        this.startActivity(intent);
     }
 
     public void forgetPassword(View view) {
@@ -149,51 +149,46 @@ public class LoginActivity extends AppCompatActivity {
         EditText password = findViewById(R.id.password);
         EditText confirmPassword = findViewById(R.id.confirm_password);
 
-        if(email.getText().toString().isEmpty() ||
+        if (email.getText().toString().isEmpty() ||
                 firstName.getText().toString().isEmpty() ||
                 lastName.getText().toString().isEmpty() ||
                 phoneNumber.getText().toString().isEmpty() ||
                 password.getText().toString().isEmpty() ||
                 confirmPassword.getText().toString().isEmpty()) {
             reminder.setText("Some required field is empty");
-        }
-        else if (Patterns.EMAIL_ADDRESS.matcher(email.getText().toString()).matches() == false){
+        } else if (!Patterns.EMAIL_ADDRESS.matcher(email.getText().toString()).matches()) {
             reminder.setText("Email pattern is invalid");
-        }
-        else if(Patterns.PHONE.matcher(email.getText().toString()).matches() == false){
+        } else if (!Patterns.PHONE.matcher(email.getText().toString()).matches()) {
             reminder.setText("Phone number is invalid");
+        } else if (password.getText().toString().equals(confirmPassword.getText().toString())) {
+            Account account = new Account();
+            account.setEmail(email.getText().toString());
+            account.setFirstName(firstName.getText().toString());
+            account.setLastName(lastName.getText().toString());
+            account.setPhoneNumber(phoneNumber.getText().toString());
+            account.setPassword(password.getText().toString());
+
+            apiInterface.doSubmitUser(account).enqueue(new Callback<ResponseTemplate>() {
+                @Override
+                public void onResponse(Call<ResponseTemplate> call, retrofit2.Response<ResponseTemplate> response) {
+                    Log.d("TAG", response.code() + "");
+                    Log.d("TAG", response.raw() + "");
+                    Log.d("TAG", response.body() + "");
+                    Log.d("TAG", response.message() + "");
+                    Log.d("TAG", response.headers() + "");
+                    Log.d("TAG", AppValue.getSuccessMessage());
+                }
+
+                @Override
+                public void onFailure(Call<ResponseTemplate> call, Throwable t) {
+                    String displayResponse = t.toString();
+                    Log.d("TAG", displayResponse);
+                    Log.d("TAG", AppValue.getFailMessage());
+                }
+            });
+        } else {
+            reminder.setText("Password and confirm password mismatch");
         }
-
-        else if (password.getText().toString().equals(confirmPassword.getText().toString())) {
-                Account account = new Account();
-                account.setEmail(email.getText().toString());
-                account.setFirstName(firstName.getText().toString());
-                account.setLastName(lastName.getText().toString());
-                account.setPhoneNumber(phoneNumber.getText().toString());
-                account.setPassword(password.getText().toString());
-
-                apiInterface.doSubmitUser(account).enqueue(new Callback<ResponseTemplate>() {
-                    @Override
-                    public void onResponse(Call<ResponseTemplate> call, retrofit2.Response<ResponseTemplate> response) {
-                        Log.d("TAG", response.code() + "");
-                        Log.d("TAG", response.raw() + "");
-                        Log.d("TAG", response.body() + "");
-                        Log.d("TAG", response.message() + "");
-                        Log.d("TAG", response.headers() + "");
-                        Log.d("TAG", appValue.getSuccessMessage());
-                    }
-
-                    @Override
-                    public void onFailure(Call<ResponseTemplate> call, Throwable t) {
-                        String displayResponse = t.toString();
-                        Log.d("TAG", displayResponse);
-                        Log.d("TAG", appValue.getFailMessage());
-                    }
-                });
-         } else {
-                reminder.setText("Password and confirm password mismatch");
-         }
-
     }
 
     public void confirmForgetPassword(View view) {
@@ -203,29 +198,29 @@ public class LoginActivity extends AppCompatActivity {
         if (!email.getText().toString().isEmpty()) {
             apiInterface.doForgetPassword(email.getText().toString()).enqueue(
                     new Callback<ResponseTemplate>() {
-                      @Override
-                      public void onResponse(Call<ResponseTemplate> call, Response<ResponseTemplate> response) {
-                          Log.d("TAG", response.code() + "");
-                          Log.d("TAG", response.raw() + "");
-                          Log.d("TAG", response.body() + "");
-                          Log.d("TAG", appValue.getSuccessMessage());
-                          if (response.body().isStatus() == false) {
-                              reminder.setText("Invalid email address");
-                          } else {
-                              reminder.setText("Email sent, please check your box");
-                          }
-                      }
+                        @Override
+                        public void onResponse(Call<ResponseTemplate> call, Response<ResponseTemplate> response) {
+                            Log.d("TAG", response.code() + "");
+                            Log.d("TAG", response.raw() + "");
+                            Log.d("TAG", response.body() + "");
+                            Log.d("TAG", AppValue.getSuccessMessage());
+                            if (!response.body().isStatus()) {
+                                reminder.setText("Invalid email address");
+                            } else {
+                                reminder.setText("Email sent, please check your box");
+                            }
+                        }
 
-                      @Override
-                      public void onFailure(Call<ResponseTemplate> call, Throwable t) {
-                          String displayResponse = t.toString();
-                          Log.d("TAG", displayResponse);
-                          Log.d("TAG", appValue.getFailMessage());
-                          reminder.setText("Unstable network connection, please check");
-                      }
-                  }
+                        @Override
+                        public void onFailure(Call<ResponseTemplate> call, Throwable t) {
+                            String displayResponse = t.toString();
+                            Log.d("TAG", displayResponse);
+                            Log.d("TAG", AppValue.getFailMessage());
+                            reminder.setText("Unstable network connection, please check");
+                        }
+                    }
             );
-        }else{
+        } else {
             reminder.setText("The email address is empty");
         }
     }
@@ -263,7 +258,7 @@ public class LoginActivity extends AppCompatActivity {
             } else {
                 // No explanation needed, we can request the permission.
                 ActivityCompat.requestPermissions(this,
-                        new String[]{ Manifest.permission.ACCESS_FINE_LOCATION },
+                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                         MY_PERMISSIONS_REQUEST_LOCATION);
             }
             return false;

@@ -30,7 +30,6 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewFlipper;
@@ -77,16 +76,16 @@ import retrofit2.Response;
 
 public class UserInterfaceActivity
         extends
-        AppCompatActivity
+            AppCompatActivity
         implements
-        NavigationView.OnNavigationItemSelectedListener,
-        OnMapReadyCallback,
-        GoogleMap.OnMarkerClickListener {
+            NavigationView.OnNavigationItemSelectedListener,
+            OnMapReadyCallback,
+            GoogleMap.OnMarkerClickListener {
 
     private ViewFlipper vf;
     private String currentUserId = AppValue.getTestUser();
     private APIClient apiClient = new APIClient();
-    private APIInterface apiInterface = apiClient.getClient(AppValue.getMainLink()).create(APIInterface.class);
+    private APIInterface apiInterface = APIClient.getClient(AppValue.getMainLink()).create(APIInterface.class);
     private InformationAccount account = new InformationAccount();
     List<ParkingLot> parkingLots = new ArrayList<>();
     private int currentCarParkId = 1;
@@ -94,14 +93,15 @@ public class UserInterfaceActivity
 
     private static LatLng currentLocation = new LatLng(10.852711, 106.626786);
 
-    private static final List<LatLng> lotsList = new ArrayList<>();
-
     private Polyline directionPolyline;
 
     private GoogleMap map;
     private Marker selectedMarker = null;
 
     private FloatingActionButton btnShowDirection;
+
+    private boolean isLotsReady = false;
+    private boolean isMapReady = false;
 
     public LocationResult locationResult = new LocationResult() {
 
@@ -130,7 +130,7 @@ public class UserInterfaceActivity
 
         btnShowDirection = findViewById(R.id.btnShowDirection);
 
-        addMarkers();
+//        addMarkers();
 
         vf = findViewById(R.id.vfu);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -169,6 +169,8 @@ public class UserInterfaceActivity
                         parkingLots.add((ParkingLot) apiClient.ObjectConverter(((List) response.body().getObjectResponse()).get(i), new ParkingLot()));
                         //parkingLots.add((ParkingLot)gson.fromJson(gson.toJson((LinkedTreeMap)(((List)response.body().getObjectResponse()).get(i))), parkingLots.getClass()));
                     }
+                    isLotsReady = true;
+                    addMarkers();
 //                    blackScreen.setVisibility(View.INVISIBLE);
 //                    loadingLogo.setVisibility(View.INVISIBLE);
                 } catch (Exception e) {
@@ -277,7 +279,6 @@ public class UserInterfaceActivity
         TextView timeText = (TextView) findViewById(R.id.time_text);
         if (!parkingLots.isEmpty()) {
             Owner owner = parkingLots.get(currentCarParkId).getOwner();
-
             ownerText.setText(owner.getFullName());
             addressText.setText(parkingLots.get(currentCarParkId).getAddress());
             telText.setText(parkingLots.get(currentCarParkId).getPhoneNumber());
@@ -545,42 +546,44 @@ public class UserInterfaceActivity
             map.getUiSettings().setMapToolbarEnabled(false);
 
             MyLocation myLocation = new MyLocation();
-            myLocation.getLocation(getApplicationContext(), locationResult);
-            boolean r = myLocation.getLocation(getApplicationContext(),
-                    locationResult);
-            if (r) {
-                SharedPreferences locationpref = getApplication().getSharedPreferences("location", MODE_PRIVATE);
-                currentLocation = new LatLng(Double.parseDouble(locationpref.getString("Latitude", "10.852711")),
-                        Double.parseDouble(locationpref.getString("Longitude", "106.626786")));
+            if (myLocation.getLocation(getApplicationContext(), locationResult)) {
+                SharedPreferences locationPref = getApplication().getSharedPreferences("location", MODE_PRIVATE);
+                currentLocation = new LatLng(Double.parseDouble(locationPref.getString("Latitude", "10.852711")),
+                        Double.parseDouble(locationPref.getString("Longitude", "106.626786")));
             }
 
-            LatLngBounds.Builder builder = new LatLngBounds.Builder();
-            int i = 0;
-            for (LatLng lot : lotsList) {
-                MarkerOptions option = new MarkerOptions();
-                option.position(lot);
-                //TODO: RED if busy, GREEN if available
-                option.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
-                //TODO: Change number of slots and name
-                option.snippet("Free/Total: 123/512");
-                option.title("LOT #" + (i + 1));
-                i++;
-                map.addMarker(option);
-                builder.include(lot);
-            }
-
-            builder.include(currentLocation);
-            LatLngBounds bounds = builder.build();
-            map.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 100));
+            isMapReady = true;
+            addMarkers();
 
             map.setOnMarkerClickListener(this);
         }
     }
 
     private void addMarkers() {
-        lotsList.add(new LatLng(10.8671443, 106.6250343));
-        lotsList.add(new LatLng(10.8542203, 106.6119883));
-        lotsList.add(new LatLng(10.8473773, 106.6434973));
+        if (isLotsReady && isMapReady) {
+            LatLngBounds.Builder builder = new LatLngBounds.Builder();
+            for (ParkingLot lot : parkingLots) {
+                LatLng marker = new LatLng(lot.getLatitude(), lot.getLongitude());
+                MarkerOptions option = new MarkerOptions();
+                option.position(marker);
+                if (lot.isActive()) {
+                    option.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+                } else {
+                    option.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
+                }
+                //TODO: Change number of slots and name
+                option.snippet("Total slots: " + lot.getTotalSlot());
+                option.title(lot.getDisplayName());
+                map.addMarker(option);
+                builder.include(marker);
+            }
+            builder.include(currentLocation);
+            LatLngBounds bounds = builder.build();
+            map.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 100));
+        }
+//        lotsList.add(new LatLng(10.8671443, 106.6250343));
+//        lotsList.add(new LatLng(10.8542203, 106.6119883));
+//        lotsList.add(new LatLng(10.8473773, 106.6434973));
     }
 
     private RequestParams getParams(LatLng origin, LatLng dest) {
