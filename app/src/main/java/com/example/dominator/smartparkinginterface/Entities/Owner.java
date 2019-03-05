@@ -79,4 +79,8 @@ public class Owner {
     public void setYearOfBirth(Date yearOfBirth) {
         this.yearOfBirth = yearOfBirth;
     }
+
+    public String getFullName() {
+        return this.firstName + " " + this.lastName;
+    }
 }

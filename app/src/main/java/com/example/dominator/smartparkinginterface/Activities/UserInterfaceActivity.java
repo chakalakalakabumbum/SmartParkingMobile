@@ -3,6 +3,7 @@ package com.example.dominator.smartparkinginterface.Activities;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -26,12 +27,16 @@ import android.widget.ViewFlipper;
 
 import com.example.dominator.smartparkinginterface.Constant.AppValue;
 import com.example.dominator.smartparkinginterface.Entities.InformationAccount;
+import com.example.dominator.smartparkinginterface.Entities.Owner;
 import com.example.dominator.smartparkinginterface.Entities.PasswordChanger;
 import com.example.dominator.smartparkinginterface.Entities.ParkingLot;
 import com.example.dominator.smartparkinginterface.Entities.ResponseTemplate;
 import com.example.dominator.smartparkinginterface.R;
 import com.example.dominator.smartparkinginterface.Retrofit.APIClient;
 import com.example.dominator.smartparkinginterface.Retrofit.APIInterface;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.Marker;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,14 +45,18 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class UserInterfaceActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+public class UserInterfaceActivity
+        extends
+        AppCompatActivity
+        implements
+        NavigationView.OnNavigationItemSelectedListener,
+        OnMapReadyCallback,
+        GoogleMap.OnMarkerClickListener {
 
     private ViewFlipper vf;
-    private AppValue appValue;
-    private String currentUserId = appValue.getTestUser();
+    private String currentUserId = AppValue.getTestUser();
     private APIClient apiClient = new APIClient();
-    private APIInterface apiInterface = apiClient.getClient(appValue.getMainLink()).create(APIInterface.class);
+    private APIInterface apiInterface = apiClient.getClient(AppValue.getMainLink()).create(APIInterface.class);
     private InformationAccount account = new InformationAccount();
     List<ParkingLot> parkingLots = new ArrayList<>();
     private int currentCarParkId = 1;
@@ -71,8 +80,8 @@ public class UserInterfaceActivity extends AppCompatActivity
 
         account = (InformationAccount) getIntent().getSerializableExtra("ACCOUNT_INFO");
 
-        final ImageView blackScreen = (ImageView)findViewById(R.id.loading_image);
-        final ImageView loadingLogo = (ImageView)findViewById(R.id.loadingLogo);
+        final ImageView blackScreen = (ImageView) findViewById(R.id.loading_image);
+        final ImageView loadingLogo = (ImageView) findViewById(R.id.loadingLogo);
 
         final TextView reminder = (TextView) findViewById(R.id.reminder);
         blackScreen.setVisibility(View.VISIBLE);
@@ -84,31 +93,31 @@ public class UserInterfaceActivity extends AppCompatActivity
         apiInterface.doGetAllParkingLot().enqueue(new Callback<ResponseTemplate>() {
             @Override
             public void onResponse(Call<ResponseTemplate> call, Response<ResponseTemplate> response) {
-                Log.d("TAG",response.code()+"");
-                Log.d("TAG",response.raw()+"");
-                Log.d("TAG",response.body()+"");
-                Log.d("TAG",appValue.getSuccessMessage());
+                Log.d("TAG", response.code() + "");
+                Log.d("TAG", response.raw() + "");
+                Log.d("TAG", response.body() + "");
+                Log.d("TAG", AppValue.getSuccessMessage());
                 ResponseTemplate responseTemplate = response.body();
                 try {
-                    for(int i = 0; i < ((List)response.body().getObjectResponse()).size(); i++) {
-                        parkingLots.add((ParkingLot)apiClient.ObjectConverter(((List)response.body().getObjectResponse()).get(i), new ParkingLot()));
+                    for (int i = 0; i < ((List) response.body().getObjectResponse()).size(); i++) {
+                        parkingLots.add((ParkingLot) apiClient.ObjectConverter(((List) response.body().getObjectResponse()).get(i), new ParkingLot()));
                         //parkingLots.add((ParkingLot)gson.fromJson(gson.toJson((LinkedTreeMap)(((List)response.body().getObjectResponse()).get(i))), parkingLots.getClass()));
                     }
                     blackScreen.setVisibility(View.INVISIBLE);
                     loadingLogo.setVisibility(View.INVISIBLE);
-                }
-                catch(Exception e){
-                    Log.d("TAG",appValue.getFailMessage());
-                    Log.d("TAG",e.toString());
+                } catch (Exception e) {
+                    Log.d("TAG", AppValue.getFailMessage());
+                    Log.d("TAG", e.toString());
                     blackScreen.setVisibility(View.INVISIBLE);
                     loadingLogo.setVisibility(View.INVISIBLE);
                 }
             }
+
             @Override
             public void onFailure(Call<ResponseTemplate> call, Throwable t) {
                 String displayResponse = t.toString();
-                Log.d("TAG",displayResponse);
-                Log.d("TAG",appValue.getFailMessage());
+                Log.d("TAG", displayResponse);
+                Log.d("TAG", AppValue.getFailMessage());
             }
         });
 
@@ -148,7 +157,7 @@ public class UserInterfaceActivity extends AppCompatActivity
 
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
-    public boolean onNavigationItemSelected(MenuItem item) {
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
@@ -157,14 +166,13 @@ public class UserInterfaceActivity extends AppCompatActivity
         } else if (id == R.id.nav_help) {
 
         } else if (id == R.id.nav_logout) {
-            Intent intent = new Intent(this,LoginActivity.class);
+            Intent intent = new Intent(this, LoginActivity.class);
             this.startActivity(intent);
 
         } else if (id == R.id.nav_news) {
 
         } else if (id == R.id.nav_profile) {
-            if(failsafe == true || failsafe == false)
-            {
+            if (failsafe == true || failsafe == false) {
                 NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
                 TextView header = (TextView) findViewById(R.id.toolbar_title);
                 header.setText("Profile");
@@ -182,16 +190,18 @@ public class UserInterfaceActivity extends AppCompatActivity
 
     public void backButton(View view) {
         vf.setDisplayedChild(0);
-        TextView header = (TextView)findViewById(R.id.toolbar_title);
+        TextView header = (TextView) findViewById(R.id.toolbar_title);
         header.setText("Home");
     }
+
     public void changePassword(View view) {
-        TextView header = (TextView)findViewById(R.id.toolbar_title);
+        TextView header = (TextView) findViewById(R.id.toolbar_title);
         header.setText("Change password");
         vf.setDisplayedChild(3);
     }
+
     public void viewCarpark(View view) {
-        TextView header = (TextView)findViewById(R.id.toolbar_title);
+        TextView header = (TextView) findViewById(R.id.toolbar_title);
         header.setText("Car park info");
         vf.setDisplayedChild(2);
         TextView ownerText = (TextView) findViewById(R.id.owner_text);
@@ -199,25 +209,27 @@ public class UserInterfaceActivity extends AppCompatActivity
         TextView telText = (TextView) findViewById(R.id.tel_text);
         TextView slotText = (TextView) findViewById(R.id.slot_text);
         TextView timeText = (TextView) findViewById(R.id.time_text);
-        if(!parkingLots.isEmpty()) {
-            ownerText.setText(parkingLots.get(currentCarParkId).getOwner().getFirstName()
-                    + " " + parkingLots.get(currentCarParkId).getOwner().getLastName());
+        if (!parkingLots.isEmpty()) {
+            Owner owner = parkingLots.get(currentCarParkId).getOwner();
+
+            ownerText.setText(owner.getFullName());
             addressText.setText(parkingLots.get(currentCarParkId).getAddress());
             telText.setText(parkingLots.get(currentCarParkId).getPhoneNumber());
-            slotText.setText(parkingLots.get(currentCarParkId).getTotalSlot().toString());
+            slotText.setText(parkingLots.get(currentCarParkId).getTotalSlot());
             timeText.setText(parkingLots.get(currentCarParkId).getTimeOfOperation());
         }
 
     }
+
     public void viewInfo(View view) {
-        TextView header = (TextView)findViewById(R.id.toolbar_title);
+        TextView header = (TextView) findViewById(R.id.toolbar_title);
         header.setText("User info");
         vf.setDisplayedChild(1);
-        EditText phoneNumberText = (EditText)findViewById(R.id.phone_number);
+        EditText phoneNumberText = (EditText) findViewById(R.id.phone_number);
         TextView emailText = (TextView) findViewById(R.id.email);
-        EditText firstNameText = (EditText)findViewById(R.id.first_name);
-        EditText lastNameText = (EditText)findViewById(R.id.last_name);
-        Button changeButton = (Button)findViewById(R.id.save_info);
+        EditText firstNameText = (EditText) findViewById(R.id.first_name);
+        EditText lastNameText = (EditText) findViewById(R.id.last_name);
+        Button changeButton = (Button) findViewById(R.id.save_info);
 
         //get info from outer resource
         phoneNumberText.setText(account.getPhoneNumber());
@@ -235,7 +247,7 @@ public class UserInterfaceActivity extends AppCompatActivity
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                Button changeButton = (Button)findViewById(R.id.save_info);
+                Button changeButton = (Button) findViewById(R.id.save_info);
                 changeButton.setEnabled(true);
                 changeButton.setTextColor(Color.parseColor("#ffffff"));
             }
@@ -252,20 +264,18 @@ public class UserInterfaceActivity extends AppCompatActivity
     }
 
     public void saveInfo(View view) {
-        Button changeButton = (Button)findViewById(R.id.save_info);
-        EditText firstNameText = (EditText)findViewById(R.id.first_name);
-        EditText lastNameText = (EditText)findViewById(R.id.last_name);
-        EditText phoneNumberText = (EditText)findViewById(R.id.phone_number);
-        TextView reminder = (TextView)findViewById(R.id.reminder);
+        Button changeButton = (Button) findViewById(R.id.save_info);
+        EditText firstNameText = (EditText) findViewById(R.id.first_name);
+        EditText lastNameText = (EditText) findViewById(R.id.last_name);
+        EditText phoneNumberText = (EditText) findViewById(R.id.phone_number);
+        TextView reminder = (TextView) findViewById(R.id.reminder);
 
-        if(firstNameText.getText().toString().isEmpty() || lastNameText.getText().toString().isEmpty()
-                || phoneNumberText.getText().toString().isEmpty()){
+        if (firstNameText.getText().toString().isEmpty() || lastNameText.getText().toString().isEmpty()
+                || phoneNumberText.getText().toString().isEmpty()) {
             reminder.setText("Some required field is empty");
-        }
-        else if(Patterns.PHONE.matcher(phoneNumberText.getText().toString()).matches() == false){
+        } else if (!Patterns.PHONE.matcher(phoneNumberText.getText().toString()).matches()) {
             reminder.setText("Phone number is invalid");
-        }
-        else if(changeButton.isEnabled() == true){
+        } else if (changeButton.isEnabled()) {
 
             InformationAccount user = new InformationAccount();
             user.setLastName(lastNameText.getText().toString());
@@ -280,7 +290,7 @@ public class UserInterfaceActivity extends AppCompatActivity
                     Log.d("TAG3", response.body() + "");
                     Log.d("TAG4", response.message() + "");
                     Log.d("TAG5", response.headers() + "");
-                    Log.d("TAG6", appValue.getSuccessMessage());
+                    Log.d("TAG6", AppValue.getSuccessMessage());
                     failsafe = true;
                 }
 
@@ -288,10 +298,10 @@ public class UserInterfaceActivity extends AppCompatActivity
                 public void onFailure(Call<ResponseTemplate> call, Throwable t) {
                     String displayResponse = t.toString();
                     Log.d("TAG", displayResponse);
-                    Log.d("TAG", appValue.getFailMessage());
+                    Log.d("TAG", AppValue.getFailMessage());
                 }
             });
-            if(failsafe = true) {
+            if (failsafe) {
                 account.setFirstName(firstNameText.getText().toString());
                 account.setLastName(lastNameText.getText().toString());
                 account.setPhoneNumber(phoneNumberText.getText().toString());
@@ -302,21 +312,21 @@ public class UserInterfaceActivity extends AppCompatActivity
     }
 
     public void confirmChangePassword(View view) {
-        EditText oldPass = (EditText)findViewById(R.id.old_password);
-        EditText newPass = (EditText)findViewById(R.id.new_password);
-        EditText confirmNewPass = (EditText)findViewById(R.id.confirm_password);
-        TextView reminder = (TextView)findViewById(R.id.reminder);
+        EditText oldPass = (EditText) findViewById(R.id.old_password);
+        EditText newPass = (EditText) findViewById(R.id.new_password);
+        EditText confirmNewPass = (EditText) findViewById(R.id.confirm_password);
+        TextView reminder = (TextView) findViewById(R.id.reminder);
 
         Log.d("TAG", "Old PASS: " + account.getPassword());
 
-        if(oldPass.getText().toString().equals(account.getPassword()) && !oldPass.getText().toString().isEmpty()){
-            if(newPass.getText().toString().equals(confirmNewPass.getText().toString()) && !newPass.getText().toString().isEmpty()){
+        if (oldPass.getText().toString().equals(account.getPassword()) && !oldPass.getText().toString().isEmpty()) {
+            if (newPass.getText().toString().equals(confirmNewPass.getText().toString()) && !newPass.getText().toString().isEmpty()) {
                 PasswordChanger passwordChanger = new PasswordChanger(
                         account.getAccountId(),
                         oldPass.getText().toString(),
                         newPass.getText().toString(),
                         confirmNewPass.getText().toString()
-                        );
+                );
                 failsafe = false;
                 apiInterface.doChangePassword(passwordChanger).enqueue(new Callback<ResponseTemplate>() {
                     @Override
@@ -326,7 +336,7 @@ public class UserInterfaceActivity extends AppCompatActivity
                         Log.d("TAG3", response.body() + "");
                         Log.d("TAG4", response.message() + "");
                         Log.d("TAG5", response.headers() + "");
-                        Log.d("TAG6", appValue.getSuccessMessage());
+                        Log.d("TAG6", AppValue.getSuccessMessage());
                         failsafe = true;
                     }
 
@@ -334,22 +344,33 @@ public class UserInterfaceActivity extends AppCompatActivity
                     public void onFailure(Call<ResponseTemplate> call, Throwable t) {
                         String displayResponse = t.toString();
                         Log.d("TAG", displayResponse);
-                        Log.d("TAG", appValue.getFailMessage());
+                        Log.d("TAG", AppValue.getFailMessage());
                     }
                 });
-                if(failsafe = true) {
+                if (failsafe) {
                     account.setPassword(newPass.getText().toString());
                     vf.setDisplayedChild(0);
                     TextView header = (TextView) findViewById(R.id.toolbar_title);
                     header.setText("Home");
                 }
-            }
-            else{
+            } else {
                 reminder.setText("New password and confirm password mismatch or empty");
             }
-        }
-        else{
+        } else {
             reminder.setText("Old password is empty or not correct");
         }
+    }
+
+    public void showDirection(View view) {
+    }
+
+    @Override
+    public boolean onMarkerClick(Marker marker) {
+        return false;
+    }
+
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+
     }
 }
