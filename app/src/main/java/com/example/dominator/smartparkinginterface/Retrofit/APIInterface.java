@@ -20,7 +20,7 @@ public interface APIInterface {
     @HTTP(method = "GET", path = "parking_lot/all_parking_lot")
     Call<ResponseTemplate> doGetAllParkingLot();
 
-    @HTTP(method = "POST", path = "/driver_account/create", hasBody = true)
+    @HTTP(method = "POST", path = "/driver/create_driver", hasBody = true)
     Call<ResponseTemplate> doSubmitUser(@Body Account account);
 
     @HTTP(method = "POST", path = "/account/login", hasBody = true)

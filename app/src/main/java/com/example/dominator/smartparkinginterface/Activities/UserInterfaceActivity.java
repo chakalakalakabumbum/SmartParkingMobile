@@ -31,6 +31,7 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewFlipper;
@@ -102,13 +103,13 @@ public class UserInterfaceActivity
     private EditText oldPass;
     private EditText newPass;
     private EditText confirmNewPass;
+    private ImageView blackScreen;
 
     //API
     private String currentUserId = AppValue.getTestUser();
     private APIClient apiClient = new APIClient();
     private APIInterface apiInterface = APIClient.getClient(AppValue.getMainLink()).create(APIInterface.class);
     private InformationAccount account = new InformationAccount();
-    private boolean failsafe;
 
     //Data
     private List<ParkingLot> parkingLots = new ArrayList<>();
@@ -161,7 +162,6 @@ public class UserInterfaceActivity
                 Log.d("TAG", response.raw() + "");
                 Log.d("TAG", response.body() + "");
                 Log.d("TAG", AppValue.getSuccessMessage());
-                ResponseTemplate responseTemplate = response.body();
                 try {
                     for (int i = 0; i < ((List) response.body().getObjectResponse()).size(); i++) {
                         parkingLots.add((ParkingLot) apiClient.ObjectConverter(((List) response.body().getObjectResponse()).get(i), new ParkingLot()));
@@ -302,18 +302,16 @@ public class UserInterfaceActivity
         } else if (id == R.id.nav_news) {
 
         } else if (id == R.id.nav_profile) {
-            if (failsafe == true || failsafe == false) {
-                NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-                TextView header = (TextView) findViewById(R.id.toolbar_title);
+                NavigationView navigationView = findViewById(R.id.nav_view);
+                TextView header = findViewById(R.id.toolbar_title);
                 header.setText("Profile");
                 View hView = navigationView.getHeaderView(0);
                 viewInfo(hView);
-            }
         } else if (id == R.id.nav_rate_us) {
 
         }
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
@@ -374,18 +372,20 @@ public class UserInterfaceActivity
     }
 
     public void saveInfo(View view) {
+        blackScreen.setVisibility(View.VISIBLE);
         if (firstNameText.getText().toString().isEmpty() || lastNameText.getText().toString().isEmpty()
                 || phoneNumberText.getText().toString().isEmpty()) {
             reminder.setText("Some required field is empty");
+            blackScreen.setVisibility(View.INVISIBLE);
         } else if (!Patterns.PHONE.matcher(phoneNumberText.getText().toString()).matches()) {
             reminder.setText("Phone number is invalid");
+            blackScreen.setVisibility(View.INVISIBLE);
         } else if (changeButton.isEnabled()) {
 
             InformationAccount user = new InformationAccount();
             user.setLastName(lastNameText.getText().toString());
             user.setFirstName(firstNameText.getText().toString());
             user.setPhoneNumber(phoneNumberText.getText().toString());
-            failsafe = false;
             apiInterface.doUpdateUser(currentUserId, user).enqueue(new Callback<ResponseTemplate>() {
                 @Override
                 public void onResponse(Call<ResponseTemplate> call, Response<ResponseTemplate> response) {
@@ -395,7 +395,18 @@ public class UserInterfaceActivity
                     Log.d("TAG4", response.message() + "");
                     Log.d("TAG5", response.headers() + "");
                     Log.d("TAG6", AppValue.getSuccessMessage());
-                    failsafe = true;
+                    if(response.isSuccessful() == true) {
+                        account.setFirstName(firstNameText.getText().toString());
+                        account.setLastName(lastNameText.getText().toString());
+                        account.setPhoneNumber(phoneNumberText.getText().toString());
+                        reminder.setText("Account update sucessfull");
+                        changeButton.setEnabled(false);
+                        blackScreen.setVisibility(View.INVISIBLE);
+                    }
+                    else{
+                        reminder.setText("Unable to save this new infromation");
+                        blackScreen.setVisibility(View.INVISIBLE);
+                    }
                 }
 
                 @Override
@@ -403,18 +414,14 @@ public class UserInterfaceActivity
                     String displayResponse = t.toString();
                     Log.d("TAG", displayResponse);
                     Log.d("TAG", AppValue.getFailMessage());
+                    reminder.setText("Connection failed, please check your connection");
+                    blackScreen.setVisibility(View.INVISIBLE);
                 }
             });
-            if (failsafe) {
-                account.setFirstName(firstNameText.getText().toString());
-                account.setLastName(lastNameText.getText().toString());
-                account.setPhoneNumber(phoneNumberText.getText().toString());
-            }
         }
     }
 
     public void confirmChangePassword(View view) {
-        Log.d("TAG", "Old PASS: " + account.getPassword());
         if (oldPass.getText().toString().equals(account.getPassword()) && !oldPass.getText().toString().isEmpty()) {
             if (newPass.getText().toString().equals(confirmNewPass.getText().toString()) && !newPass.getText().toString().isEmpty()) {
                 PasswordChanger passwordChanger = new PasswordChanger(
@@ -423,7 +430,6 @@ public class UserInterfaceActivity
                         newPass.getText().toString(),
                         confirmNewPass.getText().toString()
                 );
-                failsafe = false;
                 apiInterface.doChangePassword(passwordChanger).enqueue(new Callback<ResponseTemplate>() {
                     @Override
                     public void onResponse(Call<ResponseTemplate> call, Response<ResponseTemplate> response) {
@@ -433,7 +439,13 @@ public class UserInterfaceActivity
                         Log.d("TAG4", response.message() + "");
                         Log.d("TAG5", response.headers() + "");
                         Log.d("TAG6", AppValue.getSuccessMessage());
-                        failsafe = true;
+                        if(response.isSuccessful()) {
+                            account.setPassword(newPass.getText().toString());
+                            reminder.setText("Password has been changed");
+                        }
+                        else{
+                            reminder.setText("Unable to change password");
+                        }
                     }
 
                     @Override
@@ -441,13 +453,9 @@ public class UserInterfaceActivity
                         String displayResponse = t.toString();
                         Log.d("TAG", displayResponse);
                         Log.d("TAG", AppValue.getFailMessage());
+                        reminder.setText("Connection failed, please check your network");
                     }
                 });
-                if (failsafe) {
-                    account.setPassword(newPass.getText().toString());
-                    vf.setDisplayedChild(0);
-                    header.setText("Home");
-                }
             } else {
                 reminder.setText("New password and confirm password mismatch or empty");
             }
@@ -599,6 +607,7 @@ public class UserInterfaceActivity
         oldPass = findViewById(R.id.old_password);
         newPass = findViewById(R.id.new_password);
         confirmNewPass = findViewById(R.id.confirm_password);
+        blackScreen = findViewById(R.id.loading_image);
 
     }
 
