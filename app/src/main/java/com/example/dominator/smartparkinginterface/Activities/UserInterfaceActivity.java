@@ -328,8 +328,6 @@ public class UserInterfaceActivity
     }
 
     public void backButton(View view) {
-        reminder.setText("");
-        changeReminder.setText("");
         vf.setDisplayedChild(0);
         header.setText("Home");
     }
@@ -337,6 +335,7 @@ public class UserInterfaceActivity
     public void changePassword(View view) {
         header.setText("Change password");
         vf.setDisplayedChild(3);
+        changeReminder.setText("");
     }
 
     @SuppressLint("DefaultLocale")
@@ -362,6 +361,7 @@ public class UserInterfaceActivity
 
         changeButton.setEnabled(false);
         changeButton.setTextColor(Color.parseColor("#999999"));
+        reminder.setText("");
         TextWatcher textWatcher = new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {

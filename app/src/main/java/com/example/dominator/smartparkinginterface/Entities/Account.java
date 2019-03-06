@@ -16,7 +16,7 @@ public class Account {
     private String lastName;
     private Date createdDate;
     private Integer roleId;
-    private boolean isActive;
+    private boolean active;
 
     public Account() {
     }
@@ -43,7 +43,7 @@ public class Account {
         this.lastName = lastName;
         this.createdDate = createdDate;
         this.roleId = roleId;
-        this.isActive = isActive;
+        this.active = active;
     }
 
     public Integer getAccountId() {
@@ -111,11 +111,11 @@ public class Account {
     }
 
     public boolean isActive() {
-        return isActive;
+        return active;
     }
 
     public void setActive(boolean active) {
-        isActive = active;
+        active = active;
     }
 
 }

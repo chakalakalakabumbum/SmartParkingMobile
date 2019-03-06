@@ -251,7 +251,6 @@ public class LoginActivity extends AppCompatActivity {
         emailText = findViewById(R.id.email_text);
         passwordText = findViewById(R.id.password_text);
         reminder = findViewById(R.id.reminder);
-        changeReminder = findViewById(R.id.change_reminder);
         forgetReminder = findViewById(R.id.forget_reminder);
         newReminder = findViewById(R.id.new_reminder);
         email = findViewById(R.id.email);

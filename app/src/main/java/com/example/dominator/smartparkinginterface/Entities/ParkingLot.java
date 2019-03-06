@@ -19,7 +19,7 @@ public class ParkingLot {
     private String address;
     private String phoneNumber;
     private String timeOfOperation;
-    private boolean isActive;
+    private boolean active;
     private Integer createdBy;
     private Date createdDate;
     private Integer editedBy;
@@ -34,7 +34,7 @@ public class ParkingLot {
      */
     public ParkingLot(Integer parkingLotId, String displayName, Account ownedBy, float longitude,
                       float latitude, Integer totalSlot, String address, String phoneNumber,
-                      String timeOfOperation, boolean isActive, Integer createdBy,
+                      String timeOfOperation, boolean active, Integer createdBy,
                       Date createdDate, Integer editedBy, Date lastEdited, Owner owner) {
         this.parkingLotId = parkingLotId;
         this.displayName = displayName;
@@ -45,7 +45,7 @@ public class ParkingLot {
         this.address = address;
         this.phoneNumber = phoneNumber;
         this.timeOfOperation = timeOfOperation;
-        this.isActive = isActive;
+        this.active = active;
         this.createdBy = createdBy;
         this.createdDate = createdDate;
         this.editedBy = editedBy;
@@ -126,11 +126,11 @@ public class ParkingLot {
     }
 
     public boolean isActive() {
-        return isActive;
+        return active;
     }
 
     public void setActive(boolean active) {
-        isActive = active;
+        active = active;
     }
 
     public Integer getCreatedBy() {
