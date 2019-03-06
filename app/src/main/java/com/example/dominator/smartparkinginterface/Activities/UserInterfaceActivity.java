@@ -529,6 +529,11 @@ public class UserInterfaceActivity
                         directionPolyline.remove();
                     }
 
+                    if (lineOptions == null) {
+                        Toast.makeText(getApplicationContext(), "Parking lot's out of range!", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
                     // Drawing polyline in the Google Map for the i-th route
                     directionPolyline = map.addPolyline(lineOptions);
 
