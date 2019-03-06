@@ -93,36 +93,36 @@ public class LoginActivity extends AppCompatActivity {
 
     public void loginInput(View view) {
         blackScreen.setVisibility(View.VISIBLE);
-        nextActivity();
-//        apiInterface.doCheckLogin(new UserLogin(null, emailText.getText().toString(), passwordText.getText().toString())).enqueue(new Callback<ResponseTemplate>() {
-//            @Override
-//            public void onResponse(Call<ResponseTemplate> call, Response<ResponseTemplate> response) {
-//                Log.d("TAG", response.code() + "");
-//                Log.d("TAG", response.raw() + "");
-//                Log.d("TAG", response.body() + "");
-//                Log.d("TAG", AppValue.getSuccessMessage());
-//                blackScreen.setVisibility(View.INVISIBLE);
-//                if (response.body().getObjectResponse() == null) {
-//                    reminder.setText("Invalid email or password");
-//                    if(response.body().isStatus() == true){
-//                        reminder.setText("This account is not actived, check your email");
-//                    }
-//                } else {
-//                    accountInfo = (InformationAccount) apiClient.ObjectConverter(response.body().getObjectResponse(), new InformationAccount());
-//                    accountInfo.setPassword(passwordText.getText().toString());
-//                    nextActivity();
-//                }
-//            }
-//
-//            @Override
-//            public void onFailure(Call<ResponseTemplate> call, Throwable t) {
-//                String displayResponse = t.toString();
-//                Log.d("TAG", displayResponse);
-//                Log.d("TAG", AppValue.getFailMessage());
-//                reminder.setText("Unable to connect to server");
-//                blackScreen.setVisibility(View.INVISIBLE);
-//            }
-//        });
+//        nextActivity();
+        apiInterface.doCheckLogin(new UserLogin(null, emailText.getText().toString(), passwordText.getText().toString())).enqueue(new Callback<ResponseTemplate>() {
+            @Override
+            public void onResponse(Call<ResponseTemplate> call, Response<ResponseTemplate> response) {
+                Log.d("TAG", response.code() + "");
+                Log.d("TAG", response.raw() + "");
+                Log.d("TAG", response.body() + "");
+                Log.d("TAG", AppValue.getSuccessMessage());
+                blackScreen.setVisibility(View.INVISIBLE);
+                if (response.body().getObjectResponse() == null) {
+                    reminder.setText("Invalid email or password");
+                    if(response.body().isStatus() == true){
+                        reminder.setText("This account is not actived, check your email");
+                    }
+                } else {
+                    accountInfo = (InformationAccount) apiClient.ObjectConverter(response.body().getObjectResponse(), new InformationAccount());
+                    accountInfo.setPassword(passwordText.getText().toString());
+                    nextActivity();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseTemplate> call, Throwable t) {
+                String displayResponse = t.toString();
+                Log.d("TAG", displayResponse);
+                Log.d("TAG", AppValue.getFailMessage());
+                reminder.setText("Unable to connect to server");
+                blackScreen.setVisibility(View.INVISIBLE);
+            }
+        });
     }
 
     public void nextActivity() {
