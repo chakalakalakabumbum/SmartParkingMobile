@@ -87,7 +87,7 @@ public class UserInterfaceActivity
     //View
     private ViewFlipper vf;
     private FloatingActionButton btnShowDirection;
-    private FloatingActionButton btnShowDetail;
+//    private FloatingActionButton btnShowDetail;
     private TextView header;
     private TextView ownerText;
     private TextView addressText;
@@ -194,7 +194,7 @@ public class UserInterfaceActivity
         selectedMarker = marker;
         marker.showInfoWindow();
         btnShowDirection.show();
-        btnShowDetail.show();
+//        btnShowDetail.show();
         return true;
     }
 
@@ -250,6 +250,16 @@ public class UserInterfaceActivity
             addMarkers();
 
             map.setOnMarkerClickListener(this);
+
+            map.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
+                @Override
+                public void onInfoWindowClick(Marker marker) {
+                    if (selectedLot != null) {
+                        viewParkingLot(selectedLot);
+                    }
+                }
+            });
+
         }
     }
 
@@ -534,12 +544,12 @@ public class UserInterfaceActivity
         });
     }
 
-    public void showDetail(View view) {
-        if (selectedLot != null) {
-            viewParkingLot(selectedLot);
-        }
-        selectedLot = null;
-    }
+//    public void showDetail(View view) {
+//        if (selectedLot != null) {
+//            viewParkingLot(selectedLot);
+//        }
+//        selectedLot = null;
+//    }
 
     private void addMarkers() {
         if (isLotsReady && isMapReady) {
@@ -579,7 +589,7 @@ public class UserInterfaceActivity
 
     private void bindView() {
         btnShowDirection = findViewById(R.id.btnShowDirection);
-        btnShowDetail = findViewById(R.id.btnShowDetail);
+//        btnShowDetail = findViewById(R.id.btnShowDetail);
 
         vf = findViewById(R.id.vfu);
         Toolbar toolbar = findViewById(R.id.toolbar);
@@ -608,7 +618,6 @@ public class UserInterfaceActivity
         newPass = findViewById(R.id.new_password);
         confirmNewPass = findViewById(R.id.confirm_password);
         blackScreen = findViewById(R.id.loading_image);
-
     }
 
 }
