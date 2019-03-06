@@ -100,6 +100,7 @@ public class UserInterfaceActivity
     private EditText lastNameText;
     private Button changeButton;
     private TextView reminder;
+    private TextView changeReminder;
     private EditText oldPass;
     private EditText newPass;
     private EditText confirmNewPass;
@@ -327,6 +328,8 @@ public class UserInterfaceActivity
     }
 
     public void backButton(View view) {
+        reminder.setText("");
+        changeReminder.setText("");
         vf.setDisplayedChild(0);
         header.setText("Home");
     }
@@ -411,6 +414,7 @@ public class UserInterfaceActivity
                         account.setPhoneNumber(phoneNumberText.getText().toString());
                         reminder.setText("Account update sucessfull");
                         changeButton.setEnabled(false);
+                        changeButton.setTextColor(Color.parseColor("#999999"));
                         blackScreen.setVisibility(View.INVISIBLE);
                     }
                     else{
@@ -451,10 +455,10 @@ public class UserInterfaceActivity
                         Log.d("TAG6", AppValue.getSuccessMessage());
                         if(response.isSuccessful()) {
                             account.setPassword(newPass.getText().toString());
-                            reminder.setText("Password has been changed");
+                            changeReminder.setText("Password has been changed");
                         }
                         else{
-                            reminder.setText("Unable to change password");
+                            changeReminder.setText("Unable to change password");
                         }
                     }
 
@@ -463,14 +467,14 @@ public class UserInterfaceActivity
                         String displayResponse = t.toString();
                         Log.d("TAG", displayResponse);
                         Log.d("TAG", AppValue.getFailMessage());
-                        reminder.setText("Connection failed, please check your network");
+                        changeReminder.setText("Connection failed, please check your network");
                     }
                 });
             } else {
-                reminder.setText("New password and confirm password mismatch or empty");
+                changeReminder.setText("New password and confirm password mismatch or empty");
             }
         } else {
-            reminder.setText("Old password is empty or not correct");
+            changeReminder.setText("Old password is empty or not correct");
         }
     }
 

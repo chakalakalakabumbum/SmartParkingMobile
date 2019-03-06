@@ -1,7 +1,7 @@
 package com.example.dominator.smartparkinginterface.Constant;
 
 public class AppValue {
-    public static final String MAIN_LINK = "http://192.168.1.4:8080/";
+    public static final String MAIN_LINK = "http://192.168.10.109:8080/";
     public static final String FAIL_MESSAGE = "FAILED";
     public static final String SUCCESS_MESSAGE = "DONE";
     public static final String TEST_USER = "6";
