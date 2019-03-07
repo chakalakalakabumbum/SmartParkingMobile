@@ -2,6 +2,7 @@ package com.example.dominator.smartparkinginterface.Activities;
 
 import android.Manifest;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -23,7 +24,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.ViewFlipper;
 
-import com.example.dominator.smartparkinginterface.Constant.AppValue;
 import com.example.dominator.smartparkinginterface.Entities.Account;
 import com.example.dominator.smartparkinginterface.Entities.InformationAccount;
 import com.example.dominator.smartparkinginterface.Entities.ResponseTemplate;
@@ -43,11 +43,11 @@ public class LoginActivity extends AppCompatActivity {
 
 
     //API
-    private APIInterface apiInterface = APIClient.getClient(AppValue.getMainLink()).create(APIInterface.class);
-    private APIClient apiClient = new APIClient();
+    private APIInterface apiInterface;
+    private APIClient apiClient;
 
     //Entities
-    private InformationAccount accountInfo = new InformationAccount();
+    private InformationAccount accountInfo;
 
     //View
     private ViewFlipper vf;
@@ -100,12 +100,12 @@ public class LoginActivity extends AppCompatActivity {
                     Log.d("TAG", response.code() + "");
                     Log.d("TAG", response.raw() + "");
                     Log.d("TAG", response.body() + "");
-                    Log.d("TAG", AppValue.getSuccessMessage());
+                    Log.d("TAG", getResources().getString(R.string.success_message));
                     blackScreen.setVisibility(View.INVISIBLE);
                     if (response.body().getObjectResponse() == null) {
-                        reminder.setText("Invalid email or password");
+                        reminder.setText(getResources().getString(R.string.invalid_email_and_password));
                         if (response.body().isStatus() == true) {
-                            reminder.setText("This account is not actived, check your email");
+                            reminder.setText(getResources().getString(R.string.not_activated));
                         }
                     } else {
                         accountInfo = (InformationAccount) apiClient.ObjectConverter(response.body().getObjectResponse(), new InformationAccount());
@@ -118,14 +118,14 @@ public class LoginActivity extends AppCompatActivity {
                 public void onFailure(Call<ResponseTemplate> call, Throwable t) {
                     String displayResponse = t.toString();
                     Log.d("TAG", displayResponse);
-                    Log.d("TAG", AppValue.getFailMessage());
-                    reminder.setText("Unable to connect to server");
+                    Log.d("TAG", getResources().getString(R.string.fail_message));
+                    reminder.setText(getResources().getString(R.string.connection_failed));
                     blackScreen.setVisibility(View.INVISIBLE);
                 }
             });
         }
         else{
-            reminder.setText("Invalid email or password");
+            reminder.setText(getResources().getString(R.string.invalid_email_and_password));
             blackScreen.setVisibility(View.INVISIBLE);
         }
     }
@@ -157,13 +157,13 @@ public class LoginActivity extends AppCompatActivity {
                 phoneNumber.getText().toString().isEmpty() ||
                 password.getText().toString().isEmpty() ||
                 confirmPassword.getText().toString().isEmpty()) {
-            newReminder.setText("Some required field is empty");
+            newReminder.setText(getResources().getString(R.string.empty_field));
             newBlackScreen.setVisibility(View.INVISIBLE);
         } else if (!Patterns.EMAIL_ADDRESS.matcher(email.getText().toString()).matches()) {
-            newReminder.setText("Email pattern is invalid");
+            newReminder.setText(getResources().getString(R.string.invalid_email));
             newBlackScreen.setVisibility(View.INVISIBLE);
         } else if (!Patterns.PHONE.matcher(phoneNumber.getText().toString()).matches()) {
-            newReminder.setText("Phone number is invalid");
+            newReminder.setText(getResources().getString(R.string.invalid_phone));
             newBlackScreen.setVisibility(View.INVISIBLE);
         } else if (password.getText().toString().equals(confirmPassword.getText().toString())) {
             Account account = new Account();
@@ -181,13 +181,13 @@ public class LoginActivity extends AppCompatActivity {
                     Log.d("TAG", response.body() + "");
                     Log.d("TAG", response.message() + "");
                     Log.d("TAG", response.headers() + "");
-                    Log.d("TAG", AppValue.getSuccessMessage());
+                    Log.d("TAG", getResources().getString(R.string.success_message));
                     newBlackScreen.setVisibility(View.INVISIBLE);
                     if(response.body().isStatus()){
-                        newReminder.setText("New account has been created, please check your email");
+                        newReminder.setText(getResources().getString(R.string.new_account_success));
                     }
                     else{
-                        newReminder.setText("This account is already exist");
+                        newReminder.setText(getResources().getString(R.string.account_exist));
                     }
                 }
 
@@ -195,12 +195,12 @@ public class LoginActivity extends AppCompatActivity {
                 public void onFailure(Call<ResponseTemplate> call, Throwable t) {
                     String displayResponse = t.toString();
                     Log.d("TAG", displayResponse);
-                    Log.d("TAG", AppValue.getFailMessage());
+                    Log.d("TAG", getResources().getString(R.string.fail_message));
                     newBlackScreen.setVisibility(View.INVISIBLE);
                 }
             });
         } else {
-            newReminder.setText("Password and confirm password mismatch");
+            newReminder.setText(getResources().getString(R.string.confirm_password_mismatch));
         }
     }
 
@@ -214,11 +214,11 @@ public class LoginActivity extends AppCompatActivity {
                             Log.d("TAG", response.code() + "");
                             Log.d("TAG", response.raw() + "");
                             Log.d("TAG", response.body() + "");
-                            Log.d("TAG", AppValue.getSuccessMessage());
+                            Log.d("TAG", getResources().getString(R.string.success_message));
                             if (response.body().isStatus()) {
-                                forgetReminder.setText("Email sent, please check your box");
+                                forgetReminder.setText(getResources().getString(R.string.email_sent));
                             } else {
-                                forgetReminder.setText("Invalid email address");
+                                forgetReminder.setText(getResources().getString(R.string.invalid_email));
                             }
                             changeBlackScreen.setVisibility(View.INVISIBLE);
                         }
@@ -227,14 +227,14 @@ public class LoginActivity extends AppCompatActivity {
                         public void onFailure(Call<ResponseTemplate> call, Throwable t) {
                             String displayResponse = t.toString();
                             Log.d("TAG", displayResponse);
-                            Log.d("TAG", AppValue.getFailMessage());
-                            forgetReminder.setText("Unstable network connection, please check");
+                            Log.d("TAG", getResources().getString(R.string.fail_message));
+                            forgetReminder.setText(getResources().getString(R.string.connection_failed));
                             changeBlackScreen.setVisibility(View.INVISIBLE);
                         }
                     }
             );
         } else {
-            forgetReminder.setText("The email address is empty");
+            forgetReminder.setText(getResources().getString(R.string.invalid_email));
             changeBlackScreen.setVisibility(View.INVISIBLE);
         }
     }
@@ -260,6 +260,13 @@ public class LoginActivity extends AppCompatActivity {
         password = findViewById(R.id.password);
         confirmPassword = findViewById(R.id.confirm_password);
         submitEmail = findViewById(R.id.forget_email_text);
+
+        //API
+        apiInterface = APIClient.getClient(getResources().getString(R.string.main_link)).create(APIInterface.class);
+        apiClient = new APIClient();
+
+        //Entities
+        accountInfo = new InformationAccount();
 
         //Bind animation
         animateLogo = AnimationUtils.loadAnimation(getApplicationContext(),

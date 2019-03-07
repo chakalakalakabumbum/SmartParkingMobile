@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationListener;
@@ -36,7 +37,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewFlipper;
 
-import com.example.dominator.smartparkinginterface.Constant.AppValue;
 import com.example.dominator.smartparkinginterface.Entities.InformationAccount;
 import com.example.dominator.smartparkinginterface.Entities.Owner;
 import com.example.dominator.smartparkinginterface.Entities.PasswordChanger;
@@ -107,14 +107,13 @@ public class UserInterfaceActivity
     private ImageView blackScreen;
 
     //API
-    private String currentUserId = AppValue.getTestUser();
-    private APIClient apiClient = new APIClient();
-    private APIInterface apiInterface = APIClient.getClient(AppValue.getMainLink()).create(APIInterface.class);
-    private InformationAccount account = new InformationAccount();
+    private APIClient apiClient;
+    private APIInterface apiInterface;
+    private InformationAccount account;
 
     //Data
-    private List<ParkingLot> parkingLots = new ArrayList<>();
-    private static LatLng currentLocation = new LatLng(10.852711, 106.626786);
+    private List<ParkingLot> parkingLots;
+    private static LatLng currentLocation;
 
     //Google Map
     private Polyline directionPolyline;
@@ -125,6 +124,7 @@ public class UserInterfaceActivity
     private ParkingLot selectedLot = null;
     private boolean isLotsReady = false;
     private boolean isMapReady = false;
+
 
     //Location Result
     private LocationResult locationResult = new LocationResult() {
@@ -162,7 +162,7 @@ public class UserInterfaceActivity
                 Log.d("TAG", response.code() + "");
                 Log.d("TAG", response.raw() + "");
                 Log.d("TAG", response.body() + "");
-                Log.d("TAG", AppValue.getSuccessMessage());
+                Log.d("TAG", getResources().getString(R.string.success_message));
                 try {
                     for (int i = 0; i < ((List) response.body().getObjectResponse()).size(); i++) {
                         parkingLots.add((ParkingLot) apiClient.ObjectConverter(((List) response.body().getObjectResponse()).get(i), new ParkingLot()));
@@ -170,7 +170,7 @@ public class UserInterfaceActivity
                     isLotsReady = true;
                     addMarkers();
                 } catch (Exception e) {
-                    Log.d("TAG", AppValue.getFailMessage());
+                    Log.d("TAG", getResources().getString(R.string.fail_message));
                     Log.d("TAG", e.toString());
                 }
             }
@@ -179,7 +179,7 @@ public class UserInterfaceActivity
             public void onFailure(Call<ResponseTemplate> call, Throwable t) {
                 String displayResponse = t.toString();
                 Log.d("TAG", displayResponse);
-                Log.d("TAG", AppValue.getFailMessage());
+                Log.d("TAG", getResources().getString(R.string.fail_message));
             }
         });
     }
@@ -209,7 +209,7 @@ public class UserInterfaceActivity
             if (ActivityCompat.checkSelfPermission(this,
                     Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                     && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                Toast.makeText(this, "Please accept location permission!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getResources().getString(R.string.Request_location_permission), Toast.LENGTH_SHORT).show();
                 return;
             }
             LocationListener locationListener = new LocationListener() {
@@ -266,7 +266,7 @@ public class UserInterfaceActivity
 
     @Override
     public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
@@ -315,7 +315,7 @@ public class UserInterfaceActivity
         } else if (id == R.id.nav_profile) {
                 NavigationView navigationView = findViewById(R.id.nav_view);
                 TextView header = findViewById(R.id.toolbar_title);
-                header.setText("Profile");
+                header.setText(getResources().getString(R.string.profile));
                 View hView = navigationView.getHeaderView(0);
                 viewInfo(hView);
         } else if (id == R.id.nav_rate_us) {
@@ -329,11 +329,11 @@ public class UserInterfaceActivity
 
     public void backButton(View view) {
         vf.setDisplayedChild(0);
-        header.setText("Home");
+        header.setText(getResources().getString(R.string.home));
     }
 
     public void changePassword(View view) {
-        header.setText("Change password");
+        header.setText(getResources().getString(R.string.change_password));
         vf.setDisplayedChild(3);
         changeReminder.setText("");
     }
@@ -351,7 +351,7 @@ public class UserInterfaceActivity
     }
 
     public void viewInfo(View view) {
-        header.setText("User info");
+        header.setText(getResources().getString(R.string.user_info));
         vf.setDisplayedChild(1);
         //get info from outer resource
         phoneNumberText.setText(account.getPhoneNumber());
@@ -388,10 +388,10 @@ public class UserInterfaceActivity
         blackScreen.setVisibility(View.VISIBLE);
         if (firstNameText.getText().toString().isEmpty() || lastNameText.getText().toString().isEmpty()
                 || phoneNumberText.getText().toString().isEmpty()) {
-            reminder.setText("Some required field is empty");
+            reminder.setText(getResources().getString(R.string.empty_field));
             blackScreen.setVisibility(View.INVISIBLE);
         } else if (!Patterns.PHONE.matcher(phoneNumberText.getText().toString()).matches()) {
-            reminder.setText("Phone number is invalid");
+            reminder.setText(getResources().getString(R.string.invalid_phone));
             blackScreen.setVisibility(View.INVISIBLE);
         } else if (changeButton.isEnabled()) {
 
@@ -399,7 +399,7 @@ public class UserInterfaceActivity
             user.setLastName(lastNameText.getText().toString());
             user.setFirstName(firstNameText.getText().toString());
             user.setPhoneNumber(phoneNumberText.getText().toString());
-            apiInterface.doUpdateUser(currentUserId, user).enqueue(new Callback<ResponseTemplate>() {
+            apiInterface.doUpdateUser(account.getAccountId(), user).enqueue(new Callback<ResponseTemplate>() {
                 @Override
                 public void onResponse(Call<ResponseTemplate> call, Response<ResponseTemplate> response) {
                     Log.d("TAG1", response.code() + "");
@@ -407,18 +407,18 @@ public class UserInterfaceActivity
                     Log.d("TAG3", response.body() + "");
                     Log.d("TAG4", response.message() + "");
                     Log.d("TAG5", response.headers() + "");
-                    Log.d("TAG6", AppValue.getSuccessMessage());
+                    Log.d("TAG6", getResources().getString(R.string.success_message));
                     if(response.isSuccessful() == true) {
                         account.setFirstName(firstNameText.getText().toString());
                         account.setLastName(lastNameText.getText().toString());
                         account.setPhoneNumber(phoneNumberText.getText().toString());
-                        reminder.setText("Account update sucessfull");
+                        reminder.setText(getResources().getString(R.string.update_success));
                         changeButton.setEnabled(false);
                         changeButton.setTextColor(Color.parseColor("#999999"));
                         blackScreen.setVisibility(View.INVISIBLE);
                     }
                     else{
-                        reminder.setText("Unable to save this new infromation");
+                        reminder.setText(getResources().getString(R.string.update_fail));
                         blackScreen.setVisibility(View.INVISIBLE);
                     }
                 }
@@ -427,8 +427,8 @@ public class UserInterfaceActivity
                 public void onFailure(Call<ResponseTemplate> call, Throwable t) {
                     String displayResponse = t.toString();
                     Log.d("TAG", displayResponse);
-                    Log.d("TAG", AppValue.getFailMessage());
-                    reminder.setText("Connection failed, please check your connection");
+                    Log.d("TAG", getResources().getString(R.string.fail_message));
+                    reminder.setText(getResources().getString(R.string.connection_failed));
                     blackScreen.setVisibility(View.INVISIBLE);
                 }
             });
@@ -452,13 +452,13 @@ public class UserInterfaceActivity
                         Log.d("TAG3", response.body() + "");
                         Log.d("TAG4", response.message() + "");
                         Log.d("TAG5", response.headers() + "");
-                        Log.d("TAG6", AppValue.getSuccessMessage());
+                        Log.d("TAG6", getResources().getString(R.string.success_message));
                         if(response.isSuccessful()) {
                             account.setPassword(newPass.getText().toString());
-                            changeReminder.setText("Password has been changed");
+                            changeReminder.setText(getResources().getString(R.string.password_change_success));
                         }
                         else{
-                            changeReminder.setText("Unable to change password");
+                            changeReminder.setText(getResources().getString(R.string.password_change_fail));
                         }
                     }
 
@@ -466,22 +466,22 @@ public class UserInterfaceActivity
                     public void onFailure(Call<ResponseTemplate> call, Throwable t) {
                         String displayResponse = t.toString();
                         Log.d("TAG", displayResponse);
-                        Log.d("TAG", AppValue.getFailMessage());
-                        changeReminder.setText("Connection failed, please check your network");
+                        Log.d("TAG", getResources().getString(R.string.fail_message));
+                        changeReminder.setText(getResources().getString(R.string.connection_failed));
                     }
                 });
             } else {
-                changeReminder.setText("New password and confirm password mismatch or empty");
+                changeReminder.setText(getResources().getString(R.string.confirm_password_mismatch));
             }
         } else {
-            changeReminder.setText("Old password is empty or not correct");
+            changeReminder.setText(getResources().getString(R.string.wrong_old_password));
         }
     }
 
     public void showDirection(View view) {
         RequestParams params = getParams(currentLocation, selectedMarker.getPosition());
 
-        HttpUtils.getByUrl("https://maps.googleapis.com/maps/api/directions/json", params, new JsonHttpResponseHandler() {
+        HttpUtils.getByUrl(getResources().getString(R.string.google_api_link), params, new JsonHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
 
@@ -530,7 +530,7 @@ public class UserInterfaceActivity
                     }
 
                     if (lineOptions == null) {
-                        Toast.makeText(getApplicationContext(), "Parking lot's out of range!", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(), getResources().getString(R.string.carpark_out_of_range), Toast.LENGTH_SHORT).show();
                         return;
                     }
 
@@ -627,12 +627,22 @@ public class UserInterfaceActivity
         newPass = findViewById(R.id.new_password);
         confirmNewPass = findViewById(R.id.confirm_password);
         blackScreen = findViewById(R.id.loading_image);
+        currentLocation = new LatLng(10.852711, 106.626786);
+
+        //Entities
+        account = new InformationAccount();
+
+        //API
+        apiClient = new APIClient();
+        apiInterface = APIClient.getClient(getResources().getString(R.string.main_link)).create(APIInterface.class);
+        parkingLots = new ArrayList<>();
+
     }
 
     public void infoNavigate(View view) {
         NavigationView navigationView = findViewById(R.id.nav_view);
         View hView = navigationView.getHeaderView(0);
-        header.setText("Home");
+        header.setText(getResources().getString(R.string.home));
         vf.setDisplayedChild(0);
         showDirection(hView);
     }

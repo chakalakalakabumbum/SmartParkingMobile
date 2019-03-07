@@ -11,4 +11,44 @@
     <string name="testTitle"><font color="#FFFFFF">-------------------------------------------------------------</font></string>
     <string name="title_activity_user_interface">UserInterfaceActivity</string>
     <string name="map_description">Google Maps</string>
+
+    //Main resources
+    <string name="main_link">http://192.168.1.56:8080/</string>
+    <string name="google_api_link">https://maps.googleapis.com/maps/api/directions/json</string>
+    <string name="fail_message">FAILED</string>
+    <string name="success_message">DONE</string>
+
+    //Errors
+    <string name="empty_field">Some required field is empty</string>
+    <string name="invalid_phone">Phone number is invalid</string>
+    <string name="invalid_email">Email is invalid</string>
+    <string name="connection_failed">Connection failed, please check your connection</string>
+    <string name="confirm_password_mismatch">New password and confirm password mismatch or empty</string>
+
+    //Headers
+    <string name="profile">Profile</string>
+    <string name="home">Home</string>
+    <string name="change_password">Change password</string>
+    <string name="user_info">User info</string>
+
+
+    //UserInterfaceActivity String
+    <string name="update_success">Account update sucessfull</string>
+    <string name="update_fail">Unable to save this new infromation</string>
+    <string name="password_change_success">Password has been changed</string>
+    <string name="password_change_fail">Unable to change password</string>
+    <string name="wrong_old_password">Old password is empty or not correct</string>
+    <string name="carpark_out_of_range">Parking lot\'s out of range</string>
+    <string name="Request_location_permission">Please accept location permission</string>
+
+    //LoginActivity String
+    <string name="invalid_email_and_password">Invalid email or password</string>
+    <string name="not_activated">This account is not actived, check your email</string>
+    <string name="new_account_success">New account has been created, please check your email</string>
+    <string name="account_exist">This account is already exist</string>
+    <string name="email_sent">Email sent, please check your box</string>
+
+
+
+
 </resources>

@@ -30,7 +30,7 @@ public interface APIInterface {
     Call<ResponseTemplate> doForgetPassword(@Query("email") String email);
 
     @HTTP(method = "PUT", path = "/account/update/{id}", hasBody = true)
-    Call<ResponseTemplate> doUpdateUser(@Path("id") String id, @Body InformationAccount account);
+    Call<ResponseTemplate> doUpdateUser(@Path("id") Integer id, @Body InformationAccount account);
 
     @HTTP(method = "PUT", path = "/account/change_password", hasBody = true)
     Call<ResponseTemplate> doChangePassword(@Body PasswordChanger changePassword);
