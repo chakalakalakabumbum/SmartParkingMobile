@@ -11,6 +11,8 @@ import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.os.Handler;
@@ -67,6 +69,8 @@ public class LoginActivity extends AppCompatActivity {
     private EditText password;
     private EditText confirmPassword;
     private EditText submitEmail;
+    private ImageView newUserAvatar;
+    private ImageView choosingAvatarImage;
 
     //Animation
     private Animation animateLogo;
@@ -110,6 +114,9 @@ public class LoginActivity extends AppCompatActivity {
                     } else {
                         accountInfo = (InformationAccount) apiClient.ObjectConverter(response.body().getObjectResponse(), new InformationAccount());
                         accountInfo.setPassword(passwordText.getText().toString());
+                        if(accountInfo.getAvatar() == null || accountInfo.getAvatar().isEmpty()){
+                            accountInfo.setAvatar("default_avatar");
+                        }
                         nextActivity();
                     }
                 }
@@ -148,6 +155,8 @@ public class LoginActivity extends AppCompatActivity {
         vf.setDisplayedChild(1);
     }
 
+
+
     public void createAccount(View view) {
         newBlackScreen.setVisibility(View.VISIBLE);
 
@@ -172,6 +181,7 @@ public class LoginActivity extends AppCompatActivity {
             account.setLastName(lastName.getText().toString());
             account.setPhoneNumber(phoneNumber.getText().toString());
             account.setPassword(password.getText().toString());
+            account.setAvatar(newUserAvatar.getTag().toString());
 
             apiInterface.doSubmitUser(account).enqueue(new Callback<ResponseTemplate>() {
                 @Override
@@ -196,6 +206,7 @@ public class LoginActivity extends AppCompatActivity {
                     String displayResponse = t.toString();
                     Log.d("TAG", displayResponse);
                     Log.d("TAG", getResources().getString(R.string.fail_message));
+                    newReminder.setText(getResources().getString(R.string.connection_failed));
                     newBlackScreen.setVisibility(View.INVISIBLE);
                 }
             });
@@ -239,6 +250,25 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
+    public void changeAvatar(View view) {
+        vf.setDisplayedChild(4);
+    }
+
+    public void choosingImage(View view) {
+        String pageImage = view.getTag().toString();
+        choosingAvatarImage.setImageResource(apiClient.getResId(pageImage, R.drawable.class));
+        choosingAvatarImage.setTag(pageImage);
+    }
+
+    public void saveImage(View view) {
+        newUserAvatar.setImageResource(apiClient.getResId(choosingAvatarImage.getTag().toString(), R.drawable.class));
+        newUserAvatar.setTag(choosingAvatarImage.getTag().toString());
+        vf.setDisplayedChild(2);
+    }
+
+    public void backButton(View view) {
+        vf.setDisplayedChild(2);
+    }
 
     private void bindView() {
 
@@ -260,6 +290,8 @@ public class LoginActivity extends AppCompatActivity {
         password = findViewById(R.id.password);
         confirmPassword = findViewById(R.id.confirm_password);
         submitEmail = findViewById(R.id.forget_email_text);
+        newUserAvatar = findViewById(R.id.new_user_avatar);
+        choosingAvatarImage = findViewById(R.id.choosing_user_avatar);
 
         //API
         apiInterface = APIClient.getClient(getResources().getString(R.string.main_link)).create(APIInterface.class);
@@ -348,5 +380,6 @@ public class LoginActivity extends AppCompatActivity {
 
         }
     }
+
 
 }

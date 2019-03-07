@@ -46,7 +46,7 @@
             <include android:id="@+id/loading_screen" layout="@layout/user_info_screen" />
             <include android:id="@+id/change_password" layout="@layout/carpark_screen" />
             <include android:id="@+id/park_inform" layout="@layout/change_pass_screen" />
-
+            <include android:id="@+id/avatar_click" layout="@layout/avatar_choosing_screen" />
         </ViewFlipper>
 
     </android.support.design.widget.AppBarLayout>
@@ -64,6 +64,5 @@
         app:itemIconTint="@color/foregroundText"
         app:itemTextColor="@color/foregroundText"
         app:menu="@menu/activity_main_drawer" />
-
 </android.support.v4.widget.DrawerLayout>
 </LinearLayout>

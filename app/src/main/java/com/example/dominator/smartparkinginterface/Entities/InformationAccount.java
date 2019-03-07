@@ -12,17 +12,19 @@ public class InformationAccount implements Serializable {
     private String phoneNumber;
     private String firstName;
     private String lastName;
+    private String avatar;
 
     public InformationAccount() {
     }
 
-    public InformationAccount(Integer accountId, String email, String password, String phoneNumber, String firstName, String lastName) {
+    public InformationAccount(Integer accountId, String email, String password, String phoneNumber, String firstName, String lastName, String avatar) {
         this.accountId = accountId;
         this.email = email;
         this.password = password;
         this.phoneNumber = phoneNumber;
         this.firstName = firstName;
         this.lastName = lastName;
+        this.avatar = avatar;
     }
 
     public Integer getAccountId() {
@@ -71,5 +73,13 @@ public class InformationAccount implements Serializable {
 
     public void setLastName(String lastName) {
         this.lastName = lastName;
+    }
+
+    public String getAvatar() {
+        return avatar;
+    }
+
+    public void setAvatar(String avatar) {
+        this.avatar = avatar;
     }
 }

@@ -1,0 +1,445 @@
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:layout_editor_absoluteY="25dp">
+
+    <ImageView
+        android:id="@+id/background"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:scaleType="fitXY"
+        app:srcCompat="@drawable/background" />
+
+    <ImageView
+        android:id="@+id/imageView2"
+        android:layout_width="wrap_content"
+        android:layout_height="80dp"
+        app:srcCompat="@drawable/logo_name" />
+
+    <ImageView
+        android:id="@+id/choosing_user_avatar"
+        android:layout_width="202dp"
+        android:layout_height="206dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/imageView4"
+        app:srcCompat="@drawable/default_avatar" />
+
+    <ImageView
+        android:id="@+id/imageView4"
+        android:layout_width="148dp"
+        android:layout_height="35dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/imageView2"
+        app:srcCompat="@drawable/user_info" />
+
+    <ScrollView
+        android:id="@+id/scrollView"
+        android:layout_width="161dp"
+        android:layout_height="429dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginBottom="8dp"
+        android:background="@drawable/button_color"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/choosing_user_avatar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/imageView4">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <ImageView
+                android:id="@+id/choosing_user_avatar1"
+                android:layout_width="150dp"
+                android:layout_height="100dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginRight="8dp"
+                android:tag="avatar1"
+                android:onClick="choosingImage"
+                app:srcCompat="@drawable/avatar1" />
+
+            <ImageView
+                android:id="@+id/choosing_user_avatar2"
+                android:layout_width="150dp"
+                android:layout_height="100dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginRight="8dp"
+                android:tag="avatar2"
+                android:onClick="choosingImage"
+                app:srcCompat="@drawable/avatar2" />
+
+            <ImageView
+                android:id="@+id/choosing_user_avatar3"
+                android:layout_width="150dp"
+                android:layout_height="100dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginRight="8dp"
+                android:tag="avatar3"
+                android:onClick="choosingImage"
+                app:srcCompat="@drawable/avatar3" />
+
+            <ImageView
+                android:id="@+id/choosing_user_avatar4"
+                android:layout_width="150dp"
+                android:layout_height="100dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginRight="8dp"
+                android:tag="avatar4"
+                android:onClick="choosingImage"
+                app:srcCompat="@drawable/avatar4" />
+
+            <ImageView
+                android:id="@+id/choosing_user_avatar5"
+                android:layout_width="150dp"
+                android:layout_height="100dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginRight="8dp"
+                android:tag="avatar5"
+                android:onClick="choosingImage"
+                app:srcCompat="@drawable/avatar5" />
+
+            <ImageView
+                android:id="@+id/choosing_user_avatar6"
+                android:layout_width="150dp"
+                android:layout_height="100dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginRight="8dp"
+                android:tag="avatar6"
+                android:onClick="choosingImage"
+                app:srcCompat="@drawable/avatar6" />
+
+            <ImageView
+                android:id="@+id/choosing_user_avatar7"
+                android:layout_width="150dp"
+                android:layout_height="100dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginRight="8dp"
+                android:tag="avatar7"
+                android:onClick="choosingImage"
+                app:srcCompat="@drawable/avatar7" />
+
+            <ImageView
+                android:id="@+id/choosing_user_avatar8"
+                android:layout_width="150dp"
+                android:layout_height="100dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginRight="8dp"
+                android:tag="avatar8"
+                android:onClick="choosingImage"
+                app:srcCompat="@drawable/avatar8" />
+
+            <ImageView
+                android:id="@+id/choosing_user_avatar9"
+                android:layout_width="150dp"
+                android:layout_height="100dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginRight="8dp"
+                android:tag="avatar9"
+                android:onClick="choosingImage"
+                app:srcCompat="@drawable/avatar9" />
+
+            <ImageView
+                android:id="@+id/choosing_user_avatar10"
+                android:layout_width="150dp"
+                android:layout_height="100dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginRight="8dp"
+                android:tag="avatar10"
+                android:onClick="choosingImage"
+                app:srcCompat="@drawable/avatar10" />
+
+            <ImageView
+                android:id="@+id/choosing_user_avatar11"
+                android:layout_width="150dp"
+                android:layout_height="100dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginRight="8dp"
+                android:tag="avatar11"
+                android:onClick="choosingImage"
+                app:srcCompat="@drawable/avatar11" />
+
+            <ImageView
+                android:id="@+id/choosing_user_avatar12"
+                android:layout_width="150dp"
+                android:layout_height="100dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginRight="8dp"
+                android:tag="avatar12"
+                android:onClick="choosingImage"
+                app:srcCompat="@drawable/avatar12" />
+
+            <ImageView
+                android:id="@+id/choosing_user_avatar13"
+                android:layout_width="150dp"
+                android:layout_height="100dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginRight="8dp"
+                android:tag="avatar13"
+                android:onClick="choosingImage"
+                app:srcCompat="@drawable/avatar13" />
+
+            <ImageView
+                android:id="@+id/choosing_user_avatar14"
+                android:layout_width="150dp"
+                android:layout_height="100dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginRight="8dp"
+                android:tag="avatar14"
+                android:onClick="choosingImage"
+                app:srcCompat="@drawable/avatar14" />
+
+            <ImageView
+                android:id="@+id/choosing_user_avatar15"
+                android:layout_width="150dp"
+                android:layout_height="100dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginRight="8dp"
+                android:tag="avatar15"
+                android:onClick="choosingImage"
+                app:srcCompat="@drawable/avatar15" />
+
+            <ImageView
+                android:id="@+id/choosing_user_avatar16"
+                android:layout_width="150dp"
+                android:layout_height="100dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginRight="8dp"
+                android:tag="avatar16"
+                android:onClick="choosingImage"
+                app:srcCompat="@drawable/avatar16" />
+
+            <ImageView
+                android:id="@+id/choosing_user_avatar17"
+                android:layout_width="150dp"
+                android:layout_height="100dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginRight="8dp"
+                android:tag="avatar17"
+                android:onClick="choosingImage"
+                app:srcCompat="@drawable/avatar17" />
+
+            <ImageView
+                android:id="@+id/choosing_user_avatar18"
+                android:layout_width="150dp"
+                android:layout_height="100dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginRight="8dp"
+                android:tag="avatar18"
+                android:onClick="choosingImage"
+                app:srcCompat="@drawable/avatar18" />
+
+            <ImageView
+                android:id="@+id/choosing_user_avatar19"
+                android:layout_width="150dp"
+                android:layout_height="100dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginRight="8dp"
+                android:tag="avatar19"
+                android:onClick="choosingImage"
+                app:srcCompat="@drawable/avatar19" />
+
+            <ImageView
+                android:id="@+id/choosing_user_avatar20"
+                android:layout_width="150dp"
+                android:layout_height="100dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginRight="8dp"
+                android:tag="avatar20"
+                android:onClick="choosingImage"
+                app:srcCompat="@drawable/avatar20" />
+
+            <ImageView
+                android:id="@+id/choosing_user_avatar21"
+                android:layout_width="150dp"
+                android:layout_height="100dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginRight="8dp"
+                android:tag="avatar21"
+                android:onClick="choosingImage"
+                app:srcCompat="@drawable/avatar21" />
+
+            <ImageView
+                android:id="@+id/choosing_user_avatar22"
+                android:layout_width="150dp"
+                android:layout_height="100dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginRight="8dp"
+                android:tag="avatar22"
+                android:onClick="choosingImage"
+                app:srcCompat="@drawable/avatar22" />
+
+            <ImageView
+                android:id="@+id/choosing_user_avatar23"
+                android:layout_width="150dp"
+                android:layout_height="100dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginRight="8dp"
+                android:tag="avatar23"
+                android:onClick="choosingImage"
+                app:srcCompat="@drawable/avatar23" />
+
+            <ImageView
+                android:id="@+id/choosing_user_avatar24"
+                android:layout_width="150dp"
+                android:layout_height="100dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginRight="8dp"
+                android:tag="avatar24"
+                android:onClick="choosingImage"
+                app:srcCompat="@drawable/avatar24" />
+
+            <ImageView
+                android:id="@+id/choosing_user_avatar25"
+                android:layout_width="150dp"
+                android:layout_height="100dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginRight="8dp"
+                android:tag="avatar25"
+                android:onClick="choosingImage"
+                app:srcCompat="@drawable/avatar25" />
+        </LinearLayout>
+    </ScrollView>
+
+    <TextView
+        android:id="@+id/reminder"
+        android:layout_width="202dp"
+        android:layout_height="29dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginBottom="8dp"
+        android:fontFamily="@font/champagnelimousinesbold"
+        android:onClick="backButton"
+        android:text="This is a reminder"
+        android:textAlignment="center"
+        android:textColor="@color/colorAccent"
+        android:textSize="15dp"
+        app:layout_constraintBottom_toTopOf="@+id/save_image"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/scrollView"
+        app:layout_constraintTop_toBottomOf="@+id/advice" />
+
+    <TextView
+        android:id="@+id/advice"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
+        android:fontFamily="@font/champagnelimousinesbold"
+        android:text="Select the avatar\nof your choice"
+        android:textAlignment="center"
+        android:textColor="@color/foregroundText"
+        android:textSize="20dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/scrollView"
+        app:layout_constraintTop_toBottomOf="@+id/choosing_user_avatar" />
+
+
+    <Button
+        android:id="@+id/save_image"
+        android:layout_width="201dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginBottom="8dp"
+        android:background="@drawable/button_color"
+        android:text="Save image"
+        android:onClick="saveImage"
+        android:textColor="@color/foregroundText"
+        app:layout_constraintBottom_toTopOf="@+id/back"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/scrollView" />
+
+    <Button
+        android:id="@+id/back"
+        android:layout_width="201dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginBottom="16dp"
+        android:background="@drawable/button_color"
+        android:onClick="backButton"
+        android:text="Back"
+        android:textColor="@color/foregroundText"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/scrollView" />
+
+
+</android.support.constraint.ConstraintLayout>

@@ -105,6 +105,9 @@ public class UserInterfaceActivity
     private EditText newPass;
     private EditText confirmNewPass;
     private ImageView blackScreen;
+    private ImageView choosingAvatar;
+    private ImageView currentAvatar;
+    private ImageView sidebarAvatar;
 
     //API
     private APIClient apiClient;
@@ -182,6 +185,9 @@ public class UserInterfaceActivity
                 Log.d("TAG", getResources().getString(R.string.fail_message));
             }
         });
+        currentAvatar.setImageResource(apiClient.getResId(account.getAvatar(), R.drawable.class));
+        choosingAvatar.setImageResource(apiClient.getResId(account.getAvatar(), R.drawable.class));
+        sidebarAvatar.setImageResource(apiClient.getResId(account.getAvatar(), R.drawable.class));
     }
 
     @Override
@@ -314,8 +320,6 @@ public class UserInterfaceActivity
 
         } else if (id == R.id.nav_profile) {
                 NavigationView navigationView = findViewById(R.id.nav_view);
-                TextView header = findViewById(R.id.toolbar_title);
-                header.setText(getResources().getString(R.string.profile));
                 View hView = navigationView.getHeaderView(0);
                 viewInfo(hView);
         } else if (id == R.id.nav_rate_us) {
@@ -399,6 +403,7 @@ public class UserInterfaceActivity
             user.setLastName(lastNameText.getText().toString());
             user.setFirstName(firstNameText.getText().toString());
             user.setPhoneNumber(phoneNumberText.getText().toString());
+            user.setAvatar(currentAvatar.getTag().toString());
             apiInterface.doUpdateUser(account.getAccountId(), user).enqueue(new Callback<ResponseTemplate>() {
                 @Override
                 public void onResponse(Call<ResponseTemplate> call, Response<ResponseTemplate> response) {
@@ -416,6 +421,7 @@ public class UserInterfaceActivity
                         changeButton.setEnabled(false);
                         changeButton.setTextColor(Color.parseColor("#999999"));
                         blackScreen.setVisibility(View.INVISIBLE);
+                        sidebarAvatar.setImageResource(apiClient.getResId(currentAvatar.getTag().toString(), R.drawable.class));
                     }
                     else{
                         reminder.setText(getResources().getString(R.string.update_fail));
@@ -627,6 +633,9 @@ public class UserInterfaceActivity
         newPass = findViewById(R.id.new_password);
         confirmNewPass = findViewById(R.id.confirm_password);
         blackScreen = findViewById(R.id.loading_image);
+        choosingAvatar = findViewById(R.id.choosing_user_avatar);
+        currentAvatar = findViewById(R.id.current_user_avatar);
+        sidebarAvatar = navigationView.getHeaderView(0).findViewById(R.id.user_sidebar_avatar);
         currentLocation = new LatLng(10.852711, 106.626786);
 
         //Entities
@@ -645,5 +654,24 @@ public class UserInterfaceActivity
         header.setText(getResources().getString(R.string.home));
         vf.setDisplayedChild(0);
         showDirection(hView);
+    }
+
+    public void changeAvatar(View view) {
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
+        drawer.closeDrawer(GravityCompat.START);
+        header.setText("Change avatar");
+        vf.setDisplayedChild(4);
+    }
+
+    public void choosingImage(View view) {
+        String pageImage = view.getTag().toString();
+        choosingAvatar.setImageResource(apiClient.getResId(pageImage, R.drawable.class));
+        choosingAvatar.setTag(pageImage);
+    }
+
+    public void saveImage(View view) {
+        currentAvatar.setImageResource(apiClient.getResId(choosingAvatar.getTag().toString(), R.drawable.class));
+        currentAvatar.setTag(choosingAvatar.getTag().toString());
+        vf.setDisplayedChild(2);
     }
 }

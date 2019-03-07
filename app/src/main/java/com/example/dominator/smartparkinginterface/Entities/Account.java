@@ -17,6 +17,7 @@ public class Account {
     private Date createdDate;
     private Integer roleId;
     private boolean active;
+    private String avatar;
 
     public Account() {
     }
@@ -34,7 +35,7 @@ public class Account {
      * @param isActive
      */
     public Account(Integer accountId, String email, String password, String phoneNumber, String firstName,
-                   String lastName, Date createdDate, Integer roleId, boolean isActive) {
+                   String lastName, Date createdDate, Integer roleId, boolean isActive, String avatar) {
         this.accountId = accountId;
         this.email = email;
         this.password = password;
@@ -44,6 +45,7 @@ public class Account {
         this.createdDate = createdDate;
         this.roleId = roleId;
         this.active = active;
+        this.avatar = avatar;
     }
 
     public Integer getAccountId() {
@@ -116,6 +118,14 @@ public class Account {
 
     public void setActive(boolean active) {
         active = active;
+    }
+
+    public String getAvatar() {
+        return avatar;
+    }
+
+    public void setAvatar(String avatar) {
+        this.avatar = avatar;
     }
 
 }

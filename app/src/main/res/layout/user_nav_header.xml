@@ -13,12 +13,14 @@
     android:theme="@style/AlertDialog.AppCompat.Light">
 
     <ImageView
-        android:id="@+id/imageView"
+        android:id="@+id/user_sidebar_avatar"
         android:layout_width="183dp"
         android:layout_height="94dp"
         android:contentDescription="@string/nav_header_desc"
         android:paddingTop="@dimen/nav_header_vertical_spacing"
-        app:srcCompat="@drawable/user_avatar" />
+        android:tag="default_avatar"
+        android:onClick="viewInfo"
+        app:srcCompat="@drawable/default_avatar" />
 
     <TextView
         android:layout_width="365dp"
