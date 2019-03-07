@@ -205,7 +205,7 @@
         android:layout_marginRight="8dp"
         android:layout_marginBottom="8dp"
         android:background="@drawable/button_color"
-        android:onClick="backButton"
+        android:onClick="infoNavigate"
         android:text="Navigate"
         android:textColor="@color/foregroundText"
         app:layout_constraintBottom_toTopOf="@+id/back"

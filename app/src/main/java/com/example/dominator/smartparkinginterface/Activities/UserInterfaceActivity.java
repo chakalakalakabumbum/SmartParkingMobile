@@ -629,4 +629,11 @@ public class UserInterfaceActivity
         blackScreen = findViewById(R.id.loading_image);
     }
 
+    public void infoNavigate(View view) {
+        NavigationView navigationView = findViewById(R.id.nav_view);
+        View hView = navigationView.getHeaderView(0);
+        header.setText("Home");
+        vf.setDisplayedChild(0);
+        showDirection(hView);
+    }
 }
