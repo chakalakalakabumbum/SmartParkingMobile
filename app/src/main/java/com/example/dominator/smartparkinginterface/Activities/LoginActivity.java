@@ -2,20 +2,15 @@ package com.example.dominator.smartparkinginterface.Activities;
 
 import android.Manifest;
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.net.Uri;
-import android.provider.Settings;
+import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.view.GravityCompat;
-import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
 import android.util.Patterns;
 import android.view.View;
@@ -34,7 +29,6 @@ import com.example.dominator.smartparkinginterface.R;
 import com.example.dominator.smartparkinginterface.Retrofit.APIClient;
 import com.example.dominator.smartparkinginterface.Retrofit.APIInterface;
 
-import java.io.IOException;
 import java.io.Serializable;
 
 import retrofit2.Call;
@@ -281,7 +275,7 @@ public class LoginActivity extends AppCompatActivity {
         emailText = findViewById(R.id.email_text);
         passwordText = findViewById(R.id.password_text);
         reminder = findViewById(R.id.reminder);
-        forgetReminder = findViewById(R.id.forget_reminder);
+        forgetReminder = findViewById( R.id.forget_reminder);
         newReminder = findViewById(R.id.new_reminder);
         email = findViewById(R.id.email);
         firstName = findViewById(R.id.first_name);

@@ -34,7 +34,6 @@
         android:layout_marginRight="40dp"
         android:layout_marginBottom="40dp"
         android:backgroundTintMode="multiply"
-        android:onClick="showDirection"
         android:scaleType="center"
         android:src="@drawable/ic_baseline_directions_24px"
         android:visibility="invisible"

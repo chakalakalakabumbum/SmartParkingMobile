@@ -17,6 +17,7 @@ import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -106,6 +107,11 @@ public class UserInterfaceActivity
     private ImageView choosingAvatar;
     private ImageView currentAvatar;
     private ImageView sidebarAvatar;
+    private TextView sidebarName;
+    private TextView sidebarEmail;
+    private View hView;
+    private DrawerLayout drawer;
+    private NavigationView navigationView;
 
     //API
     private APIClient apiClient;
@@ -145,6 +151,8 @@ public class UserInterfaceActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        ActionBar actionBar = getSupportActionBar();
+        actionBar.hide();
         setContentView(R.layout.activity_user_interface);
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
@@ -183,8 +191,13 @@ public class UserInterfaceActivity
             }
         });
         currentAvatar.setImageResource(APIClient.getResId(account.getAvatar(), R.drawable.class));
+        currentAvatar.setTag(account.getAvatar());
         choosingAvatar.setImageResource(APIClient.getResId(account.getAvatar(), R.drawable.class));
+        choosingAvatar.setTag(account.getAvatar());
         sidebarAvatar.setImageResource(APIClient.getResId(account.getAvatar(), R.drawable.class));
+        sidebarAvatar.setTag(account.getAvatar());
+        sidebarEmail.setText(account.getEmail());
+        sidebarName.setText(account.getFirstName() + " " + account.getLastName());
     }
 
     @Override
@@ -271,7 +284,6 @@ public class UserInterfaceActivity
 
     @Override
     public void onBackPressed() {
-        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
@@ -318,14 +330,11 @@ public class UserInterfaceActivity
         } else if (id == R.id.nav_news) {
 
         } else if (id == R.id.nav_profile) {
-            NavigationView navigationView = findViewById(R.id.nav_view);
-            View hView = navigationView.getHeaderView(0);
+            hView = navigationView.getHeaderView(0);
             viewInfo(hView);
         } else if (id == R.id.nav_rate_us) {
 
         }
-
-        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
@@ -354,6 +363,7 @@ public class UserInterfaceActivity
     }
 
     public void viewInfo(View view) {
+        drawer.closeDrawer(GravityCompat.START);
         header.setText(getResources().getString(R.string.user_info));
         vf.setDisplayedChild(1);
         //get info from outer resource
@@ -554,6 +564,7 @@ public class UserInterfaceActivity
         });
     }
 
+
 //    public void showDetail(View view) {
 //        if (selectedLot != null) {
 //            viewParkingLot(selectedLot);
@@ -599,17 +610,23 @@ public class UserInterfaceActivity
 
     private void bindView() {
         btnShowDirection = findViewById(R.id.btnShowDirection);
+        btnShowDirection.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showDirection(v);
+            }
+        });
 //        btnShowDetail = findViewById(R.id.btnShowDetail);
 
         vf = findViewById(R.id.vfu);
         Toolbar toolbar = findViewById(R.id.toolbar);
         toolbar.setBackgroundColor(Color.parseColor("#4F515C"));
-        DrawerLayout drawer = findViewById(R.id.drawer_layout);
+        drawer = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
-        NavigationView navigationView = findViewById(R.id.nav_view);
+        navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
         header = findViewById(R.id.toolbar_title);
@@ -631,6 +648,8 @@ public class UserInterfaceActivity
         choosingAvatar = findViewById(R.id.choosing_user_avatar);
         currentAvatar = findViewById(R.id.current_user_avatar);
         sidebarAvatar = navigationView.getHeaderView(0).findViewById(R.id.user_sidebar_avatar);
+        sidebarEmail = navigationView.getHeaderView(0).findViewById(R.id.user_sidebar_email);
+        sidebarName = navigationView.getHeaderView(0).findViewById(R.id.user_sidebar_name);
         currentLocation = new LatLng(10.852711, 106.626786);
 
         //Entities
@@ -654,6 +673,8 @@ public class UserInterfaceActivity
     public void changeAvatar(View view) {
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
+        changeButton.setEnabled(true);
+        changeButton.setTextColor(Color.parseColor("#ffffff"));
         header.setText(getResources().getString(R.string.change_avatar_header_text));
         vf.setDisplayedChild(4);
     }
@@ -667,6 +688,6 @@ public class UserInterfaceActivity
     public void saveImage(View view) {
         currentAvatar.setImageResource(APIClient.getResId(choosingAvatar.getTag().toString(), R.drawable.class));
         currentAvatar.setTag(choosingAvatar.getTag().toString());
-        vf.setDisplayedChild(2);
+        vf.setDisplayedChild(1);
     }
 }

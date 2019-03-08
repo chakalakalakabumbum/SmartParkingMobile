@@ -12,12 +12,18 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:scaleType="fitXY"
+        app:layout_constraintBottom_toTopOf="@+id/confirm_password"
+        app:layout_constraintStart_toStartOf="@+id/imageView2"
+        app:layout_constraintTop_toTopOf="@+id/confirm_password"
         app:srcCompat="@drawable/background" />
 
     <ImageView
         android:id="@+id/imageView2"
         android:layout_width="wrap_content"
         android:layout_height="73dp"
+        app:layout_constraintEnd_toStartOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/logo_name" />
 
     <ImageView
@@ -29,8 +35,8 @@
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
-        android:tag="default_avatar"
         android:onClick="changeAvatar"
+        android:tag="default_avatar"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/imageView2"
@@ -52,7 +58,7 @@
         app:layout_constraintTop_toBottomOf="@+id/new_user_avatar" />
 
     <EditText
-        android:id="@+id/email"
+        android:id="@+id/firstname"
         android:layout_width="251dp"
         android:layout_height="35dp"
         android:layout_marginStart="32dp"
@@ -67,7 +73,7 @@
         app:layout_constraintTop_toBottomOf="@+id/phone_number" />
 
     <EditText
-        android:id="@+id/first_name"
+        android:id="@+id/email"
         android:layout_width="251dp"
         android:layout_height="35dp"
         android:layout_marginStart="32dp"
@@ -79,7 +85,7 @@
         android:textColorHint="@color/foregroundText"
         android:textSize="15dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/email" />
+        app:layout_constraintTop_toBottomOf="@+id/firstname" />
 
     <EditText
         android:id="@+id/last_name"
@@ -94,7 +100,7 @@
         android:textColorHint="@color/foregroundText"
         android:textSize="15dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/first_name" />
+        app:layout_constraintTop_toBottomOf="@+id/email" />
 
     <EditText
         android:id="@+id/confirm_password"
@@ -111,8 +117,7 @@
         android:textColorHint="@color/foregroundText"
         android:textSize="15dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/password"
-        app:layout_constraintVertical_bias="1.0" />
+        app:layout_constraintTop_toBottomOf="@+id/password" />
 
     <EditText
         android:id="@+id/password"
@@ -155,7 +160,7 @@
         android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/first_name"
+        app:layout_constraintStart_toEndOf="@+id/email"
         app:layout_constraintTop_toBottomOf="@+id/imageView7"
         app:srcCompat="@drawable/name_card" />
 
@@ -213,7 +218,7 @@
         android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/email"
+        app:layout_constraintStart_toEndOf="@+id/firstname"
         app:layout_constraintTop_toBottomOf="@+id/imageView5"
         app:srcCompat="@drawable/email" />
 
@@ -273,12 +278,14 @@
         android:id="@+id/new_loading_image"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:scaleType="fitXY"
         android:alpha="0.4"
-        android:visibility="invisible"
         android:background="@color/black"
-        tools:layout_editor_absoluteX="0dp"
-        tools:layout_editor_absoluteY="0dp" />
+        android:scaleType="fitXY"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="@+id/background"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
 
 </android.support.constraint.ConstraintLayout>

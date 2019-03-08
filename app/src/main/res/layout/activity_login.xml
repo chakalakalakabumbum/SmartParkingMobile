@@ -1,23 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/my_layout"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/my_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".Activities.LoginActivity">
 
     <ViewFlipper xmlns:android="http://schemas.android.com/apk/res/android"
-        android:layout_gravity="bottom"
         android:id="@+id/vf"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent" >
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_gravity="bottom"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
-        <include android:id="@+id/loading_screen" layout="@layout/loading_screen" />
-        <include android:id="@+id/login_screen" layout="@layout/login_screen" />
-        <include android:id="@+id/new_account" layout="@layout/new_account_screen" />
-        <include android:id="@+id/reset_password" layout="@layout/forget_pass_screen" />
-        <include android:id="@+id/avatar_click" layout="@layout/avatar_choosing_screen" />
+        <include
+            android:id="@+id/loading_screen"
+            layout="@layout/loading_screen" />
+
+        <include
+            android:id="@+id/login_screen"
+            layout="@layout/login_screen" />
+
+        <include
+            android:id="@+id/new_account"
+            layout="@layout/new_account_screen" />
+
+        <include
+            android:id="@+id/reset_password"
+            layout="@layout/forget_pass_screen" />
+
+        <include
+            android:id="@+id/avatar_click"
+            layout="@layout/avatar_choosing_screen" />
 
     </ViewFlipper>
 
