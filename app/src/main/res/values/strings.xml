@@ -30,10 +30,9 @@
     <string name="change_password">Change password</string>
     <string name="user_info">User info</string>
 
-
     //UserInterfaceActivity String
-    <string name="update_success">Account update sucessfull</string>
-    <string name="update_fail">Unable to save this new infromation</string>
+    <string name="update_success">Account update successful</string>
+    <string name="update_fail">Unable to save this new information</string>
     <string name="password_change_success">Password has been changed</string>
     <string name="password_change_fail">Unable to change password</string>
     <string name="wrong_old_password">Old password is empty or not correct</string>
@@ -42,12 +41,9 @@
 
     //LoginActivity String
     <string name="invalid_email_and_password">Invalid email or password</string>
-    <string name="not_activated">This account is not actived, check your email</string>
+    <string name="not_activated">This account is not confirmed, check your email</string>
     <string name="new_account_success">New account has been created, please check your email</string>
     <string name="account_exist">This account is already exist</string>
     <string name="email_sent">Email sent, please check your box</string>
-
-
-
 
 </resources>
