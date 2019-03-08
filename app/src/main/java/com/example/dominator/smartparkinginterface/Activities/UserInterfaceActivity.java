@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.content.res.Resources;
 import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationListener;
@@ -14,22 +13,20 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v4.app.ActivityCompat;
-import android.text.Editable;
-import android.text.TextWatcher;
-import android.util.Log;
-import android.util.Patterns;
-import android.view.View;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.util.Log;
+import android.util.Patterns;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -39,8 +36,8 @@ import android.widget.ViewFlipper;
 
 import com.example.dominator.smartparkinginterface.Entities.InformationAccount;
 import com.example.dominator.smartparkinginterface.Entities.Owner;
-import com.example.dominator.smartparkinginterface.Entities.PasswordChanger;
 import com.example.dominator.smartparkinginterface.Entities.ParkingLot;
+import com.example.dominator.smartparkinginterface.Entities.PasswordChanger;
 import com.example.dominator.smartparkinginterface.Entities.ResponseTemplate;
 import com.example.dominator.smartparkinginterface.R;
 import com.example.dominator.smartparkinginterface.Retrofit.APIClient;
@@ -49,6 +46,7 @@ import com.example.dominator.smartparkinginterface.utils.DirectionsJSONParser;
 import com.example.dominator.smartparkinginterface.utils.HttpUtils;
 import com.example.dominator.smartparkinginterface.utils.LocationResult;
 import com.example.dominator.smartparkinginterface.utils.MyLocation;
+import com.example.dominator.smartparkinginterface.utils.NumberUtil;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -78,16 +76,16 @@ import retrofit2.Response;
 
 public class UserInterfaceActivity
         extends
-            AppCompatActivity
+        AppCompatActivity
         implements
-            NavigationView.OnNavigationItemSelectedListener,
-            OnMapReadyCallback,
-            GoogleMap.OnMarkerClickListener {
+        NavigationView.OnNavigationItemSelectedListener,
+        OnMapReadyCallback,
+        GoogleMap.OnMarkerClickListener {
 
     //View
     private ViewFlipper vf;
     private FloatingActionButton btnShowDirection;
-//    private FloatingActionButton btnShowDetail;
+    //    private FloatingActionButton btnShowDetail;
     private TextView header;
     private TextView ownerText;
     private TextView addressText;
@@ -127,7 +125,6 @@ public class UserInterfaceActivity
     private ParkingLot selectedLot = null;
     private boolean isLotsReady = false;
     private boolean isMapReady = false;
-
 
     //Location Result
     private LocationResult locationResult = new LocationResult() {
@@ -185,9 +182,9 @@ public class UserInterfaceActivity
                 Log.d("TAG", getResources().getString(R.string.fail_message));
             }
         });
-        currentAvatar.setImageResource(apiClient.getResId(account.getAvatar(), R.drawable.class));
-        choosingAvatar.setImageResource(apiClient.getResId(account.getAvatar(), R.drawable.class));
-        sidebarAvatar.setImageResource(apiClient.getResId(account.getAvatar(), R.drawable.class));
+        currentAvatar.setImageResource(APIClient.getResId(account.getAvatar(), R.drawable.class));
+        choosingAvatar.setImageResource(APIClient.getResId(account.getAvatar(), R.drawable.class));
+        sidebarAvatar.setImageResource(APIClient.getResId(account.getAvatar(), R.drawable.class));
     }
 
     @Override
@@ -249,8 +246,10 @@ public class UserInterfaceActivity
             MyLocation myLocation = new MyLocation();
             if (myLocation.getLocation(getApplicationContext(), locationResult)) {
                 SharedPreferences locationPref = getApplication().getSharedPreferences("location", MODE_PRIVATE);
-                currentLocation = new LatLng(Double.parseDouble(locationPref.getString("Latitude", "10.852711")),
-                        Double.parseDouble(locationPref.getString("Longitude", "106.626786")));
+                currentLocation = new LatLng(
+                        NumberUtil.tryParseDouble(locationPref.getString("Latitude", "10.852711"), 10.852711),
+                        NumberUtil.tryParseDouble(locationPref.getString("Longitude", "106.626786"), 106.626786)
+                );
             }
 
             isMapReady = true;
@@ -319,9 +318,9 @@ public class UserInterfaceActivity
         } else if (id == R.id.nav_news) {
 
         } else if (id == R.id.nav_profile) {
-                NavigationView navigationView = findViewById(R.id.nav_view);
-                View hView = navigationView.getHeaderView(0);
-                viewInfo(hView);
+            NavigationView navigationView = findViewById(R.id.nav_view);
+            View hView = navigationView.getHeaderView(0);
+            viewInfo(hView);
         } else if (id == R.id.nav_rate_us) {
 
         }
@@ -413,7 +412,7 @@ public class UserInterfaceActivity
                     Log.d("TAG4", response.message() + "");
                     Log.d("TAG5", response.headers() + "");
                     Log.d("TAG6", getResources().getString(R.string.success_message));
-                    if(response.isSuccessful() == true) {
+                    if (response.isSuccessful()) {
                         account.setFirstName(firstNameText.getText().toString());
                         account.setLastName(lastNameText.getText().toString());
                         account.setPhoneNumber(phoneNumberText.getText().toString());
@@ -421,9 +420,8 @@ public class UserInterfaceActivity
                         changeButton.setEnabled(false);
                         changeButton.setTextColor(Color.parseColor("#999999"));
                         blackScreen.setVisibility(View.INVISIBLE);
-                        sidebarAvatar.setImageResource(apiClient.getResId(currentAvatar.getTag().toString(), R.drawable.class));
-                    }
-                    else{
+                        sidebarAvatar.setImageResource(APIClient.getResId(currentAvatar.getTag().toString(), R.drawable.class));
+                    } else {
                         reminder.setText(getResources().getString(R.string.update_fail));
                         blackScreen.setVisibility(View.INVISIBLE);
                     }
@@ -459,11 +457,10 @@ public class UserInterfaceActivity
                         Log.d("TAG4", response.message() + "");
                         Log.d("TAG5", response.headers() + "");
                         Log.d("TAG6", getResources().getString(R.string.success_message));
-                        if(response.isSuccessful()) {
+                        if (response.isSuccessful()) {
                             account.setPassword(newPass.getText().toString());
                             changeReminder.setText(getResources().getString(R.string.password_change_success));
-                        }
-                        else{
+                        } else {
                             changeReminder.setText(getResources().getString(R.string.password_change_fail));
                         }
                     }
@@ -514,11 +511,9 @@ public class UserInterfaceActivity
                         List<HashMap<String, String>> path = routes.get(i);
 
                         // Fetching all the points in i-th route
-                        for (int j = 0; j < path.size(); j++) {
-                            HashMap<String, String> point = path.get(j);
-
-                            double lat = Double.parseDouble(point.get("lat"));
-                            double lng = Double.parseDouble(point.get("lng"));
+                        for (HashMap<String, String> point: path){
+                            double lat = NumberUtil.tryParseDouble(point.get("lat"), 0);
+                            double lng = NumberUtil.tryParseDouble(point.get("lng"), 0);
                             LatLng position = new LatLng(lat, lng);
                             builder.include(position);
 
@@ -625,7 +620,7 @@ public class UserInterfaceActivity
         timeText = findViewById(R.id.time_text);
         phoneNumberText = findViewById(R.id.phone_number);
         emailText = findViewById(R.id.email);
-        firstNameText =  findViewById(R.id.first_name);
+        firstNameText = findViewById(R.id.first_name);
         lastNameText = findViewById(R.id.last_name);
         changeButton = findViewById(R.id.save_info);
         reminder = findViewById(R.id.reminder);
@@ -659,18 +654,18 @@ public class UserInterfaceActivity
     public void changeAvatar(View view) {
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
-        header.setText("Change avatar");
+        header.setText(getResources().getString(R.string.change_avatar_header_text));
         vf.setDisplayedChild(4);
     }
 
     public void choosingImage(View view) {
         String pageImage = view.getTag().toString();
-        choosingAvatar.setImageResource(apiClient.getResId(pageImage, R.drawable.class));
+        choosingAvatar.setImageResource(APIClient.getResId(pageImage, R.drawable.class));
         choosingAvatar.setTag(pageImage);
     }
 
     public void saveImage(View view) {
-        currentAvatar.setImageResource(apiClient.getResId(choosingAvatar.getTag().toString(), R.drawable.class));
+        currentAvatar.setImageResource(APIClient.getResId(choosingAvatar.getTag().toString(), R.drawable.class));
         currentAvatar.setTag(choosingAvatar.getTag().toString());
         vf.setDisplayedChild(2);
     }

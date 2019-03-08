@@ -29,6 +29,7 @@
     <string name="home">Home</string>
     <string name="change_password">Change password</string>
     <string name="user_info">User info</string>
+    <string name="change_avatar_header_text">Change avatar</string>
 
     //UserInterfaceActivity String
     <string name="update_success">Account update successful</string>
