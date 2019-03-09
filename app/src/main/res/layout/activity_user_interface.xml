@@ -42,10 +42,10 @@
             android:fillViewport="true"
             android:layout_height="match_parent" >
 
-            <include android:id="@+id/detail_screen" layout="@layout/map_screen" />
-            <include android:id="@+id/loading_screen" layout="@layout/user_info_screen" />
-            <include android:id="@+id/change_password" layout="@layout/carpark_screen" />
-            <include android:id="@+id/park_inform" layout="@layout/change_pass_screen" />
+            <include android:id="@+id/map_screen" layout="@layout/map_screen" />
+            <include android:id="@+id/user_info_screen" layout="@layout/user_info_screen" />
+            <include android:id="@+id/carpark_screen" layout="@layout/carpark_screen" />
+            <include android:id="@+id/change_pass_screen" layout="@layout/change_pass_screen" />
             <include android:id="@+id/avatar_click" layout="@layout/avatar_choosing_screen" />
         </ViewFlipper>
 

@@ -28,6 +28,7 @@ import android.util.Patterns;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -131,6 +132,13 @@ public class UserInterfaceActivity
     private ParkingLot selectedLot = null;
     private boolean isLotsReady = false;
     private boolean isMapReady = false;
+    
+    //Integer
+    private static final int MAP_SCREEN = 0;
+    private static final int USER_INFO_SCREEN = 1;
+    private static final int CARPARK_SCREEN = 2;
+    private static final int CHANGE_PASS_SCREEN = 3;
+    private static final int AVATAR_SCREEN = 4;
 
     //Location Result
     private LocationResult locationResult = new LocationResult() {
@@ -340,20 +348,20 @@ public class UserInterfaceActivity
     }
 
     public void backButton(View view) {
-        vf.setDisplayedChild(0);
+        vf.setDisplayedChild(MAP_SCREEN);
         header.setText(getResources().getString(R.string.home));
     }
 
     public void changePassword(View view) {
         header.setText(getResources().getString(R.string.change_password));
-        vf.setDisplayedChild(3);
+        vf.setDisplayedChild(CHANGE_PASS_SCREEN);
         changeReminder.setText("");
     }
 
     @SuppressLint("DefaultLocale")
     public void viewParkingLot(ParkingLot parkingLot) {
         header.setText(parkingLot.getDisplayName());
-        vf.setDisplayedChild(2);
+        vf.setDisplayedChild(CARPARK_SCREEN);
         Owner owner = parkingLot.getOwner();
         ownerText.setText(owner.getFullName());
         addressText.setText(parkingLot.getAddress());
@@ -365,7 +373,7 @@ public class UserInterfaceActivity
     public void viewInfo(View view) {
         drawer.closeDrawer(GravityCompat.START);
         header.setText(getResources().getString(R.string.user_info));
-        vf.setDisplayedChild(1);
+        vf.setDisplayedChild(USER_INFO_SCREEN);
         //get info from outer resource
         phoneNumberText.setText(account.getPhoneNumber());
         emailText.setText(account.getEmail());
@@ -398,14 +406,14 @@ public class UserInterfaceActivity
     }
 
     public void saveInfo(View view) {
-        blackScreen.setVisibility(View.VISIBLE);
+        blackScreen.setVisibility(View.VISIBLE); preventClick();
         if (firstNameText.getText().toString().isEmpty() || lastNameText.getText().toString().isEmpty()
                 || phoneNumberText.getText().toString().isEmpty()) {
             reminder.setText(getResources().getString(R.string.empty_field));
-            blackScreen.setVisibility(View.INVISIBLE);
+            blackScreen.setVisibility(View.INVISIBLE); resumeClick();
         } else if (!Patterns.PHONE.matcher(phoneNumberText.getText().toString()).matches()) {
             reminder.setText(getResources().getString(R.string.invalid_phone));
-            blackScreen.setVisibility(View.INVISIBLE);
+            blackScreen.setVisibility(View.INVISIBLE); resumeClick();
         } else if (changeButton.isEnabled()) {
 
             InformationAccount user = new InformationAccount();
@@ -429,11 +437,11 @@ public class UserInterfaceActivity
                         reminder.setText(getResources().getString(R.string.update_success));
                         changeButton.setEnabled(false);
                         changeButton.setTextColor(Color.parseColor("#999999"));
-                        blackScreen.setVisibility(View.INVISIBLE);
+                        blackScreen.setVisibility(View.INVISIBLE); resumeClick();
                         sidebarAvatar.setImageResource(APIClient.getResId(currentAvatar.getTag().toString(), R.drawable.class));
                     } else {
                         reminder.setText(getResources().getString(R.string.update_fail));
-                        blackScreen.setVisibility(View.INVISIBLE);
+                        blackScreen.setVisibility(View.INVISIBLE); resumeClick();
                     }
                 }
 
@@ -443,7 +451,7 @@ public class UserInterfaceActivity
                     Log.d("TAG", displayResponse);
                     Log.d("TAG", getResources().getString(R.string.fail_message));
                     reminder.setText(getResources().getString(R.string.connection_failed));
-                    blackScreen.setVisibility(View.INVISIBLE);
+                    blackScreen.setVisibility(View.INVISIBLE); resumeClick();
                 }
             });
         }
@@ -666,7 +674,7 @@ public class UserInterfaceActivity
         NavigationView navigationView = findViewById(R.id.nav_view);
         View hView = navigationView.getHeaderView(0);
         header.setText(getResources().getString(R.string.home));
-        vf.setDisplayedChild(0);
+        vf.setDisplayedChild(MAP_SCREEN);
         showDirection(hView);
     }
 
@@ -676,7 +684,7 @@ public class UserInterfaceActivity
         changeButton.setEnabled(true);
         changeButton.setTextColor(Color.parseColor("#ffffff"));
         header.setText(getResources().getString(R.string.change_avatar_header_text));
-        vf.setDisplayedChild(4);
+        vf.setDisplayedChild(AVATAR_SCREEN);
     }
 
     public void choosingImage(View view) {
@@ -688,6 +696,15 @@ public class UserInterfaceActivity
     public void saveImage(View view) {
         currentAvatar.setImageResource(APIClient.getResId(choosingAvatar.getTag().toString(), R.drawable.class));
         currentAvatar.setTag(choosingAvatar.getTag().toString());
-        vf.setDisplayedChild(1);
+        vf.setDisplayedChild(USER_INFO_SCREEN);
+    }
+
+    public void preventClick(){
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
+                WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+    }
+
+    public void resumeClick(){
+        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
     }
 }
