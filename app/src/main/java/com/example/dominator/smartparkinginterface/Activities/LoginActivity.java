@@ -30,8 +30,6 @@ import com.example.dominator.smartparkinginterface.R;
 import com.example.dominator.smartparkinginterface.Retrofit.APIClient;
 import com.example.dominator.smartparkinginterface.Retrofit.APIInterface;
 
-import java.io.Serializable;
-
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -288,10 +286,10 @@ public class LoginActivity extends AppCompatActivity {
         reminder = findViewById(R.id.reminder);
         forgetReminder = findViewById(R.id.forget_reminder);
         newReminder = findViewById(R.id.new_reminder);
-        email = findViewById(R.id.email);
-        firstName = findViewById(R.id.first_name);
-        lastName = findViewById(R.id.last_name);
-        phoneNumber = findViewById(R.id.phone_number);
+        email = findViewById(R.id.new_email);
+        firstName = findViewById(R.id.new_firstname);
+        lastName = findViewById(R.id.new_lastname);
+        phoneNumber = findViewById(R.id.new_phone_number);
         password = findViewById(R.id.password);
         confirmPassword = findViewById(R.id.confirm_password);
         submitEmail = findViewById(R.id.forget_email_text);

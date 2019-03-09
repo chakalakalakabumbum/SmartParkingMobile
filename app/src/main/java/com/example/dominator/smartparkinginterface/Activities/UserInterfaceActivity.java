@@ -110,7 +110,6 @@ public class UserInterfaceActivity
     private ImageView sidebarAvatar;
     private TextView sidebarName;
     private TextView sidebarEmail;
-    private View hView;
     private DrawerLayout drawer;
     private NavigationView navigationView;
 
@@ -333,7 +332,7 @@ public class UserInterfaceActivity
         } else if (id == R.id.nav_news) {
 
         } else if (id == R.id.nav_profile) {
-            hView = navigationView.getHeaderView(0);
+            View hView = navigationView.getHeaderView(0);
             viewInfo(hView);
         } else if (id == R.id.nav_rate_us) {
 
@@ -656,6 +655,7 @@ public class UserInterfaceActivity
         blackScreen = findViewById(R.id.loading_image);
         choosingAvatar = findViewById(R.id.choosing_user_avatar);
         currentAvatar = findViewById(R.id.current_user_avatar);
+        changeReminder = findViewById(R.id.change_reminder);
         sidebarAvatar = navigationView.getHeaderView(0).findViewById(R.id.user_sidebar_avatar);
         sidebarEmail = navigationView.getHeaderView(0).findViewById(R.id.user_sidebar_email);
         sidebarName = navigationView.getHeaderView(0).findViewById(R.id.user_sidebar_name);

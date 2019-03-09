@@ -9,21 +9,22 @@
 
     <ImageView
         android:id="@+id/background"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:scaleType="fitXY"
-        app:layout_constraintBottom_toTopOf="@+id/confirm_password"
-        app:layout_constraintStart_toStartOf="@+id/imageView2"
-        app:layout_constraintTop_toTopOf="@+id/confirm_password"
-        app:srcCompat="@drawable/background" />
+        app:srcCompat="@drawable/background"
+        tools:layout_editor_absoluteX="16dp" />
 
     <ImageView
         android:id="@+id/imageView2"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="73dp"
-        app:layout_constraintEnd_toStartOf="parent"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/new_loading_image"
         app:srcCompat="@drawable/logo_name" />
 
     <ImageView
@@ -43,26 +44,12 @@
         app:srcCompat="@drawable/default_avatar" />
 
     <EditText
-        android:id="@+id/phone_number"
+        android:id="@+id/new_email"
         android:layout_width="251dp"
         android:layout_height="35dp"
         android:layout_marginStart="32dp"
         android:layout_marginLeft="32dp"
-        android:fontFamily="@font/champagnelimousines"
-        android:hint="Phone number"
-        android:inputType="number"
-        android:textColor="@color/foregroundText"
-        android:textColorHint="@color/foregroundText"
-        android:textSize="15dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/new_user_avatar" />
-
-    <EditText
-        android:id="@+id/firstname"
-        android:layout_width="251dp"
-        android:layout_height="35dp"
-        android:layout_marginStart="32dp"
-        android:layout_marginLeft="32dp"
+        android:layout_marginTop="8dp"
         android:fontFamily="@font/champagnelimousines"
         android:hint="Email"
         android:inputType="textEmailAddress"
@@ -70,10 +57,25 @@
         android:textColorHint="@color/foregroundText"
         android:textSize="15dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/phone_number" />
+        app:layout_constraintTop_toBottomOf="@+id/new_user_avatar" />
 
     <EditText
-        android:id="@+id/email"
+        android:id="@+id/new_phone_number"
+        android:layout_width="251dp"
+        android:layout_height="35dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginLeft="32dp"
+        android:fontFamily="@font/champagnelimousines"
+        android:hint="Phone number"
+        android:inputType="phone"
+        android:textColor="@color/foregroundText"
+        android:textColorHint="@color/foregroundText"
+        android:textSize="15dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/new_email" />
+
+    <EditText
+        android:id="@+id/new_firstname"
         android:layout_width="251dp"
         android:layout_height="35dp"
         android:layout_marginStart="32dp"
@@ -85,10 +87,10 @@
         android:textColorHint="@color/foregroundText"
         android:textSize="15dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/firstname" />
+        app:layout_constraintTop_toBottomOf="@+id/new_phone_number" />
 
     <EditText
-        android:id="@+id/last_name"
+        android:id="@+id/new_lastname"
         android:layout_width="251dp"
         android:layout_height="35dp"
         android:layout_marginStart="32dp"
@@ -100,24 +102,7 @@
         android:textColorHint="@color/foregroundText"
         android:textSize="15dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/email" />
-
-    <EditText
-        android:id="@+id/confirm_password"
-        android:layout_width="251dp"
-        android:layout_height="35dp"
-        android:layout_marginStart="32dp"
-        android:layout_marginLeft="32dp"
-        android:layout_marginTop="8dp"
-        android:ems="10"
-        android:fontFamily="@font/champagnelimousines"
-        android:hint="Confirm password"
-        android:inputType="textPassword"
-        android:textColor="@color/foregroundText"
-        android:textColorHint="@color/foregroundText"
-        android:textSize="15dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/password" />
+        app:layout_constraintTop_toBottomOf="@+id/new_firstname" />
 
     <EditText
         android:id="@+id/password"
@@ -133,7 +118,23 @@
         android:textColorHint="@color/foregroundText"
         android:textSize="15dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/last_name" />
+        app:layout_constraintTop_toBottomOf="@+id/new_lastname" />
+
+    <EditText
+        android:id="@+id/confirm_password"
+        android:layout_width="251dp"
+        android:layout_height="35dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginLeft="32dp"
+        android:ems="10"
+        android:fontFamily="@font/champagnelimousines"
+        android:hint="Confirm password"
+        android:inputType="textPassword"
+        android:textColor="@color/foregroundText"
+        android:textColorHint="@color/foregroundText"
+        android:textSize="15dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/password" />
 
 
     <ImageView
@@ -145,9 +146,8 @@
         android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.511"
-        app:layout_constraintStart_toEndOf="@+id/phone_number"
-        app:layout_constraintTop_toTopOf="@+id/phone_number"
+        app:layout_constraintStart_toEndOf="@+id/new_email"
+        app:layout_constraintTop_toTopOf="@+id/new_email"
         app:srcCompat="@drawable/emaillogo" />
 
     <ImageView
@@ -160,7 +160,7 @@
         android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/email"
+        app:layout_constraintStart_toEndOf="@+id/new_firstname"
         app:layout_constraintTop_toBottomOf="@+id/imageView7"
         app:srcCompat="@drawable/name_card" />
 
@@ -174,7 +174,7 @@
         android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/last_name"
+        app:layout_constraintStart_toEndOf="@+id/new_lastname"
         app:layout_constraintTop_toBottomOf="@+id/imageView6"
         app:srcCompat="@drawable/name_card" />
 
@@ -192,6 +192,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/confirm_password"
         app:layout_constraintTop_toBottomOf="@+id/imageView9"
+        app:layout_constraintVertical_bias="0.0"
         app:srcCompat="@drawable/passwordlogo" />
 
     <ImageView
@@ -204,7 +205,7 @@
         android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/confirm_password"
+        app:layout_constraintStart_toEndOf="@+id/password"
         app:layout_constraintTop_toBottomOf="@+id/imageView10"
         app:srcCompat="@drawable/passwordlogo" />
 
@@ -218,9 +219,8 @@
         android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/firstname"
-        app:layout_constraintTop_toBottomOf="@+id/imageView5"
-        app:srcCompat="@drawable/email" />
+        app:layout_constraintStart_toEndOf="@+id/new_phone_number"
+        app:layout_constraintTop_toBottomOf="@+id/imageView5" />
 
 
     <Button
@@ -246,16 +246,18 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginLeft="8dp"
+        android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
-        android:layout_marginBottom="4dp"
+        android:layout_marginBottom="8dp"
         android:fontFamily="@font/champagnelimousinesbold"
         android:text="Please fill the following information"
         android:textColor="@color/colorAccent"
         android:textSize="15dp"
         app:layout_constraintBottom_toTopOf="@+id/create_account"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/confirm_password" />
 
     <Button
         android:id="@+id/back"
@@ -270,7 +272,7 @@
         android:onClick="returnLogin"
         android:text="Back"
         android:textColor="@color/foregroundText"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toBottomOf="@+id/background"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
@@ -281,11 +283,7 @@
         android:alpha="0.4"
         android:background="@color/black"
         android:scaleType="fitXY"
-        android:visibility="invisible"
-        app:layout_constraintBottom_toBottomOf="@+id/background"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:visibility="invisible" />
 
 
 </android.support.constraint.ConstraintLayout>
