@@ -38,7 +38,6 @@ import retrofit2.Response;
 
 public class LoginActivity extends AppCompatActivity {
 
-
     //API
     private APIInterface apiInterface;
     private APIClient apiClient;
@@ -69,13 +68,6 @@ public class LoginActivity extends AppCompatActivity {
 
     //Animation
     private Animation animateLogo;
-    
-    //Integer
-    private static final int LOADING_SCREEN = 0;
-    private static final int LOGIN_SCREEN = 1;
-    private static final int NEW_ACCOUNT_SCREEN = 2;
-    private static final int FORGET_PASS_SCREEN = 3;
-    private static final int AVATAR_SCREEN = 4;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,15 +83,16 @@ public class LoginActivity extends AppCompatActivity {
         Handler handler = new Handler();
         handler.postDelayed(new Runnable() {
             public void run() {
-                vf.setDisplayedChild(LOGIN_SCREEN);
+                vf.setDisplayedChild(getResources().getInteger(R.integer.LOGIN_SCREEN));
             }
         }, 5000);   //5 seconds
     }
 
     public void loginInput(View view) {
-        blackScreen.setVisibility(View.VISIBLE); preventClick();
+        blackScreen.setVisibility(View.VISIBLE);
+        preventClick();
         //nextActivity();
-        if(!emailText.getText().toString().isEmpty() || !passwordText.getText().toString().isEmpty()) {
+        if (!emailText.getText().toString().isEmpty() || !passwordText.getText().toString().isEmpty()) {
             apiInterface.doCheckLogin(new UserLogin(null, emailText.getText().toString(), passwordText.getText().toString())).enqueue(new Callback<ResponseTemplate>() {
                 @Override
                 public void onResponse(Call<ResponseTemplate> call, Response<ResponseTemplate> response) {
@@ -107,16 +100,17 @@ public class LoginActivity extends AppCompatActivity {
                     Log.d("TAG", response.raw() + "");
                     Log.d("TAG", response.body() + "");
                     Log.d("TAG", getResources().getString(R.string.success_message));
-                    blackScreen.setVisibility(View.INVISIBLE); resumeClick();
+                    blackScreen.setVisibility(View.INVISIBLE);
+                    resumeClick();
                     if (response.body().getObjectResponse() == null) {
                         reminder.setText(getResources().getString(R.string.invalid_email_and_password));
-                        if (response.body().isStatus() == true) {
+                        if (response.body().isStatus()) {
                             reminder.setText(getResources().getString(R.string.not_activated));
                         }
                     } else {
                         accountInfo = (InformationAccount) apiClient.ObjectConverter(response.body().getObjectResponse(), new InformationAccount());
                         accountInfo.setPassword(passwordText.getText().toString());
-                        if(accountInfo.getAvatar() == null || accountInfo.getAvatar().isEmpty()){
+                        if (accountInfo.getAvatar() == null || accountInfo.getAvatar().isEmpty()) {
                             accountInfo.setAvatar("default_avatar");
                         }
                         nextActivity();
@@ -129,38 +123,39 @@ public class LoginActivity extends AppCompatActivity {
                     Log.d("TAG", displayResponse);
                     Log.d("TAG", getResources().getString(R.string.fail_message));
                     reminder.setText(getResources().getString(R.string.connection_failed));
-                    blackScreen.setVisibility(View.INVISIBLE); resumeClick();
+                    blackScreen.setVisibility(View.INVISIBLE);
+                    resumeClick();
                 }
             });
-        }
-        else{
+        } else {
             reminder.setText(getResources().getString(R.string.invalid_email_and_password));
-            blackScreen.setVisibility(View.INVISIBLE); resumeClick();
+            blackScreen.setVisibility(View.INVISIBLE);
+            resumeClick();
         }
     }
 
     public void nextActivity() {
         Intent intent = new Intent(this, UserInterfaceActivity.class)
-                .putExtra("ACCOUNT_INFO", (Serializable) accountInfo);
+                .putExtra("ACCOUNT_INFO", accountInfo);
         this.startActivity(intent);
     }
 
     public void forgetPassword(View view) {
-        vf.setDisplayedChild(FORGET_PASS_SCREEN);
+        vf.setDisplayedChild(getResources().getInteger(R.integer.FORGET_PASS_SCREEN));
     }
 
     public void newAccount(View view) {
-        vf.setDisplayedChild(NEW_ACCOUNT_SCREEN);
+        vf.setDisplayedChild(getResources().getInteger(R.integer.NEW_ACCOUNT_SCREEN));
     }
 
     public void returnLogin(View view) {
-        vf.setDisplayedChild(LOGIN_SCREEN);
+        vf.setDisplayedChild(getResources().getInteger(R.integer.LOGIN_SCREEN));
     }
 
 
-
     public void createAccount(View view) {
-        newBlackScreen.setVisibility(View.VISIBLE); preventClick();
+        newBlackScreen.setVisibility(View.VISIBLE);
+        preventClick();
 
         if (email.getText().toString().isEmpty() ||
                 firstName.getText().toString().isEmpty() ||
@@ -169,13 +164,16 @@ public class LoginActivity extends AppCompatActivity {
                 password.getText().toString().isEmpty() ||
                 confirmPassword.getText().toString().isEmpty()) {
             newReminder.setText(getResources().getString(R.string.empty_field));
-            newBlackScreen.setVisibility(View.INVISIBLE); resumeClick();
+            newBlackScreen.setVisibility(View.INVISIBLE);
+            resumeClick();
         } else if (!Patterns.EMAIL_ADDRESS.matcher(email.getText().toString()).matches()) {
             newReminder.setText(getResources().getString(R.string.invalid_email));
-            newBlackScreen.setVisibility(View.INVISIBLE); resumeClick();
+            newBlackScreen.setVisibility(View.INVISIBLE);
+            resumeClick();
         } else if (!Patterns.PHONE.matcher(phoneNumber.getText().toString()).matches()) {
             newReminder.setText(getResources().getString(R.string.invalid_phone));
-            newBlackScreen.setVisibility(View.INVISIBLE); resumeClick();
+            newBlackScreen.setVisibility(View.INVISIBLE);
+            resumeClick();
         } else if (password.getText().toString().equals(confirmPassword.getText().toString())) {
             Account account = new Account();
             account.setEmail(email.getText().toString());
@@ -194,11 +192,11 @@ public class LoginActivity extends AppCompatActivity {
                     Log.d("TAG", response.message() + "");
                     Log.d("TAG", response.headers() + "");
                     Log.d("TAG", getResources().getString(R.string.success_message));
-                    newBlackScreen.setVisibility(View.INVISIBLE); resumeClick();
-                    if(response.body().isStatus()){
+                    newBlackScreen.setVisibility(View.INVISIBLE);
+                    resumeClick();
+                    if (response.body().isStatus()) {
                         newReminder.setText(getResources().getString(R.string.new_account_success));
-                    }
-                    else{
+                    } else {
                         newReminder.setText(getResources().getString(R.string.account_exist));
                     }
                 }
@@ -209,7 +207,8 @@ public class LoginActivity extends AppCompatActivity {
                     Log.d("TAG", displayResponse);
                     Log.d("TAG", getResources().getString(R.string.fail_message));
                     newReminder.setText(getResources().getString(R.string.connection_failed));
-                    newBlackScreen.setVisibility(View.INVISIBLE); resumeClick();
+                    newBlackScreen.setVisibility(View.INVISIBLE);
+                    resumeClick();
                 }
             });
         } else {
@@ -218,7 +217,8 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     public void confirmForgetPassword(View view) {
-        changeBlackScreen.setVisibility(View.VISIBLE); preventClick();
+        changeBlackScreen.setVisibility(View.VISIBLE);
+        preventClick();
         if (!submitEmail.getText().toString().isEmpty()) {
             apiInterface.doForgetPassword(submitEmail.getText().toString()).enqueue(
                     new Callback<ResponseTemplate>() {
@@ -233,7 +233,8 @@ public class LoginActivity extends AppCompatActivity {
                             } else {
                                 forgetReminder.setText(getResources().getString(R.string.invalid_email));
                             }
-                            changeBlackScreen.setVisibility(View.INVISIBLE); resumeClick();
+                            changeBlackScreen.setVisibility(View.INVISIBLE);
+                            resumeClick();
                         }
 
                         @Override
@@ -242,34 +243,36 @@ public class LoginActivity extends AppCompatActivity {
                             Log.d("TAG", displayResponse);
                             Log.d("TAG", getResources().getString(R.string.fail_message));
                             forgetReminder.setText(getResources().getString(R.string.connection_failed));
-                            changeBlackScreen.setVisibility(View.INVISIBLE); resumeClick();
+                            changeBlackScreen.setVisibility(View.INVISIBLE);
+                            resumeClick();
                         }
                     }
             );
         } else {
             forgetReminder.setText(getResources().getString(R.string.invalid_email));
-            changeBlackScreen.setVisibility(View.INVISIBLE); resumeClick();
+            changeBlackScreen.setVisibility(View.INVISIBLE);
+            resumeClick();
         }
     }
 
     public void changeAvatar(View view) {
-        vf.setDisplayedChild(AVATAR_SCREEN);
+        vf.setDisplayedChild(getResources().getInteger(R.integer.AVATAR_SCREEN));
     }
 
     public void choosingImage(View view) {
         String pageImage = view.getTag().toString();
-        choosingAvatarImage.setImageResource(apiClient.getResId(pageImage, R.drawable.class));
+        choosingAvatarImage.setImageResource(APIClient.getResId(pageImage, R.drawable.class));
         choosingAvatarImage.setTag(pageImage);
     }
 
     public void saveImage(View view) {
-        newUserAvatar.setImageResource(apiClient.getResId(choosingAvatarImage.getTag().toString(), R.drawable.class));
+        newUserAvatar.setImageResource(APIClient.getResId(choosingAvatarImage.getTag().toString(), R.drawable.class));
         newUserAvatar.setTag(choosingAvatarImage.getTag().toString());
-        vf.setDisplayedChild(NEW_ACCOUNT_SCREEN);
+        vf.setDisplayedChild(getResources().getInteger(R.integer.NEW_ACCOUNT_SCREEN));
     }
 
     public void backButton(View view) {
-        vf.setDisplayedChild(NEW_ACCOUNT_SCREEN);
+        vf.setDisplayedChild(getResources().getInteger(R.integer.NEW_ACCOUNT_SCREEN));
     }
 
     private void bindView() {
@@ -283,7 +286,7 @@ public class LoginActivity extends AppCompatActivity {
         emailText = findViewById(R.id.email_text);
         passwordText = findViewById(R.id.password_text);
         reminder = findViewById(R.id.reminder);
-        forgetReminder = findViewById( R.id.forget_reminder);
+        forgetReminder = findViewById(R.id.forget_reminder);
         newReminder = findViewById(R.id.new_reminder);
         email = findViewById(R.id.email);
         firstName = findViewById(R.id.first_name);
@@ -336,8 +339,6 @@ public class LoginActivity extends AppCompatActivity {
                         })
                         .create()
                         .show();
-
-
             } else {
                 // No explanation needed, we can request the permission.
                 ActivityCompat.requestPermissions(this,
@@ -350,12 +351,12 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
-    public void preventClick(){
+    public void preventClick() {
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
                 WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
     }
 
-    public void resumeClick(){
+    public void resumeClick() {
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
     }
 

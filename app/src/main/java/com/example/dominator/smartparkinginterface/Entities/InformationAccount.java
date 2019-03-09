@@ -82,4 +82,8 @@ public class InformationAccount implements Serializable {
     public void setAvatar(String avatar) {
         this.avatar = avatar;
     }
+
+    public String getFullName() {
+        return firstName + " " + lastName;
+    }
 }

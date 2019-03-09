@@ -132,13 +132,6 @@ public class UserInterfaceActivity
     private ParkingLot selectedLot = null;
     private boolean isLotsReady = false;
     private boolean isMapReady = false;
-    
-    //Integer
-    private static final int MAP_SCREEN = 0;
-    private static final int USER_INFO_SCREEN = 1;
-    private static final int CARPARK_SCREEN = 2;
-    private static final int CHANGE_PASS_SCREEN = 3;
-    private static final int AVATAR_SCREEN = 4;
 
     //Location Result
     private LocationResult locationResult = new LocationResult() {
@@ -160,7 +153,9 @@ public class UserInterfaceActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         ActionBar actionBar = getSupportActionBar();
-        actionBar.hide();
+        if (actionBar != null) {
+            actionBar.hide();
+        }
         setContentView(R.layout.activity_user_interface);
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
@@ -205,7 +200,7 @@ public class UserInterfaceActivity
         sidebarAvatar.setImageResource(APIClient.getResId(account.getAvatar(), R.drawable.class));
         sidebarAvatar.setTag(account.getAvatar());
         sidebarEmail.setText(account.getEmail());
-        sidebarName.setText(account.getFirstName() + " " + account.getLastName());
+        sidebarName.setText(account.getFullName());
     }
 
     @Override
@@ -348,20 +343,20 @@ public class UserInterfaceActivity
     }
 
     public void backButton(View view) {
-        vf.setDisplayedChild(MAP_SCREEN);
+        vf.setDisplayedChild(getResources().getInteger(R.integer.MAP_SCREEN));
         header.setText(getResources().getString(R.string.home));
     }
 
     public void changePassword(View view) {
         header.setText(getResources().getString(R.string.change_password));
-        vf.setDisplayedChild(CHANGE_PASS_SCREEN);
+        vf.setDisplayedChild(getResources().getInteger(R.integer.CHANGE_PASS_SCREEN));
         changeReminder.setText("");
     }
 
     @SuppressLint("DefaultLocale")
     public void viewParkingLot(ParkingLot parkingLot) {
         header.setText(parkingLot.getDisplayName());
-        vf.setDisplayedChild(CARPARK_SCREEN);
+        vf.setDisplayedChild(getResources().getInteger(R.integer.CARPARK_SCREEN));
         Owner owner = parkingLot.getOwner();
         ownerText.setText(owner.getFullName());
         addressText.setText(parkingLot.getAddress());
@@ -373,7 +368,7 @@ public class UserInterfaceActivity
     public void viewInfo(View view) {
         drawer.closeDrawer(GravityCompat.START);
         header.setText(getResources().getString(R.string.user_info));
-        vf.setDisplayedChild(USER_INFO_SCREEN);
+        vf.setDisplayedChild(getResources().getInteger(R.integer.USER_INFO_SCREEN));
         //get info from outer resource
         phoneNumberText.setText(account.getPhoneNumber());
         emailText.setText(account.getEmail());
@@ -406,14 +401,17 @@ public class UserInterfaceActivity
     }
 
     public void saveInfo(View view) {
-        blackScreen.setVisibility(View.VISIBLE); preventClick();
+        blackScreen.setVisibility(View.VISIBLE);
+        preventClick();
         if (firstNameText.getText().toString().isEmpty() || lastNameText.getText().toString().isEmpty()
                 || phoneNumberText.getText().toString().isEmpty()) {
             reminder.setText(getResources().getString(R.string.empty_field));
-            blackScreen.setVisibility(View.INVISIBLE); resumeClick();
+            blackScreen.setVisibility(View.INVISIBLE);
+            resumeClick();
         } else if (!Patterns.PHONE.matcher(phoneNumberText.getText().toString()).matches()) {
             reminder.setText(getResources().getString(R.string.invalid_phone));
-            blackScreen.setVisibility(View.INVISIBLE); resumeClick();
+            blackScreen.setVisibility(View.INVISIBLE);
+            resumeClick();
         } else if (changeButton.isEnabled()) {
 
             InformationAccount user = new InformationAccount();
@@ -437,11 +435,13 @@ public class UserInterfaceActivity
                         reminder.setText(getResources().getString(R.string.update_success));
                         changeButton.setEnabled(false);
                         changeButton.setTextColor(Color.parseColor("#999999"));
-                        blackScreen.setVisibility(View.INVISIBLE); resumeClick();
+                        blackScreen.setVisibility(View.INVISIBLE);
+                        resumeClick();
                         sidebarAvatar.setImageResource(APIClient.getResId(currentAvatar.getTag().toString(), R.drawable.class));
                     } else {
                         reminder.setText(getResources().getString(R.string.update_fail));
-                        blackScreen.setVisibility(View.INVISIBLE); resumeClick();
+                        blackScreen.setVisibility(View.INVISIBLE);
+                        resumeClick();
                     }
                 }
 
@@ -451,7 +451,8 @@ public class UserInterfaceActivity
                     Log.d("TAG", displayResponse);
                     Log.d("TAG", getResources().getString(R.string.fail_message));
                     reminder.setText(getResources().getString(R.string.connection_failed));
-                    blackScreen.setVisibility(View.INVISIBLE); resumeClick();
+                    blackScreen.setVisibility(View.INVISIBLE);
+                    resumeClick();
                 }
             });
         }
@@ -529,7 +530,7 @@ public class UserInterfaceActivity
                         List<HashMap<String, String>> path = routes.get(i);
 
                         // Fetching all the points in i-th route
-                        for (HashMap<String, String> point: path){
+                        for (HashMap<String, String> point : path) {
                             double lat = NumberUtil.tryParseDouble(point.get("lat"), 0);
                             double lng = NumberUtil.tryParseDouble(point.get("lng"), 0);
                             LatLng position = new LatLng(lat, lng);
@@ -674,7 +675,7 @@ public class UserInterfaceActivity
         NavigationView navigationView = findViewById(R.id.nav_view);
         View hView = navigationView.getHeaderView(0);
         header.setText(getResources().getString(R.string.home));
-        vf.setDisplayedChild(MAP_SCREEN);
+        vf.setDisplayedChild(getResources().getInteger(R.integer.MAP_SCREEN));
         showDirection(hView);
     }
 
@@ -684,7 +685,7 @@ public class UserInterfaceActivity
         changeButton.setEnabled(true);
         changeButton.setTextColor(Color.parseColor("#ffffff"));
         header.setText(getResources().getString(R.string.change_avatar_header_text));
-        vf.setDisplayedChild(AVATAR_SCREEN);
+        vf.setDisplayedChild(getResources().getInteger(R.integer.AVATAR_SCREEN));
     }
 
     public void choosingImage(View view) {
@@ -696,15 +697,15 @@ public class UserInterfaceActivity
     public void saveImage(View view) {
         currentAvatar.setImageResource(APIClient.getResId(choosingAvatar.getTag().toString(), R.drawable.class));
         currentAvatar.setTag(choosingAvatar.getTag().toString());
-        vf.setDisplayedChild(USER_INFO_SCREEN);
+        vf.setDisplayedChild(getResources().getInteger(R.integer.USER_INFO_SCREEN));
     }
 
-    public void preventClick(){
+    public void preventClick() {
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
                 WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
     }
 
-    public void resumeClick(){
+    public void resumeClick() {
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
     }
 }

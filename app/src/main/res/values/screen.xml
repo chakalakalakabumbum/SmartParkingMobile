@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--SHARED-->
+    <integer name="AVATAR_SCREEN">4</integer>
+
+    <!--LOGIN SCREEN-->
+    <integer name="LOADING_SCREEN">0</integer>
+    <integer name="LOGIN_SCREEN">1</integer>
+    <integer name="NEW_ACCOUNT_SCREEN">2</integer>
+    <integer name="FORGET_PASS_SCREEN">3</integer>
+
+    <!--USER INTERFACE SCREEN-->
+    <integer name="MAP_SCREEN">0</integer>
+    <integer name="USER_INFO_SCREEN">1</integer>
+    <integer name="CARPARK_SCREEN">2</integer>
+    <integer name="CHANGE_PASS_SCREEN">3</integer>
+</resources>
