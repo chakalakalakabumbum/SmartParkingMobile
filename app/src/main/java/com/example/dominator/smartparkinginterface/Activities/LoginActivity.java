@@ -194,8 +194,10 @@ public class LoginActivity extends AppCompatActivity {
                     resumeClick();
                     if (response.body().isStatus()) {
                         newReminder.setText(getResources().getString(R.string.new_account_success));
+                        resumeClick();
                     } else {
                         newReminder.setText(getResources().getString(R.string.account_exist));
+                        resumeClick();
                     }
                 }
 
@@ -210,7 +212,9 @@ public class LoginActivity extends AppCompatActivity {
                 }
             });
         } else {
+            newBlackScreen.setVisibility(View.INVISIBLE);
             newReminder.setText(getResources().getString(R.string.confirm_password_mismatch));
+            resumeClick();
         }
     }
 
