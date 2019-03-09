@@ -342,6 +342,8 @@ public class UserInterfaceActivity
     }
 
     public void backButton(View view) {
+        currentAvatar.setImageResource(APIClient.getResId(account.getAvatar(), R.drawable.class));
+        currentAvatar.setTag(account.getAvatar());
         vf.setDisplayedChild(getResources().getInteger(R.integer.MAP_SCREEN));
         header.setText(getResources().getString(R.string.home));
     }
@@ -365,6 +367,12 @@ public class UserInterfaceActivity
     }
 
     public void viewInfo(View view) {
+        currentAvatar.setImageResource(APIClient.getResId(account.getAvatar(), R.drawable.class));
+        currentAvatar.setTag(account.getAvatar());
+        choosingAvatar.setImageResource(APIClient.getResId(account.getAvatar(), R.drawable.class));
+        choosingAvatar.setTag(account.getAvatar());
+        sidebarAvatar.setImageResource(APIClient.getResId(account.getAvatar(), R.drawable.class));
+        sidebarAvatar.setTag(account.getAvatar());
         drawer.closeDrawer(GravityCompat.START);
         header.setText(getResources().getString(R.string.user_info));
         vf.setDisplayedChild(getResources().getInteger(R.integer.USER_INFO_SCREEN));
@@ -431,6 +439,7 @@ public class UserInterfaceActivity
                         account.setFirstName(firstNameText.getText().toString());
                         account.setLastName(lastNameText.getText().toString());
                         account.setPhoneNumber(phoneNumberText.getText().toString());
+                        account.setAvatar((currentAvatar.getTag().toString()));
                         reminder.setText(getResources().getString(R.string.update_success));
                         changeButton.setEnabled(false);
                         changeButton.setTextColor(Color.parseColor("#999999"));
