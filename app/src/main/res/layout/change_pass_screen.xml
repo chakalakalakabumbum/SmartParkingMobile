@@ -10,8 +10,8 @@
 
     <ImageView
         android:id="@+id/background"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:scaleType="fitXY"
         app:srcCompat="@drawable/background" />
 
@@ -152,7 +152,7 @@
         android:fontFamily="@font/champagnelimousinesbold"
         android:text="Please fill the following information"
         android:textColor="@color/colorAccent"
-        android:textSize="15dp"
+        android:textSize="20dp"
         app:layout_constraintBottom_toTopOf="@+id/old_password"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.503"

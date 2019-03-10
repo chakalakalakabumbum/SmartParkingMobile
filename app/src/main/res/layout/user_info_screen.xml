@@ -179,7 +179,7 @@
         android:onClick="backButton"
         android:text=""
         android:textColor="@color/colorAccent"
-        android:textSize="15dp"
+        android:textSize="20dp"
         app:layout_constraintBottom_toTopOf="@+id/change_password"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

@@ -449,6 +449,7 @@ public class UserInterfaceActivity
                         blackScreen.setVisibility(View.INVISIBLE);
                         resumeClick();
                         sidebarAvatar.setImageResource(APIClient.getResId(currentAvatar.getTag().toString(), R.drawable.class));
+                        sidebarName.setText(account.getFirstName() + " " + account.getLastName());
                     } else {
                         reminder.setText(getResources().getString(R.string.update_fail));
                         blackScreen.setVisibility(View.INVISIBLE);
@@ -513,7 +514,6 @@ public class UserInterfaceActivity
 
     public void showDirection(View view) {
         RequestParams params = getParams(currentLocation, selectedMarker.getPosition());
-
         HttpUtils.getByUrl(getResources().getString(R.string.google_api_link), params, new JsonHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {

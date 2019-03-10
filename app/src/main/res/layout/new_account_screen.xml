@@ -253,7 +253,7 @@
         android:fontFamily="@font/champagnelimousinesbold"
         android:text="Please fill the following information"
         android:textColor="@color/colorAccent"
-        android:textSize="15dp"
+        android:textSize="20dp"
         app:layout_constraintBottom_toTopOf="@+id/create_account"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
