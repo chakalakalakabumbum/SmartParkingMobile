@@ -192,6 +192,9 @@ public class UserInterfaceActivity
                 Log.d("TAG", getResources().getString(R.string.fail_message));
             }
         });
+        if(account.getAvatar() == null){
+            account.setAvatar("default_avatar");
+        }
         currentAvatar.setImageResource(APIClient.getResId(account.getAvatar(), R.drawable.class));
         currentAvatar.setTag(account.getAvatar());
         choosingAvatar.setImageResource(APIClient.getResId(account.getAvatar(), R.drawable.class));
@@ -521,6 +524,7 @@ public class UserInterfaceActivity
                     routes = parser.parse(response);
                 } catch (Exception e) {
                     e.printStackTrace();
+                    Log.d("NETWORK: ", e.toString());
                 }
 
                 if (routes != null) {
