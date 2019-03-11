@@ -42,6 +42,7 @@ public class LoginActivity extends AppCompatActivity {
 
     //Entities
     private InformationAccount accountInfo;
+    private Account account;
 
     //View
     private ViewFlipper vf;
@@ -63,6 +64,12 @@ public class LoginActivity extends AppCompatActivity {
     private EditText submitEmail;
     private ImageView newUserAvatar;
     private ImageView choosingAvatarImage;
+    private TextView checkEmail;
+    private TextView checkFirstName;
+    private TextView checkLastName;
+    private TextView checkPhoneNumber;
+    private TextView remindText;
+    private ImageView checkUserAvatar;
 
     //Animation
     private Animation animateLogo;
@@ -87,6 +94,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     public void loginInput(View view) {
+        reminder.setText("");
         blackScreen.setVisibility(View.VISIBLE);
         preventClick();
         //nextActivity();
@@ -139,19 +147,23 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     public void forgetPassword(View view) {
+        forgetReminder.setText("");
         vf.setDisplayedChild(getResources().getInteger(R.integer.FORGET_PASS_SCREEN));
     }
 
     public void newAccount(View view) {
+        newReminder.setText("");
         vf.setDisplayedChild(getResources().getInteger(R.integer.NEW_ACCOUNT_SCREEN));
     }
 
     public void returnLogin(View view) {
+        reminder.setText("");
         vf.setDisplayedChild(getResources().getInteger(R.integer.LOGIN_SCREEN));
     }
 
 
     public void createAccount(View view) {
+        newReminder.setText("");
         newBlackScreen.setVisibility(View.VISIBLE);
         preventClick();
 
@@ -173,7 +185,7 @@ public class LoginActivity extends AppCompatActivity {
             newBlackScreen.setVisibility(View.INVISIBLE);
             resumeClick();
         } else if (password.getText().toString().equals(confirmPassword.getText().toString())) {
-            Account account = new Account();
+            account = new Account();
             account.setEmail(email.getText().toString());
             account.setFirstName(firstName.getText().toString());
             account.setLastName(lastName.getText().toString());
@@ -193,8 +205,17 @@ public class LoginActivity extends AppCompatActivity {
                     newBlackScreen.setVisibility(View.INVISIBLE);
                     resumeClick();
                     if (response.body().isStatus()) {
-                        newReminder.setText(getResources().getString(R.string.new_account_success));
                         resumeClick();
+                        checkEmail.setText(account.getEmail());
+                        checkFirstName.setText(account.getFirstName());
+                        checkLastName.setText(account.getLastName());
+                        checkPhoneNumber.setText(account.getPhoneNumber());
+                        if(account.getAvatar() == null){
+                            account.setAvatar("default_avatar");
+                        }
+                        checkUserAvatar.setTag(account.getAvatar());
+                        checkUserAvatar.setImageResource(APIClient.getResId(account.getAvatar(), R.drawable.class));
+                        vf.setDisplayedChild(getResources().getInteger(R.integer.CONFIRM_ACCOUNT_SCREEN));
                     } else {
                         newReminder.setText(getResources().getString(R.string.account_exist));
                         resumeClick();
@@ -219,6 +240,8 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     public void confirmForgetPassword(View view) {
+        forgetReminder.setText("");
+        remindText.setVisibility(View.INVISIBLE);
         changeBlackScreen.setVisibility(View.VISIBLE);
         preventClick();
         if (!submitEmail.getText().toString().isEmpty()) {
@@ -231,7 +254,8 @@ public class LoginActivity extends AppCompatActivity {
                             Log.d("TAG", response.body() + "");
                             Log.d("TAG", getResources().getString(R.string.success_message));
                             if (response.body().isStatus()) {
-                                forgetReminder.setText(getResources().getString(R.string.email_sent));
+                                forgetReminder.setText("");
+                                remindText.setVisibility(View.VISIBLE);
                             } else {
                                 forgetReminder.setText(getResources().getString(R.string.invalid_email));
                             }
@@ -299,6 +323,12 @@ public class LoginActivity extends AppCompatActivity {
         submitEmail = findViewById(R.id.forget_email_text);
         newUserAvatar = findViewById(R.id.new_user_avatar);
         choosingAvatarImage = findViewById(R.id.choosing_user_avatar);
+        checkEmail = findViewById(R.id.check_email);
+        checkFirstName = findViewById(R.id.check_firstname);
+        checkLastName = findViewById(R.id.check_lastname);
+        checkPhoneNumber = findViewById(R.id.check_phone_number);
+        remindText = findViewById(R.id.remind_text);
+        checkUserAvatar = findViewById(R.id.check_user_avatar);
 
         //API
         apiInterface = APIClient.getClient(getResources().getString(R.string.main_link)).create(APIInterface.class);

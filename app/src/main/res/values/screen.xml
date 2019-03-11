@@ -8,6 +8,7 @@
     <integer name="LOGIN_SCREEN">1</integer>
     <integer name="NEW_ACCOUNT_SCREEN">2</integer>
     <integer name="FORGET_PASS_SCREEN">3</integer>
+    <integer name="CONFIRM_ACCOUNT_SCREEN">5</integer>
 
     <!--USER INTERFACE SCREEN-->
     <integer name="MAP_SCREEN">0</integer>

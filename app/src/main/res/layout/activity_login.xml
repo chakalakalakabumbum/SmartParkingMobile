@@ -37,6 +37,9 @@
             android:id="@+id/avatar_click"
             layout="@layout/avatar_choosing_screen" />
 
+        <include
+            android:id="@+id/confirm_account"
+            layout="@layout/confirm_account_screen" />
     </ViewFlipper>
 
 </android.support.constraint.ConstraintLayout>

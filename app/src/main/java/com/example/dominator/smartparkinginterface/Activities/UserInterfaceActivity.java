@@ -412,6 +412,7 @@ public class UserInterfaceActivity
 
     public void saveInfo(View view) {
         blackScreen.setVisibility(View.VISIBLE);
+        reminder.setText("");
         preventClick();
         if (firstNameText.getText().toString().isEmpty() || lastNameText.getText().toString().isEmpty()
                 || phoneNumberText.getText().toString().isEmpty()) {
@@ -471,6 +472,7 @@ public class UserInterfaceActivity
     }
 
     public void confirmChangePassword(View view) {
+        changeReminder.setText("");
         if (oldPass.getText().toString().equals(account.getPassword()) && !oldPass.getText().toString().isEmpty()) {
             if (newPass.getText().toString().equals(confirmNewPass.getText().toString()) && !newPass.getText().toString().isEmpty()) {
                 PasswordChanger passwordChanger = new PasswordChanger(
