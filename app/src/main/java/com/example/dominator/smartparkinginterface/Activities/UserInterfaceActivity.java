@@ -105,6 +105,7 @@ public class UserInterfaceActivity
     private EditText newPass;
     private EditText confirmNewPass;
     private ImageView blackScreen;
+    private ImageView passBlackScreen;
     private ImageView choosingAvatar;
     private ImageView currentAvatar;
     private ImageView sidebarAvatar;
@@ -472,7 +473,9 @@ public class UserInterfaceActivity
     }
 
     public void confirmChangePassword(View view) {
+        passBlackScreen.setVisibility(View.VISIBLE);
         changeReminder.setText("");
+        preventClick();
         if (oldPass.getText().toString().equals(account.getPassword()) && !oldPass.getText().toString().isEmpty()) {
             if (newPass.getText().toString().equals(confirmNewPass.getText().toString()) && !newPass.getText().toString().isEmpty()) {
                 PasswordChanger passwordChanger = new PasswordChanger(
@@ -492,8 +495,12 @@ public class UserInterfaceActivity
                         Log.d("TAG6", getResources().getString(R.string.success_message));
                         if (response.isSuccessful()) {
                             account.setPassword(newPass.getText().toString());
+                            passBlackScreen.setVisibility(View.INVISIBLE);
+                            resumeClick();
                             changeReminder.setText(getResources().getString(R.string.password_change_success));
                         } else {
+                            passBlackScreen.setVisibility(View.INVISIBLE);
+                            resumeClick();
                             changeReminder.setText(getResources().getString(R.string.password_change_fail));
                         }
                     }
@@ -503,13 +510,19 @@ public class UserInterfaceActivity
                         String displayResponse = t.toString();
                         Log.d("TAG", displayResponse);
                         Log.d("TAG", getResources().getString(R.string.fail_message));
+                        passBlackScreen.setVisibility(View.INVISIBLE);
+                        resumeClick();
                         changeReminder.setText(getResources().getString(R.string.connection_failed));
                     }
                 });
             } else {
+                passBlackScreen.setVisibility(View.INVISIBLE);
+                resumeClick();
                 changeReminder.setText(getResources().getString(R.string.confirm_password_mismatch));
             }
         } else {
+            passBlackScreen.setVisibility(View.INVISIBLE);
+            resumeClick();
             changeReminder.setText(getResources().getString(R.string.wrong_old_password));
         }
     }
@@ -668,6 +681,7 @@ public class UserInterfaceActivity
         newPass = findViewById(R.id.new_password);
         confirmNewPass = findViewById(R.id.confirm_password);
         blackScreen = findViewById(R.id.loading_image);
+        passBlackScreen = findViewById(R.id.change_pass_loading_image);
         choosingAvatar = findViewById(R.id.choosing_user_avatar);
         currentAvatar = findViewById(R.id.current_user_avatar);
         changeReminder = findViewById(R.id.change_reminder);
