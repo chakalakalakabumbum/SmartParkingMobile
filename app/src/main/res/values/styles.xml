@@ -29,6 +29,7 @@
 
     <style name="NormalMessage">
         <item name="android:textColor">#4ddbff</item>
+        <item name="android:textAlignment">center</item>
         <item name="android:fontFamily">@font/champagnelimousinesbold</item>
         <item name="android:textSize">20dp</item>
     </style>

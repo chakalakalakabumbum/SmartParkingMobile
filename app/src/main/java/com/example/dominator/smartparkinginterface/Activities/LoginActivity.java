@@ -2,11 +2,16 @@ package com.example.dominator.smartparkinginterface.Activities;
 
 import android.Manifest;
 import android.app.AlertDialog;
+import android.content.ActivityNotFoundException;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -74,6 +79,9 @@ public class LoginActivity extends AppCompatActivity {
     //Animation
     private Animation animateLogo;
 
+    //int
+    public static final int GET_FROM_GALLERY = 69;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -116,9 +124,6 @@ public class LoginActivity extends AppCompatActivity {
                     } else {
                         accountInfo = (InformationAccount) apiClient.ObjectConverter(response.body().getObjectResponse(), new InformationAccount());
                         accountInfo.setPassword(passwordText.getText().toString());
-                        if (accountInfo.getAvatar() == null || accountInfo.getAvatar().isEmpty()) {
-                            accountInfo.setAvatar("default_avatar");
-                        }
                         nextActivity();
                     }
                 }
@@ -141,6 +146,9 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     public void nextActivity() {
+        if(accountInfo.getAvatar() == null){
+            accountInfo.setAvatar(apiClient.bitmapToByte(((BitmapDrawable) getResources().getDrawable(R.drawable.default_avatar)).getBitmap()));
+        }
         Intent intent = new Intent(this, UserInterfaceActivity.class)
                 .putExtra("ACCOUNT_INFO", accountInfo);
         this.startActivity(intent);
@@ -191,7 +199,7 @@ public class LoginActivity extends AppCompatActivity {
             account.setLastName(lastName.getText().toString());
             account.setPhoneNumber(phoneNumber.getText().toString());
             account.setPassword(password.getText().toString());
-            account.setAvatar(newUserAvatar.getTag().toString());
+            account.setAvatar(apiClient.bitmapToByte(((BitmapDrawable) (newUserAvatar.getDrawable())).getBitmap()));
 
             apiInterface.doSubmitUser(account).enqueue(new Callback<ResponseTemplate>() {
                 @Override
@@ -210,11 +218,8 @@ public class LoginActivity extends AppCompatActivity {
                         checkFirstName.setText(account.getFirstName());
                         checkLastName.setText(account.getLastName());
                         checkPhoneNumber.setText(account.getPhoneNumber());
-                        if(account.getAvatar() == null){
-                            account.setAvatar("default_avatar");
-                        }
                         checkUserAvatar.setTag(account.getAvatar());
-                        checkUserAvatar.setImageResource(APIClient.getResId(account.getAvatar(), R.drawable.class));
+                        checkUserAvatar.setImageBitmap(apiClient.byteToBitmap(account.getAvatar()));
                         vf.setDisplayedChild(getResources().getInteger(R.integer.CONFIRM_ACCOUNT_SCREEN));
                     } else {
                         newReminder.setText(getResources().getString(R.string.account_exist));
@@ -357,6 +362,7 @@ public class LoginActivity extends AppCompatActivity {
                 // Show an explanation to the user *asynchronously* -- don't block
                 // this thread waiting for the user's response! After the user
                 // sees the explanation, try again to request the permission.
+                //TODO: Change title & message
                 new AlertDialog.Builder(this)
                         .setTitle("This is a title")
                         .setMessage("This is a message")
@@ -425,5 +431,54 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
+
+    Intent CropIntent;
+    Uri uri;
+    private static final int GALLERY_REQUEST_CODE = 2;
+
+    public void selectImageAction(View view) {
+        Intent GalIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        startActivityForResult(Intent.createChooser(GalIntent, "Select Image from Gallery"), GALLERY_REQUEST_CODE);
+    }
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == 0 && resultCode == RESULT_OK)
+            CropImage();
+        else if (requestCode == GALLERY_REQUEST_CODE) {
+            if (data != null) {
+                uri = data.getData();
+                CropImage();
+            }
+        } else if (requestCode == 1) {
+            if (data != null) {
+                Bundle bundle = data.getExtras();
+                Bitmap bitmap = null;
+                if (bundle != null) {
+                    bitmap = bundle.getParcelable("data");
+                }
+                newUserAvatar.setImageBitmap(apiClient.getRoundedShape(bitmap));
+            }
+        }
+    }
+
+    private void CropImage() {
+        try {
+            CropIntent = new Intent("com.android.camera.action.CROP");
+            CropIntent.setDataAndType(uri, "image/*");
+
+            CropIntent.putExtra("crop", "true");
+            CropIntent.putExtra("outputX", 180);
+            CropIntent.putExtra("outputY", 180);
+            CropIntent.putExtra("aspectX", 3);
+            CropIntent.putExtra("aspectY", 3);
+            CropIntent.putExtra("scaleUpIfNeeded", true);
+            CropIntent.putExtra("return-data", true);
+
+            startActivityForResult(CropIntent, 1);
+        } catch (ActivityNotFoundException ex) {
+
+        }
+
+    }
 
 }

@@ -1,8 +1,6 @@
 package com.example.dominator.smartparkinginterface.Entities;
 
 
-import com.google.gson.annotations.SerializedName;
-
 import java.io.Serializable;
 
 public class InformationAccount implements Serializable {
@@ -12,12 +10,12 @@ public class InformationAccount implements Serializable {
     private String phoneNumber;
     private String firstName;
     private String lastName;
-    private String avatar;
+    private byte[] avatar;
 
     public InformationAccount() {
     }
 
-    public InformationAccount(Integer accountId, String email, String password, String phoneNumber, String firstName, String lastName, String avatar) {
+    public InformationAccount(Integer accountId, String email, String password, String phoneNumber, String firstName, String lastName, byte[] avatar) {
         this.accountId = accountId;
         this.email = email;
         this.password = password;
@@ -75,11 +73,11 @@ public class InformationAccount implements Serializable {
         this.lastName = lastName;
     }
 
-    public String getAvatar() {
+    public byte[] getAvatar() {
         return avatar;
     }
 
-    public void setAvatar(String avatar) {
+    public void setAvatar(byte[] avatar) {
         this.avatar = avatar;
     }
 

@@ -2,15 +2,20 @@ package com.example.dominator.smartparkinginterface.Activities;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
@@ -193,15 +198,9 @@ public class UserInterfaceActivity
                 Log.d("TAG", getResources().getString(R.string.fail_message));
             }
         });
-        if(account.getAvatar() == null){
-            account.setAvatar("default_avatar");
-        }
-        currentAvatar.setImageResource(APIClient.getResId(account.getAvatar(), R.drawable.class));
-        currentAvatar.setTag(account.getAvatar());
-        choosingAvatar.setImageResource(APIClient.getResId(account.getAvatar(), R.drawable.class));
-        choosingAvatar.setTag(account.getAvatar());
-        sidebarAvatar.setImageResource(APIClient.getResId(account.getAvatar(), R.drawable.class));
-        sidebarAvatar.setTag(account.getAvatar());
+        currentAvatar.setImageBitmap(apiClient.byteToBitmap(account.getAvatar()));
+        choosingAvatar.setImageBitmap(apiClient.byteToBitmap(account.getAvatar()));
+        sidebarAvatar.setImageBitmap(apiClient.byteToBitmap(account.getAvatar()));
         sidebarEmail.setText(account.getEmail());
         sidebarName.setText(account.getFullName());
     }
@@ -324,30 +323,31 @@ public class UserInterfaceActivity
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
-
-        if (id == R.id.nav_images) {
-            // Handle the camera action
-        } else if (id == R.id.nav_help) {
-
-        } else if (id == R.id.nav_logout) {
+        if (id == R.id.nav_logout) {
             Intent intent = new Intent(this, LoginActivity.class);
             this.startActivity(intent);
-
-        } else if (id == R.id.nav_news) {
 
         } else if (id == R.id.nav_profile) {
             View hView = navigationView.getHeaderView(0);
             viewInfo(hView);
+        }
+        /*
+        else if (id == R.id.nav_images) {
+            // Handle the camera action
+        } else if (id == R.id.nav_help) {
+
+        } else if (id == R.id.nav_news) {
+
         } else if (id == R.id.nav_rate_us) {
 
         }
+        */
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
 
     public void backButton(View view) {
-        currentAvatar.setImageResource(APIClient.getResId(account.getAvatar(), R.drawable.class));
-        currentAvatar.setTag(account.getAvatar());
+        currentAvatar.setImageBitmap(apiClient.byteToBitmap(account.getAvatar()));
         vf.setDisplayedChild(getResources().getInteger(R.integer.MAP_SCREEN));
         header.setText(getResources().getString(R.string.home));
     }
@@ -371,12 +371,9 @@ public class UserInterfaceActivity
     }
 
     public void viewInfo(View view) {
-        currentAvatar.setImageResource(APIClient.getResId(account.getAvatar(), R.drawable.class));
-        currentAvatar.setTag(account.getAvatar());
-        choosingAvatar.setImageResource(APIClient.getResId(account.getAvatar(), R.drawable.class));
-        choosingAvatar.setTag(account.getAvatar());
-        sidebarAvatar.setImageResource(APIClient.getResId(account.getAvatar(), R.drawable.class));
-        sidebarAvatar.setTag(account.getAvatar());
+        currentAvatar.setImageBitmap(apiClient.byteToBitmap(account.getAvatar()));
+        choosingAvatar.setImageBitmap(apiClient.byteToBitmap(account.getAvatar()));
+        sidebarAvatar.setImageBitmap(apiClient.byteToBitmap(account.getAvatar()));
         drawer.closeDrawer(GravityCompat.START);
         header.setText(getResources().getString(R.string.user_info));
         vf.setDisplayedChild(getResources().getInteger(R.integer.USER_INFO_SCREEN));
@@ -389,6 +386,7 @@ public class UserInterfaceActivity
         changeButton.setEnabled(false);
         changeButton.setTextColor(Color.parseColor("#999999"));
         reminder.setText("");
+
         TextWatcher textWatcher = new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -426,11 +424,11 @@ public class UserInterfaceActivity
             resumeClick();
         } else if (changeButton.isEnabled()) {
 
-            InformationAccount user = new InformationAccount();
+            final InformationAccount user = new InformationAccount();
             user.setLastName(lastNameText.getText().toString());
             user.setFirstName(firstNameText.getText().toString());
             user.setPhoneNumber(phoneNumberText.getText().toString());
-            user.setAvatar(currentAvatar.getTag().toString());
+            user.setAvatar(apiClient.bitmapToByte(((BitmapDrawable) (currentAvatar.getDrawable())).getBitmap()));
             apiInterface.doUpdateUser(account.getAccountId(), user).enqueue(new Callback<ResponseTemplate>() {
                 @Override
                 public void onResponse(Call<ResponseTemplate> call, Response<ResponseTemplate> response) {
@@ -441,16 +439,16 @@ public class UserInterfaceActivity
                     Log.d("TAG5", response.headers() + "");
                     Log.d("TAG6", getResources().getString(R.string.success_message));
                     if (response.isSuccessful()) {
-                        account.setFirstName(firstNameText.getText().toString());
-                        account.setLastName(lastNameText.getText().toString());
-                        account.setPhoneNumber(phoneNumberText.getText().toString());
-                        account.setAvatar((currentAvatar.getTag().toString()));
+                        account.setFirstName(user.getFirstName());
+                        account.setLastName(user.getLastName());
+                        account.setPhoneNumber(user.getPhoneNumber());
+                        account.setAvatar(user.getAvatar());
                         reminder.setText(getResources().getString(R.string.update_success));
                         changeButton.setEnabled(false);
                         changeButton.setTextColor(Color.parseColor("#999999"));
                         blackScreen.setVisibility(View.INVISIBLE);
                         resumeClick();
-                        sidebarAvatar.setImageResource(APIClient.getResId(currentAvatar.getTag().toString(), R.drawable.class));
+                        sidebarAvatar.setImageBitmap(apiClient.byteToBitmap(user.getAvatar()));
                         sidebarName.setText(account.getFirstName() + " " + account.getLastName());
                     } else {
                         reminder.setText(getResources().getString(R.string.update_fail));
@@ -532,7 +530,6 @@ public class UserInterfaceActivity
         HttpUtils.getByUrl(getResources().getString(R.string.google_api_link), params, new JsonHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-
                 List<List<HashMap<String, String>>> routes = null;
                 try {
                     DirectionsJSONParser parser = new DirectionsJSONParser();
@@ -541,7 +538,6 @@ public class UserInterfaceActivity
                     e.printStackTrace();
                     Log.d("NETWORK: ", e.toString());
                 }
-
                 if (routes != null) {
                     ArrayList<LatLng> points;
                     PolylineOptions lineOptions = null;
@@ -596,6 +592,12 @@ public class UserInterfaceActivity
                     selectedMarker = null;
                     btnShowDirection.hide();
                 }
+            }
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
+//                super.onFailure(statusCode, headers, responseString, throwable);
+                Toast.makeText(getApplicationContext(), "Connection's failed! Please check your connection!", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -725,7 +727,6 @@ public class UserInterfaceActivity
 
     public void saveImage(View view) {
         currentAvatar.setImageResource(APIClient.getResId(choosingAvatar.getTag().toString(), R.drawable.class));
-        currentAvatar.setTag(choosingAvatar.getTag().toString());
         vf.setDisplayedChild(getResources().getInteger(R.integer.USER_INFO_SCREEN));
     }
 
@@ -736,5 +737,57 @@ public class UserInterfaceActivity
 
     public void resumeClick() {
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+    }
+
+    private static final int GALLERY_REQUEST_CODE = 2;
+    Intent CropIntent;
+    Uri uri;
+
+    public void selectImageAction(View view) {
+        Intent GalIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        startActivityForResult(Intent.createChooser(GalIntent, "Select Image from Gallery"), GALLERY_REQUEST_CODE);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == 0 && resultCode == RESULT_OK)
+            CropImage();
+        else if (requestCode == GALLERY_REQUEST_CODE) {
+            if (data != null) {
+                uri = data.getData();
+                CropImage();
+            }
+        } else if (requestCode == 1) {
+            if (data != null) {
+                Bundle bundle = data.getExtras();
+                Bitmap bitmap = null;
+                if (bundle != null) {
+                    bitmap = bundle.getParcelable("data");
+                }
+                currentAvatar.setImageBitmap(apiClient.getRoundedShape(bitmap));
+                changeButton.setEnabled(true);
+                changeButton.setTextColor(Color.parseColor("#ffffff"));
+            }
+        }
+    }
+
+    private void CropImage() {
+        try {
+            CropIntent = new Intent("com.android.camera.action.CROP");
+            CropIntent.setDataAndType(uri, "image/*");
+
+            CropIntent.putExtra("crop", "true");
+            CropIntent.putExtra("outputX", 180);
+            CropIntent.putExtra("outputY", 180);
+            CropIntent.putExtra("aspectX", 3);
+            CropIntent.putExtra("aspectY", 3);
+            CropIntent.putExtra("scaleUpIfNeeded", true);
+            CropIntent.putExtra("return-data", true);
+
+            startActivityForResult(CropIntent, 1);
+        } catch (ActivityNotFoundException ex) {
+
+        }
+
     }
 }

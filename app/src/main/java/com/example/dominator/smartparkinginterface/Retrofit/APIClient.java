@@ -1,17 +1,27 @@
 package com.example.dominator.smartparkinginterface.Retrofit;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Path;
+import android.graphics.Rect;
+import android.util.Base64;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
+import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSerializer;
 import com.google.gson.internal.LinkedTreeMap;
 
+import java.io.ByteArrayOutputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 import java.util.Date;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.OkHttpClient;
@@ -20,6 +30,13 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class APIClient {
+    public static final int REQUEST_CODE_PICK_IMAGE = 1001;
+
+    private static final String AUTHORIZATION_URL = "https://api.imgur.com/oauth2/authorize";
+    private static final String CLIENT_ID = "9526317f2afe001";
+    private static final String CLIENT_SECRET = "6657db8085e9f9af37194ab8579bb93810c0db0e";
+    private OkHttpClient httpClient;
+
     private static Retrofit retrofit = null;
 
     public static Retrofit getClient(String link) {
@@ -57,6 +74,16 @@ public class APIClient {
         return retrofit;
     }
 
+    private static class ByteArrayToBase64TypeAdapter implements JsonSerializer<byte[]>, JsonDeserializer<byte[]> {
+        public byte[] deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+            return Base64.decode(json.getAsString(), Base64.NO_WRAP);
+        }
+
+        public JsonElement serialize(byte[] src, Type typeOfSrc, JsonSerializationContext context) {
+            return new JsonPrimitive(Base64.encodeToString(src, Base64.NO_WRAP));
+        }
+    }
+
     public Object ObjectConverter(Object treeMapResponse, Object convertClass){
 
         GsonBuilder gsonBuilder = new GsonBuilder();
@@ -67,6 +94,10 @@ public class APIClient {
                 return new Date(json.getAsJsonPrimitive().getAsLong());
             }
         });
+
+        gsonBuilder.registerTypeHierarchyAdapter(byte[].class,
+                new ByteArrayToBase64TypeAdapter());
+
 
         Gson gson = gsonBuilder.setLenient().create();
 
@@ -88,4 +119,41 @@ public class APIClient {
             return -1;
         }
     }
+
+    public Bitmap getRoundedShape(Bitmap scaleBitmapImage) {
+            int targetWidth = 256;
+            int targetHeight = 256;
+            Bitmap targetBitmap = Bitmap.createBitmap(targetWidth,
+                    targetHeight,Bitmap.Config.ARGB_8888);
+
+            Canvas canvas = new Canvas(targetBitmap);
+            Path path = new Path();
+            path.addCircle(((float) targetWidth - 1) / 2,
+                    ((float) targetHeight - 1) / 2,
+                    (Math.min(((float) targetWidth),
+                            ((float) targetHeight)) / 2),
+                    Path.Direction.CCW);
+
+            canvas.clipPath(path);
+            Bitmap sourceBitmap = scaleBitmapImage;
+            canvas.drawBitmap(sourceBitmap,
+                    new Rect(0, 0, sourceBitmap.getWidth(),
+                            sourceBitmap.getHeight()),
+                    new Rect(0, 0, targetWidth,
+                            targetHeight), null);
+            return targetBitmap;
+    }
+
+    public byte[] bitmapToByte(Bitmap bmp){
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        bmp.compress(Bitmap.CompressFormat.PNG, 100, stream);
+        byte[] byteArray = stream.toByteArray();
+        return byteArray;
+    }
+
+    public Bitmap byteToBitmap(byte[] bytes){
+        Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);;
+        return bitmap;
+    }
+
 }
