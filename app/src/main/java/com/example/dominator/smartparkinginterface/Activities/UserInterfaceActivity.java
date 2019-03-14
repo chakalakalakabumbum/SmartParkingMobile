@@ -118,6 +118,7 @@ public class UserInterfaceActivity
     private TextView sidebarEmail;
     private DrawerLayout drawer;
     private NavigationView navigationView;
+    private ImageView carparkImage;
 
     //API
     private APIClient apiClient;
@@ -368,6 +369,13 @@ public class UserInterfaceActivity
         telText.setText(parkingLot.getPhoneNumber());
         slotText.setText(String.format("%d", parkingLot.getTotalSlot()));
         timeText.setText(parkingLot.getTimeOfOperation());
+        if(parkingLot.getParklotImage() != null) {
+            carparkImage.setImageBitmap(apiClient.byteToBitmap(parkingLot.getParklotImage()));
+        }
+        else{
+            carparkImage.setImageResource(R.drawable.persuo_carpark);
+        }
+
     }
 
     public void viewInfo(View view) {
@@ -687,6 +695,7 @@ public class UserInterfaceActivity
         choosingAvatar = findViewById(R.id.choosing_user_avatar);
         currentAvatar = findViewById(R.id.current_user_avatar);
         changeReminder = findViewById(R.id.change_reminder);
+        carparkImage = findViewById(R.id.carparkImage);
         sidebarAvatar = navigationView.getHeaderView(0).findViewById(R.id.user_sidebar_avatar);
         sidebarEmail = navigationView.getHeaderView(0).findViewById(R.id.user_sidebar_email);
         sidebarName = navigationView.getHeaderView(0).findViewById(R.id.user_sidebar_name);
