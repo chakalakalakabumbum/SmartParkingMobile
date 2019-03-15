@@ -420,6 +420,7 @@ public class UserInterfaceActivity
 
     public void saveInfo(View view) {
         blackScreen.setVisibility(View.VISIBLE);
+        reminder.setTextColor(Color.parseColor("#D81B60"));
         reminder.setText("");
         preventClick();
         if (firstNameText.getText().toString().isEmpty() || lastNameText.getText().toString().isEmpty()
@@ -452,6 +453,7 @@ public class UserInterfaceActivity
                         account.setLastName(user.getLastName());
                         account.setPhoneNumber(user.getPhoneNumber());
                         account.setAvatar(user.getAvatar());
+                        reminder.setTextColor(Color.parseColor("#4ddbff"));
                         reminder.setText(getResources().getString(R.string.update_success));
                         changeButton.setEnabled(false);
                         changeButton.setTextColor(Color.parseColor("#999999"));
@@ -481,6 +483,7 @@ public class UserInterfaceActivity
 
     public void confirmChangePassword(View view) {
         passBlackScreen.setVisibility(View.VISIBLE);
+        changeReminder.setTextColor(Color.parseColor("#D81B60"));
         changeReminder.setText("");
         preventClick();
         if (oldPass.getText().toString().equals(account.getPassword()) && !oldPass.getText().toString().isEmpty()) {
@@ -504,6 +507,7 @@ public class UserInterfaceActivity
                             account.setPassword(newPass.getText().toString());
                             passBlackScreen.setVisibility(View.INVISIBLE);
                             resumeClick();
+                            changeReminder.setTextColor(Color.parseColor("#4ddbff"));
                             changeReminder.setText(getResources().getString(R.string.password_change_success));
                         } else {
                             passBlackScreen.setVisibility(View.INVISIBLE);
@@ -525,12 +529,20 @@ public class UserInterfaceActivity
             } else {
                 passBlackScreen.setVisibility(View.INVISIBLE);
                 resumeClick();
-                changeReminder.setText(getResources().getString(R.string.confirm_password_mismatch));
+                if(newPass.getText().toString().isEmpty()){
+                    changeReminder.setText(getResources().getString(R.string.empty_field));
+                }else {
+                    changeReminder.setText(getResources().getString(R.string.confirm_password_mismatch));
+                }
             }
         } else {
             passBlackScreen.setVisibility(View.INVISIBLE);
             resumeClick();
-            changeReminder.setText(getResources().getString(R.string.wrong_old_password));
+            if(oldPass.getText().toString().isEmpty()) {
+                changeReminder.setText(getResources().getString(R.string.empty_old_password));
+            } else{
+                changeReminder.setText(getResources().getString(R.string.wrong_old_password));
+            }
         }
     }
 

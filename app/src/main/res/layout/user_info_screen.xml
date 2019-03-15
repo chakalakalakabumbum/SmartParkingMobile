@@ -175,7 +175,7 @@
         android:layout_marginBottom="8dp"
         android:onClick="backButton"
         android:text=""
-        android:theme="@style/NormalMessage"
+        android:theme="@style/WaringMessage"
         app:layout_constraintBottom_toTopOf="@+id/change_password"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

@@ -19,11 +19,11 @@
     <string name="success_message">DONE</string>
 
     //Errors
-    <string name="empty_field">Some required field is empty</string>
+    <string name="empty_field">Some required fields are empty</string>
     <string name="invalid_phone">Phone number is invalid</string>
     <string name="invalid_email">Email is invalid</string>
     <string name="connection_failed">Connection failed, please check your connection</string>
-    <string name="confirm_password_mismatch">New password and confirm password mismatch or empty</string>
+    <string name="confirm_password_mismatch">Password and confirm password mismatch</string>
 
     //Headers
     <string name="home">Home</string>
@@ -36,13 +36,15 @@
     <string name="update_fail">Unable to save this new information</string>
     <string name="password_change_success">Password has been changed</string>
     <string name="password_change_fail">Unable to change password</string>
-    <string name="wrong_old_password">Old password is empty or not correct</string>
+    <string name="wrong_old_password">Old password is not correct</string>
+    <string name="empty_old_password">Old password is empty</string>
     <string name="carpark_out_of_range">Parking lot\'s out of range</string>
     <string name="Request_location_permission">Please accept location permission</string>
 
     //LoginActivity String
     <string name="invalid_email_and_password">Invalid email or password</string>
-    <string name="not_activated">This account is not confirmed, check your email</string>
+    <string name="empty_email_and_password">Email or password is empty</string>
+    <string name="not_activated">This account is not validated, check your email</string>
     <string name="new_account_success">New account has been created, please check your email</string>
     <string name="account_exist">This account is already exist</string>
     <string name="email_sent">Email sent, please check your box</string>

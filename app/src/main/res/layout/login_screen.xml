@@ -159,19 +159,18 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
-        android:layout_marginLeft="8dp"
         android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
-        android:layout_marginBottom="8dp"
+        android:layout_marginBottom="16dp"
         android:autoLink="all"
         android:fontFamily="@font/champagnelimousinesbold"
         android:linksClickable="true"
+        android:onClick="newAccount"
         android:text="@string/no_account"
         android:textColor="@color/foregroundText"
         android:textSize="20dp"
-        android:onClick="newAccount"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.497"
         app:layout_constraintStart_toStartOf="parent" />
 
     <ImageView

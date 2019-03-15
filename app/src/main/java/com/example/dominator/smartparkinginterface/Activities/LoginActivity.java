@@ -106,7 +106,7 @@ public class LoginActivity extends AppCompatActivity {
         blackScreen.setVisibility(View.VISIBLE);
         preventClick();
         //nextActivity();
-        if (!emailText.getText().toString().isEmpty() || !passwordText.getText().toString().isEmpty()) {
+        if (!emailText.getText().toString().isEmpty() && !passwordText.getText().toString().isEmpty()) {
             apiInterface.doCheckLogin(new UserLogin(null, emailText.getText().toString(), passwordText.getText().toString())).enqueue(new Callback<ResponseTemplate>() {
                 @Override
                 public void onResponse(Call<ResponseTemplate> call, Response<ResponseTemplate> response) {
@@ -139,7 +139,7 @@ public class LoginActivity extends AppCompatActivity {
                 }
             });
         } else {
-            reminder.setText(getResources().getString(R.string.invalid_email_and_password));
+            reminder.setText(getResources().getString(R.string.empty_email_and_password));
             blackScreen.setVisibility(View.INVISIBLE);
             resumeClick();
         }
