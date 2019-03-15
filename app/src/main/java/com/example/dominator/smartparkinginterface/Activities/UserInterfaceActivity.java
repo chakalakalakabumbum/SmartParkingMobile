@@ -238,6 +238,7 @@ public class UserInterfaceActivity
                 @Override
                 public void onLocationChanged(Location location) {
                     currentLocation = new LatLng(location.getLatitude(), location.getLongitude());
+                    getDirection();
                 }
 
                 @Override
@@ -457,7 +458,7 @@ public class UserInterfaceActivity
                         blackScreen.setVisibility(View.INVISIBLE);
                         resumeClick();
                         sidebarAvatar.setImageBitmap(apiClient.byteToBitmap(user.getAvatar()));
-                        sidebarName.setText(account.getFirstName() + " " + account.getLastName());
+                        sidebarName.setText(account.getFullName());
                     } else {
                         reminder.setText(getResources().getString(R.string.update_fail));
                         blackScreen.setVisibility(View.INVISIBLE);
@@ -534,6 +535,10 @@ public class UserInterfaceActivity
     }
 
     public void showDirection(View view) {
+        getDirection();
+    }
+
+    public void getDirection() {
         RequestParams params = getParams(currentLocation, selectedMarker.getPosition());
         HttpUtils.getByUrl(getResources().getString(R.string.google_api_link), params, new JsonHttpResponseHandler() {
             @Override
@@ -795,7 +800,7 @@ public class UserInterfaceActivity
 
             startActivityForResult(CropIntent, 1);
         } catch (ActivityNotFoundException ex) {
-
+            ex.printStackTrace();
         }
 
     }
