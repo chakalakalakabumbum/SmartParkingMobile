@@ -3,7 +3,6 @@ package com.example.dominator.smartparkinginterface.Activities;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.ActivityNotFoundException;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -11,8 +10,6 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -92,7 +89,6 @@ public class UserInterfaceActivity
     //View
     private ViewFlipper vf;
     private FloatingActionButton btnShowDirection;
-    //    private FloatingActionButton btnShowDetail;
     private TextView header;
     private TextView ownerText;
     private TextView addressText;
@@ -127,7 +123,6 @@ public class UserInterfaceActivity
 
     //Data
     private List<ParkingLot> parkingLots;
-    private static LatLng currentLocation;
 
     //Google Map
     private Polyline directionPolyline;
@@ -139,18 +134,17 @@ public class UserInterfaceActivity
     private boolean isLotsReady = false;
     private boolean isMapReady = false;
 
+
     //Location Result
     private LocationResult locationResult = new LocationResult() {
         @Override
         public void gotLocation(Location location) {
-            try {
-                SharedPreferences locationPref = getApplication().getSharedPreferences("location", MODE_PRIVATE);
-                SharedPreferences.Editor prefsEditor = locationPref.edit();
-                prefsEditor.putString("Longitude", location.getLongitude() + "");
-                prefsEditor.putString("Latitude", location.getLatitude() + "");
-                prefsEditor.apply();
-            } catch (Exception e) {
-                e.printStackTrace();
+            LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+            setLocationPref(latLng);
+            if (directionPolyline != null) {
+                List<LatLng> points = directionPolyline.getPoints();
+                LatLng to = points.get(points.size() - 1);
+                getDirection(latLng, to);
             }
         }
     };
@@ -204,6 +198,8 @@ public class UserInterfaceActivity
         sidebarAvatar.setImageBitmap(apiClient.byteToBitmap(account.getAvatar()));
         sidebarEmail.setText(account.getEmail());
         sidebarName.setText(account.getFullName());
+
+        checkLocationPermission();
     }
 
     @Override
@@ -212,12 +208,12 @@ public class UserInterfaceActivity
         for (ParkingLot lot : parkingLots) {
             if (lot.getLatitude() == markerPosition.latitude && lot.getLongitude() == markerPosition.longitude) {
                 selectedLot = lot;
+                break;
             }
         }
         selectedMarker = marker;
         marker.showInfoWindow();
         btnShowDirection.show();
-//        btnShowDetail.show();
         return true;
     }
 
@@ -227,50 +223,6 @@ public class UserInterfaceActivity
 
         if (map != null) {
             map.setContentDescription(getString(R.string.map_description));
-
-            if (ActivityCompat.checkSelfPermission(this,
-                    Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                    && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                Toast.makeText(this, getResources().getString(R.string.Request_location_permission), Toast.LENGTH_SHORT).show();
-                return;
-            }
-            LocationListener locationListener = new LocationListener() {
-                @Override
-                public void onLocationChanged(Location location) {
-                    currentLocation = new LatLng(location.getLatitude(), location.getLongitude());
-                    getDirection();
-                }
-
-                @Override
-                public void onStatusChanged(String s, int i, Bundle bundle) {
-                    //DO NOTHING
-                }
-
-                @Override
-                public void onProviderEnabled(String s) {
-                    //DO NOTHING
-                }
-
-                @Override
-                public void onProviderDisabled(String s) {
-                    //DO NOTHING
-                }
-            };
-            LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-            if (locationManager != null) {
-                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 10, locationListener);
-            }
-            map.setMyLocationEnabled(true);
-            map.getUiSettings().setMapToolbarEnabled(false);
-
-            MyLocation myLocation = new MyLocation();
-            if (myLocation.getLocation(getApplicationContext(), locationResult)) {
-                SharedPreferences locationPref = getApplication().getSharedPreferences("location", MODE_PRIVATE);
-                currentLocation = new LatLng(
-                        NumberUtil.tryParseDouble(locationPref.getString("Latitude", "10.852711"), 10.852711),
-                        NumberUtil.tryParseDouble(locationPref.getString("Longitude", "106.626786"), 106.626786)
-                );
-            }
 
             isMapReady = true;
             addMarkers();
@@ -285,6 +237,13 @@ public class UserInterfaceActivity
                     }
                 }
             });
+
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                //DO NOTHING
+                return;
+            }
+            map.setMyLocationEnabled(true);
+            map.getUiSettings().setMapToolbarEnabled(false);
 
         }
     }
@@ -370,10 +329,9 @@ public class UserInterfaceActivity
         telText.setText(parkingLot.getPhoneNumber());
         slotText.setText(String.format("%d", parkingLot.getTotalSlot()));
         timeText.setText(parkingLot.getTimeOfOperation());
-        if(parkingLot.getParklotImage() != null) {
+        if (parkingLot.getParklotImage() != null) {
             carparkImage.setImageBitmap(apiClient.byteToBitmap(parkingLot.getParklotImage()));
-        }
-        else{
+        } else {
             carparkImage.setImageResource(R.drawable.persuo_carpark);
         }
 
@@ -529,29 +487,29 @@ public class UserInterfaceActivity
             } else {
                 passBlackScreen.setVisibility(View.INVISIBLE);
                 resumeClick();
-                if(newPass.getText().toString().isEmpty()){
+                if (newPass.getText().toString().isEmpty()) {
                     changeReminder.setText(getResources().getString(R.string.empty_field));
-                }else {
+                } else {
                     changeReminder.setText(getResources().getString(R.string.confirm_password_mismatch));
                 }
             }
         } else {
             passBlackScreen.setVisibility(View.INVISIBLE);
             resumeClick();
-            if(oldPass.getText().toString().isEmpty()) {
+            if (oldPass.getText().toString().isEmpty()) {
                 changeReminder.setText(getResources().getString(R.string.empty_old_password));
-            } else{
+            } else {
                 changeReminder.setText(getResources().getString(R.string.wrong_old_password));
             }
         }
     }
 
     public void showDirection(View view) {
-        getDirection();
+        getDirection(MyLocation.getCurrentLocation(this), selectedMarker.getPosition());
     }
 
-    public void getDirection() {
-        RequestParams params = getParams(currentLocation, selectedMarker.getPosition());
+    public void getDirection(LatLng from, LatLng to) {
+        RequestParams params = getParams(from, to);
         HttpUtils.getByUrl(getResources().getString(R.string.google_api_link), params, new JsonHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
@@ -627,7 +585,6 @@ public class UserInterfaceActivity
         });
     }
 
-
 //    public void showDetail(View view) {
 //        if (selectedLot != null) {
 //            viewParkingLot(selectedLot);
@@ -652,7 +609,7 @@ public class UserInterfaceActivity
                 map.addMarker(option);
                 builder.include(marker);
             }
-            builder.include(currentLocation);
+            builder.include(MyLocation.getCurrentLocation(this));
             LatLngBounds bounds = builder.build();
             map.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 100));
         }
@@ -679,7 +636,6 @@ public class UserInterfaceActivity
                 showDirection(v);
             }
         });
-//        btnShowDetail = findViewById(R.id.btnShowDetail);
 
         vf = findViewById(R.id.vfu);
         Toolbar toolbar = findViewById(R.id.toolbar);
@@ -716,7 +672,6 @@ public class UserInterfaceActivity
         sidebarAvatar = navigationView.getHeaderView(0).findViewById(R.id.user_sidebar_avatar);
         sidebarEmail = navigationView.getHeaderView(0).findViewById(R.id.user_sidebar_email);
         sidebarName = navigationView.getHeaderView(0).findViewById(R.id.user_sidebar_name);
-        currentLocation = new LatLng(10.852711, 106.626786);
 
         //Entities
         account = new InformationAccount();
@@ -816,4 +771,26 @@ public class UserInterfaceActivity
         }
 
     }
+
+    private void setLocationPref(LatLng latLng) {
+        try {
+            SharedPreferences locationPref = getApplication().getSharedPreferences("location", MODE_PRIVATE);
+            SharedPreferences.Editor prefsEditor = locationPref.edit();
+//            prefsEditor.putFloat("Latitude", (float) latLng.latitude);
+//            prefsEditor.putFloat("Longitude", (float) latLng.longitude);
+
+            prefsEditor.putString("Latitude", latLng.latitude + "");
+            prefsEditor.putString("Longitude", latLng.longitude + "");
+
+            prefsEditor.apply();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void checkLocationPermission() {
+        MyLocation myLocation = new MyLocation();
+        myLocation.getLocation(getApplicationContext(), locationResult);
+    }
+
 }

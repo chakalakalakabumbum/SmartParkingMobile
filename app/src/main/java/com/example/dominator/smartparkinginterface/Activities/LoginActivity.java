@@ -86,6 +86,7 @@ public class LoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+
         checkLocationPermission();
 
         //bind views
@@ -105,7 +106,7 @@ public class LoginActivity extends AppCompatActivity {
         reminder.setText("");
         blackScreen.setVisibility(View.VISIBLE);
         preventClick();
-        //nextActivity();
+//        nextActivity();
         if (!emailText.getText().toString().isEmpty() && !passwordText.getText().toString().isEmpty()) {
             apiInterface.doCheckLogin(new UserLogin(null, emailText.getText().toString(), passwordText.getText().toString())).enqueue(new Callback<ResponseTemplate>() {
                 @Override
@@ -146,7 +147,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     public void nextActivity() {
-        if(accountInfo.getAvatar() == null){
+        if (accountInfo.getAvatar() == null) {
             accountInfo.setAvatar(apiClient.bitmapToByte(((BitmapDrawable) getResources().getDrawable(R.drawable.default_avatar)).getBitmap()));
         }
         Intent intent = new Intent(this, UserInterfaceActivity.class)
@@ -168,7 +169,6 @@ public class LoginActivity extends AppCompatActivity {
         reminder.setText("");
         vf.setDisplayedChild(getResources().getInteger(R.integer.LOGIN_SCREEN));
     }
-
 
     public void createAccount(View view) {
         newReminder.setText("");
@@ -350,6 +350,44 @@ public class LoginActivity extends AppCompatActivity {
 
     public static final int MY_PERMISSIONS_REQUEST_LOCATION = 99;
 
+    public void preventClick() {
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
+                WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+    }
+
+    public void resumeClick() {
+        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case MY_PERMISSIONS_REQUEST_LOCATION: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                    // permission was granted, yay! Do the
+                    // location-related task you need to do.
+                    if (ContextCompat.checkSelfPermission(this,
+                            Manifest.permission.ACCESS_FINE_LOCATION)
+                            == PackageManager.PERMISSION_GRANTED) {
+
+                        //Request location updates:
+//                        locationManager.requestLocationUpdates(provider, 400, 1, this);
+                    }
+
+                } else {
+
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission.
+
+                }
+                return;
+            }
+
+        }
+    }
+
     public boolean checkLocationPermission() {
         if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_FINE_LOCATION)
@@ -389,49 +427,6 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
-    public void preventClick() {
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
-                WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
-    }
-
-    public void resumeClick() {
-        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
-    }
-
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode,
-                                           @NonNull String permissions[],
-                                           @NonNull int[] grantResults) {
-        switch (requestCode) {
-            case MY_PERMISSIONS_REQUEST_LOCATION: {
-                // If request is cancelled, the result arrays are empty.
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-
-                    // permission was granted, yay! Do the
-                    // location-related task you need to do.
-                    if (ContextCompat.checkSelfPermission(this,
-                            Manifest.permission.ACCESS_FINE_LOCATION)
-                            == PackageManager.PERMISSION_GRANTED) {
-
-                        //Request location updates:
-//                        locationManager.requestLocationUpdates(provider, 400, 1, this);
-                    }
-
-                } else {
-
-                    // permission denied, boo! Disable the
-                    // functionality that depends on this permission.
-
-                }
-                return;
-            }
-
-        }
-    }
-
-
     Intent CropIntent;
     Uri uri;
     private static final int GALLERY_REQUEST_CODE = 2;
@@ -440,6 +435,7 @@ public class LoginActivity extends AppCompatActivity {
         Intent GalIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
         startActivityForResult(Intent.createChooser(GalIntent, "Select Image from Gallery"), GALLERY_REQUEST_CODE);
     }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == 0 && resultCode == RESULT_OK)
