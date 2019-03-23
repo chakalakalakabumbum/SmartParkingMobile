@@ -17,6 +17,9 @@ public interface APIInterface {
     @HTTP(method = "GET", path = "/account/{id}")
     Call<ResponseTemplate> doGetUser(@Path("id") String id);
 
+    @HTTP(method = "GET", path = "/parking_lot/list_parking_slot")
+    Call<ResponseTemplate> doGetCarparkSlots(@Query("parkingLotId") int parkingLotId);
+
     @HTTP(method = "GET", path = "parking_lot/all_parking_lot")
     Call<ResponseTemplate> doGetAllParkingLot();
 

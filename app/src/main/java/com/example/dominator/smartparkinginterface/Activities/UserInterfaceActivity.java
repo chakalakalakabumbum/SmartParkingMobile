@@ -41,6 +41,7 @@ import android.widget.ViewFlipper;
 import com.example.dominator.smartparkinginterface.Entities.InformationAccount;
 import com.example.dominator.smartparkinginterface.Entities.Owner;
 import com.example.dominator.smartparkinginterface.Entities.ParkingLot;
+import com.example.dominator.smartparkinginterface.Entities.ParkingSlot;
 import com.example.dominator.smartparkinginterface.Entities.PasswordChanger;
 import com.example.dominator.smartparkinginterface.Entities.ResponseTemplate;
 import com.example.dominator.smartparkinginterface.R;
@@ -123,6 +124,7 @@ public class UserInterfaceActivity
 
     //Data
     private List<ParkingLot> parkingLots;
+    private List<ParkingSlot> parkingSlots;
 
     //Google Map
     private Polyline directionPolyline;
@@ -134,17 +136,22 @@ public class UserInterfaceActivity
     private boolean isLotsReady = false;
     private boolean isMapReady = false;
 
+    //Extra values
+    int freeSlots;
+    ParkingSlot currentSlot;
 
     //Location Result
     private LocationResult locationResult = new LocationResult() {
         @Override
         public void gotLocation(Location location) {
-            LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
-            setLocationPref(latLng);
-            if (directionPolyline != null) {
-                List<LatLng> points = directionPolyline.getPoints();
-                LatLng to = points.get(points.size() - 1);
-                getDirection(latLng, to);
+            if (location != null) {
+                LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+                setLocationPref(latLng);
+                if (directionPolyline != null) {
+                    List<LatLng> points = directionPolyline.getPoints();
+                    LatLng to = points.get(points.size() - 1);
+                    getDirection(latLng, to);
+                }
             }
         }
     };
@@ -321,13 +328,43 @@ public class UserInterfaceActivity
 
     @SuppressLint("DefaultLocale")
     public void viewParkingLot(ParkingLot parkingLot) {
+        freeSlots = 0;
+        apiInterface.doGetCarparkSlots(parkingLot.getParkingLotId()).enqueue(new Callback<ResponseTemplate>() {
+             @Override
+             public void onResponse(Call<ResponseTemplate> call, Response<ResponseTemplate> response) {
+                 Log.d("TAG", response.code() + "");
+                 Log.d("TAG", response.raw() + "");
+                 Log.d("TAG", response.body() + "");
+                 Log.d("TAG", getResources().getString(R.string.success_message));
+                 try {
+                     parkingSlots = new ArrayList<ParkingSlot>();
+                     for (int i = 0; i < ((List) response.body().getObjectResponse()).size(); i++) {
+                         currentSlot = (ParkingSlot) apiClient.ObjectConverter(((List) response.body().getObjectResponse()).get(i), new ParkingSlot());
+                         if(currentSlot.getStatus().toString().equals("Free")){
+                             freeSlots = freeSlots + 1;
+                         }
+                         parkingSlots.add(currentSlot);
+                     }
+                  slotText.setText(freeSlots + " Free / " + ((List) response.body().getObjectResponse()).size() + " slots");
+                 } catch (Exception e) {
+                     Log.d("TAG", getResources().getString(R.string.fail_message));
+                     Log.d("TAG", e.toString());
+                 }
+             }
+             @Override
+             public void onFailure(Call<ResponseTemplate> call, Throwable t) {
+                 String displayResponse = t.toString();
+                 Log.d("TAG", displayResponse);
+                 Log.d("TAG", getResources().getString(R.string.fail_message));
+             }
+         });
         header.setText(parkingLot.getDisplayName());
         vf.setDisplayedChild(getResources().getInteger(R.integer.CARPARK_SCREEN));
         Owner owner = parkingLot.getOwner();
         ownerText.setText(owner.getFullName());
         addressText.setText(parkingLot.getAddress());
         telText.setText(parkingLot.getPhoneNumber());
-        slotText.setText(String.format("%d", parkingLot.getTotalSlot()));
+        slotText.setText("Calculating...");
         timeText.setText(parkingLot.getTimeOfOperation());
         if (parkingLot.getParklotImage() != null) {
             carparkImage.setImageBitmap(apiClient.byteToBitmap(parkingLot.getParklotImage()));
@@ -571,8 +608,10 @@ public class UserInterfaceActivity
                     LatLngBounds bounds = builder.build();
                     map.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 100));
 
-                    selectedMarker.hideInfoWindow();
-                    selectedMarker = null;
+                    if (selectedMarker != null) {
+                        selectedMarker.hideInfoWindow();
+                        selectedMarker = null;
+                    }
                     btnShowDirection.hide();
                 }
             }
@@ -602,7 +641,6 @@ public class UserInterfaceActivity
 
                 float color = lot.isActive() ? BitmapDescriptorFactory.HUE_GREEN : BitmapDescriptorFactory.HUE_RED;
                 option.icon(BitmapDescriptorFactory.defaultMarker(color));
-
                 option.title(lot.getDisplayName());
                 option.snippet("Total slots: " + lot.getTotalSlot());
 
