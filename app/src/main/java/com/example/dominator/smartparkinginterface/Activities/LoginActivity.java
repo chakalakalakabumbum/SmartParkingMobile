@@ -1,9 +1,7 @@
 package com.example.dominator.smartparkinginterface.Activities;
 
 import android.Manifest;
-import android.app.AlertDialog;
 import android.content.ActivityNotFoundException;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -25,6 +23,7 @@ import android.view.animation.AnimationUtils;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.ViewFlipper;
 
 import com.example.dominator.smartparkinginterface.Entities.Account;
@@ -81,13 +80,23 @@ public class LoginActivity extends AppCompatActivity {
 
     //int
     public static final int GET_FROM_GALLERY = 69;
+    public static final int MY_PERMISSIONS_REQUEST_LOCATION = 99;
+    private static final int GALLERY_REQUEST_CODE = 2;
+
+    Intent CropIntent;
+    Uri uri;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        checkLocationPermission();
+        if (!checkPermissions()) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION},
+                    MY_PERMISSIONS_REQUEST_LOCATION);
+            Toast.makeText(getApplicationContext(), R.string.Request_location_permission, Toast.LENGTH_SHORT).show();
+        }
 
         //bind views
         bindView();
@@ -348,8 +357,6 @@ public class LoginActivity extends AppCompatActivity {
 
     }
 
-    public static final int MY_PERMISSIONS_REQUEST_LOCATION = 99;
-
     public void preventClick() {
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
                 WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
@@ -368,68 +375,29 @@ public class LoginActivity extends AppCompatActivity {
 
                     // permission was granted, yay! Do the
                     // location-related task you need to do.
-                    if (ContextCompat.checkSelfPermission(this,
-                            Manifest.permission.ACCESS_FINE_LOCATION)
-                            == PackageManager.PERMISSION_GRANTED) {
+                    if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
 
                         //Request location updates:
 //                        locationManager.requestLocationUpdates(provider, 400, 1, this);
                     }
-
                 } else {
 
                     // permission denied, boo! Disable the
                     // functionality that depends on this permission.
 
                 }
-                return;
             }
 
         }
     }
 
-    public boolean checkLocationPermission() {
-        if (ContextCompat.checkSelfPermission(this,
-                Manifest.permission.ACCESS_FINE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED) {
-
-            // Should we show an explanation?
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
-                    Manifest.permission.ACCESS_FINE_LOCATION)) {
-
-                // Show an explanation to the user *asynchronously* -- don't block
-                // this thread waiting for the user's response! After the user
-                // sees the explanation, try again to request the permission.
-                //TODO: Change title & message
-                new AlertDialog.Builder(this)
-                        .setTitle("This is a title")
-                        .setMessage("This is a message")
-                        .setPositiveButton("OKIE string", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                //Prompt the user once explanation has been shown
-                                ActivityCompat.requestPermissions(LoginActivity.this,
-                                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                                        MY_PERMISSIONS_REQUEST_LOCATION);
-                            }
-                        })
-                        .create()
-                        .show();
-            } else {
-                // No explanation needed, we can request the permission.
-                ActivityCompat.requestPermissions(this,
-                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                        MY_PERMISSIONS_REQUEST_LOCATION);
-            }
-            return false;
-        } else {
-            return true;
-        }
+    private boolean checkPermissions() {
+        int networkLocationState = ActivityCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_FINE_LOCATION);
+        int gpsLocationState = ActivityCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_COARSE_LOCATION);
+        return networkLocationState == PackageManager.PERMISSION_GRANTED || gpsLocationState == PackageManager.PERMISSION_GRANTED;
     }
-
-    Intent CropIntent;
-    Uri uri;
-    private static final int GALLERY_REQUEST_CODE = 2;
 
     public void selectImageAction(View view) {
         Intent GalIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
@@ -472,7 +440,7 @@ public class LoginActivity extends AppCompatActivity {
 
             startActivityForResult(CropIntent, 1);
         } catch (ActivityNotFoundException ex) {
-
+            ex.printStackTrace();
         }
 
     }

@@ -4,7 +4,6 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -12,6 +11,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Looper;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
@@ -49,9 +49,15 @@ import com.example.dominator.smartparkinginterface.Retrofit.APIClient;
 import com.example.dominator.smartparkinginterface.Retrofit.APIInterface;
 import com.example.dominator.smartparkinginterface.utils.DirectionsJSONParser;
 import com.example.dominator.smartparkinginterface.utils.HttpUtils;
-import com.example.dominator.smartparkinginterface.utils.LocationResult;
-import com.example.dominator.smartparkinginterface.utils.MyLocation;
 import com.example.dominator.smartparkinginterface.utils.NumberUtil;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.LocationSettingsRequest;
+import com.google.android.gms.location.LocationSettingsResponse;
+import com.google.android.gms.location.SettingsClient;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -65,6 +71,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.maps.model.RoundCap;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.loopj.android.http.JsonHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
 
@@ -140,21 +147,17 @@ public class UserInterfaceActivity
     int freeSlots;
     ParkingSlot currentSlot;
 
-    //Location Result
-    private LocationResult locationResult = new LocationResult() {
-        @Override
-        public void gotLocation(Location location) {
-            if (location != null) {
-                LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
-                setLocationPref(latLng);
-                if (directionPolyline != null) {
-                    List<LatLng> points = directionPolyline.getPoints();
-                    LatLng to = points.get(points.size() - 1);
-                    getDirection(latLng, to);
-                }
-            }
-        }
-    };
+    //Location
+    private FusedLocationProviderClient mFusedLocationClient;
+    private SettingsClient mSettingsClient;
+    private LocationRequest mLocationRequest;
+    private LocationSettingsRequest mLocationSettingsRequest;
+    private LocationCallback mLocationCallback;
+    private Location currentLocation;
+
+    private static final long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS = 5000;
+    private static final long UPDATE_INTERVAL_IN_MILLISECONDS = 10000;
+    private static final long SMALLEST_DISPLACEMENT = 10;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -205,8 +208,8 @@ public class UserInterfaceActivity
         sidebarAvatar.setImageBitmap(apiClient.byteToBitmap(account.getAvatar()));
         sidebarEmail.setText(account.getEmail());
         sidebarName.setText(account.getFullName());
-
-        checkLocationPermission();
+        init();
+        startLocationUpdates();
     }
 
     @Override
@@ -542,7 +545,7 @@ public class UserInterfaceActivity
     }
 
     public void showDirection(View view) {
-        getDirection(MyLocation.getCurrentLocation(this), selectedMarker.getPosition());
+        getDirection(new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude()), selectedMarker.getPosition());
     }
 
     public void getDirection(LatLng from, LatLng to) {
@@ -624,13 +627,6 @@ public class UserInterfaceActivity
         });
     }
 
-//    public void showDetail(View view) {
-//        if (selectedLot != null) {
-//            viewParkingLot(selectedLot);
-//        }
-//        selectedLot = null;
-//    }
-
     private void addMarkers() {
         if (isLotsReady && isMapReady) {
             LatLngBounds.Builder builder = new LatLngBounds.Builder();
@@ -647,7 +643,7 @@ public class UserInterfaceActivity
                 map.addMarker(option);
                 builder.include(marker);
             }
-            builder.include(MyLocation.getCurrentLocation(this));
+            builder.include(new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude()));
             LatLngBounds bounds = builder.build();
             map.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 100));
         }
@@ -810,25 +806,45 @@ public class UserInterfaceActivity
 
     }
 
-    private void setLocationPref(LatLng latLng) {
-        try {
-            SharedPreferences locationPref = getApplication().getSharedPreferences("location", MODE_PRIVATE);
-            SharedPreferences.Editor prefsEditor = locationPref.edit();
-//            prefsEditor.putFloat("Latitude", (float) latLng.latitude);
-//            prefsEditor.putFloat("Longitude", (float) latLng.longitude);
+    private void init() {
+        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+        mSettingsClient = LocationServices.getSettingsClient(this);
 
-            prefsEditor.putString("Latitude", latLng.latitude + "");
-            prefsEditor.putString("Longitude", latLng.longitude + "");
+        mLocationCallback = new LocationCallback() {
+            @Override
+            public void onLocationResult(LocationResult locationResult) {
+                super.onLocationResult(locationResult);
+                currentLocation = locationResult.getLastLocation();
+                if (directionPolyline != null) {
+                    List<LatLng> points = directionPolyline.getPoints();
+                    LatLng to = points.get(points.size() - 1);
+                    getDirection(new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude()), to);
+                }
+            }
+        };
 
-            prefsEditor.apply();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        mLocationRequest = new LocationRequest();
+        mLocationRequest.setInterval(UPDATE_INTERVAL_IN_MILLISECONDS);
+        mLocationRequest.setFastestInterval(FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS);
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        mLocationRequest.setSmallestDisplacement(SMALLEST_DISPLACEMENT);
+
+        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder();
+        builder.addLocationRequest(mLocationRequest);
+        mLocationSettingsRequest = builder.build();
     }
 
-    public void checkLocationPermission() {
-        MyLocation myLocation = new MyLocation();
-        myLocation.getLocation(getApplicationContext(), locationResult);
+    private void startLocationUpdates() {
+        mSettingsClient
+                .checkLocationSettings(mLocationSettingsRequest)
+                .addOnSuccessListener(this, new OnSuccessListener<LocationSettingsResponse>() {
+                    @SuppressLint("MissingPermission")
+                    @Override
+                    public void onSuccess(LocationSettingsResponse locationSettingsResponse) {
+                        mFusedLocationClient.requestLocationUpdates(mLocationRequest,
+                                mLocationCallback, Looper.myLooper());
+                    }
+                });
     }
 
 }
