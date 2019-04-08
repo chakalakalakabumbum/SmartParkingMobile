@@ -50,6 +50,7 @@ import com.example.dominator.smartparkinginterface.Retrofit.APIInterface;
 import com.example.dominator.smartparkinginterface.utils.DirectionsJSONParser;
 import com.example.dominator.smartparkinginterface.utils.HttpUtils;
 import com.example.dominator.smartparkinginterface.utils.NumberUtil;
+import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
@@ -58,11 +59,16 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResponse;
 import com.google.android.gms.location.SettingsClient;
+import com.google.android.gms.location.places.Place;
+import com.google.android.gms.location.places.ui.PlaceAutocompleteFragment;
+import com.google.android.gms.location.places.ui.PlaceSelectionListener;
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.JointType;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
@@ -136,6 +142,7 @@ public class UserInterfaceActivity
     //Google Map
     private Polyline directionPolyline;
     private GoogleMap map;
+    PlaceAutocompleteFragment placeAutoComplete;
 
     //Flags
     private Marker selectedMarker = null;
@@ -168,6 +175,20 @@ public class UserInterfaceActivity
         }
         setContentView(R.layout.activity_user_interface);
 
+        placeAutoComplete = (PlaceAutocompleteFragment) getFragmentManager().findFragmentById(R.id.place_autocomplete);
+        placeAutoComplete.setOnPlaceSelectedListener(new PlaceSelectionListener() {
+            @Override
+            public void onPlaceSelected(Place place) {
+                Log.d("Maps", "Place selected: " + place.getName());
+                buildCamera(place.getLatLng(), 18, 70);
+            }
+
+            @Override
+            public void onError(Status status) {
+                Log.d("Maps", "An error occurred: " + status);
+            }
+        });
+
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         if (mapFragment != null) {
             mapFragment.getMapAsync(this);
@@ -177,6 +198,18 @@ public class UserInterfaceActivity
 
         account = (InformationAccount) getIntent().getSerializableExtra("ACCOUNT_INFO");
 
+        getAllParkingLots();
+
+        currentAvatar.setImageBitmap(apiClient.byteToBitmap(account.getAvatar()));
+        choosingAvatar.setImageBitmap(apiClient.byteToBitmap(account.getAvatar()));
+        sidebarAvatar.setImageBitmap(apiClient.byteToBitmap(account.getAvatar()));
+        sidebarEmail.setText(account.getEmail());
+        sidebarName.setText(account.getFullName());
+        init();
+        startLocationUpdates();
+    }
+
+    public void getAllParkingLots(){
         apiInterface.doGetAllParkingLot().enqueue(new Callback<ResponseTemplate>() {
             @Override
             public void onResponse(Call<ResponseTemplate> call, Response<ResponseTemplate> response) {
@@ -203,13 +236,6 @@ public class UserInterfaceActivity
                 Log.d("TAG", getResources().getString(R.string.fail_message));
             }
         });
-        currentAvatar.setImageBitmap(apiClient.byteToBitmap(account.getAvatar()));
-        choosingAvatar.setImageBitmap(apiClient.byteToBitmap(account.getAvatar()));
-        sidebarAvatar.setImageBitmap(apiClient.byteToBitmap(account.getAvatar()));
-        sidebarEmail.setText(account.getEmail());
-        sidebarName.setText(account.getFullName());
-        init();
-        startLocationUpdates();
     }
 
     @Override
@@ -319,7 +345,7 @@ public class UserInterfaceActivity
 
     public void backButton(View view) {
         currentAvatar.setImageBitmap(apiClient.byteToBitmap(account.getAvatar()));
-        vf.setDisplayedChild(getResources().getInteger(R.integer.MAP_SCREEN));
+        vf.setDisplayedChild(getResources().getInteger(R.integer.MAP_SCREEN));getAllParkingLots();
         header.setText(getResources().getString(R.string.home));
     }
 
@@ -545,7 +571,9 @@ public class UserInterfaceActivity
     }
 
     public void showDirection(View view) {
-        getDirection(new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude()), selectedMarker.getPosition());
+        if (currentLocation != null) {
+            getDirection(new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude()), selectedMarker.getPosition());
+        }
     }
 
     public void getDirection(LatLng from, LatLng to) {
@@ -628,6 +656,7 @@ public class UserInterfaceActivity
     }
 
     private void addMarkers() {
+        map.clear();
         if (isLotsReady && isMapReady) {
             LatLngBounds.Builder builder = new LatLngBounds.Builder();
             for (ParkingLot lot : parkingLots) {
@@ -721,7 +750,7 @@ public class UserInterfaceActivity
         NavigationView navigationView = findViewById(R.id.nav_view);
         View hView = navigationView.getHeaderView(0);
         header.setText(getResources().getString(R.string.home));
-        vf.setDisplayedChild(getResources().getInteger(R.integer.MAP_SCREEN));
+        vf.setDisplayedChild(getResources().getInteger(R.integer.MAP_SCREEN));getAllParkingLots();
         showDirection(hView);
     }
 
@@ -752,6 +781,16 @@ public class UserInterfaceActivity
 
     public void resumeClick() {
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+    }
+
+    public void buildCamera(LatLng latLng, int zoomValue, int tiltValue){
+        CameraPosition camPos = new CameraPosition.Builder()
+                .target(latLng)
+                .zoom(zoomValue)
+                .tilt(tiltValue)
+                .build();
+        CameraUpdate camUpd3 = CameraUpdateFactory.newCameraPosition(camPos);
+        map.animateCamera(camUpd3);
     }
 
     private static final int GALLERY_REQUEST_CODE = 2;
