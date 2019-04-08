@@ -369,7 +369,7 @@ public class UserInterfaceActivity
                      parkingSlots = new ArrayList<ParkingSlot>();
                      for (int i = 0; i < ((List) response.body().getObjectResponse()).size(); i++) {
                          currentSlot = (ParkingSlot) apiClient.ObjectConverter(((List) response.body().getObjectResponse()).get(i), new ParkingSlot());
-                         if(currentSlot.getStatus().toString().equals("Free")){
+                         if(currentSlot.getStatus().toString().equals(getResources().getString(R.string.available))){
                              freeSlots = freeSlots + 1;
                          }
                          parkingSlots.add(currentSlot);

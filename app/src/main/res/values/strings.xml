@@ -12,26 +12,26 @@
     <string name="title_activity_user_interface">UserInterfaceActivity</string>
     <string name="map_description">Google Maps</string>
 
-    //Main resources
-    <string name="main_link">http:192.168.1.56:8080/</string>
+    <!--Main resources-->
+    <string name="main_link">http://192.168.1.47:8080/</string>
     <string name="google_api_link">https://maps.googleapis.com/maps/api/directions/json</string>
     <string name="fail_message">FAILED</string>
     <string name="success_message">DONE</string>
 
-    //Errors
+    <!--Errors-->
     <string name="empty_field">Some required fields are empty</string>
     <string name="invalid_phone">Phone number is invalid</string>
     <string name="invalid_email">Email is invalid</string>
     <string name="connection_failed">Connection failed, please check your connection</string>
     <string name="confirm_password_mismatch">Password and confirm password mismatch</string>
 
-    //Headers
+    <!--Headers-->
     <string name="home">Home</string>
     <string name="change_password">Change password</string>
     <string name="user_info">User info</string>
     <string name="change_avatar_header_text">Change avatar</string>
 
-    //UserInterfaceActivity String
+    <!--UserInterfaceActivity String-->
     <string name="update_success">Account update successful</string>
     <string name="update_fail">Unable to save this new information</string>
     <string name="password_change_success">Password has been changed</string>
@@ -41,12 +41,16 @@
     <string name="carpark_out_of_range">Parking lot\'s out of range</string>
     <string name="Request_location_permission">Please accept location permission</string>
 
-    //LoginActivity String
+    <!--LoginActivity String-->
     <string name="invalid_email_and_password">Invalid email or password</string>
     <string name="empty_email_and_password">Email or password is empty</string>
     <string name="not_activated">This account is not validated, check your email</string>
     <string name="new_account_success">New account has been created, please check your email</string>
     <string name="account_exist">This account is already exist</string>
     <string name="email_sent">Email sent, please check your box</string>
+
+    <!--Slot status-->
+    <string name="available">empty</string>
+    <string name="busy">occupied</string>
 
 </resources>
