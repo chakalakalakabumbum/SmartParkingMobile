@@ -20,7 +20,7 @@ public interface APIInterface {
     @HTTP(method = "GET", path = "/parking_lot/list_parking_slot")
     Call<ResponseTemplate> doGetCarparkSlots(@Query("parkingLotId") int parkingLotId);
 
-    @HTTP(method = "GET", path = "parking_lot/all_parking_lot")
+    @HTTP(method = "GET", path = "/driver/all_parking_lot")
     Call<ResponseTemplate> doGetAllParkingLot();
 
     @HTTP(method = "POST", path = "/driver/create_driver", hasBody = true)

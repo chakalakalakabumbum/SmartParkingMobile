@@ -26,7 +26,7 @@
         android:layout_marginRight="8dp"
         android:layout_marginBottom="8dp"
         android:fontFamily="@font/champagnelimousinesbold"
-        android:text="Your new password will be sent\nthrough your email box, please\ncheck your email"
+        android:text="Your new password can be changed\nthrough your email box, please\ncheck your email"
         android:textColor="@color/foregroundText"
         android:textSize="20dp"
         android:visibility="invisible"

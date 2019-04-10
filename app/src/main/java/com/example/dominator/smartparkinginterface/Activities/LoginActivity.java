@@ -14,6 +14,7 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.telephony.PhoneNumberUtils;
 import android.util.Log;
 import android.util.Patterns;
 import android.view.View;
@@ -197,7 +198,7 @@ public class LoginActivity extends AppCompatActivity {
             newReminder.setText(getResources().getString(R.string.invalid_email));
             newBlackScreen.setVisibility(View.INVISIBLE);
             resumeClick();
-        } else if (!Patterns.PHONE.matcher(phoneNumber.getText().toString()).matches()) {
+        } else if (phoneNumber.getText().toString().matches("^[+]?[0-9]{10,13}$") || !Patterns.PHONE.matcher(phoneNumber.getText().toString()).matches() || !PhoneNumberUtils.isGlobalPhoneNumber(phoneNumber.getText().toString())) {
             newReminder.setText(getResources().getString(R.string.invalid_phone));
             newBlackScreen.setVisibility(View.INVISIBLE);
             resumeClick();

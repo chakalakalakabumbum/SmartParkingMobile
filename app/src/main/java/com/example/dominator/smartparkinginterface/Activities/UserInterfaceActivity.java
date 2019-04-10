@@ -3,16 +3,19 @@ package com.example.dominator.smartparkinginterface.Activities;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.ActivityNotFoundException;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.location.Location;
+import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Looper;
 import android.provider.MediaStore;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
@@ -21,8 +24,10 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.telephony.PhoneNumberUtils;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -103,8 +108,10 @@ public class UserInterfaceActivity
     //View
     private ViewFlipper vf;
     private FloatingActionButton btnShowDirection;
+    private FloatingActionButton btnRefreshMap;
     private TextView header;
     private TextView ownerText;
+    private TextView carparkText;
     private TextView addressText;
     private TextView telText;
     private TextView slotText;
@@ -140,6 +147,7 @@ public class UserInterfaceActivity
     private List<ParkingSlot> parkingSlots;
 
     //Google Map
+    //private GPSTracker gpstracker;
     private Polyline directionPolyline;
     private GoogleMap map;
     PlaceAutocompleteFragment placeAutoComplete;
@@ -155,6 +163,7 @@ public class UserInterfaceActivity
     ParkingSlot currentSlot;
 
     //Location
+    private LocationManager locationManager;
     private FusedLocationProviderClient mFusedLocationClient;
     private SettingsClient mSettingsClient;
     private LocationRequest mLocationRequest;
@@ -169,25 +178,12 @@ public class UserInterfaceActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.hide();
         }
         setContentView(R.layout.activity_user_interface);
-
-        placeAutoComplete = (PlaceAutocompleteFragment) getFragmentManager().findFragmentById(R.id.place_autocomplete);
-        placeAutoComplete.setOnPlaceSelectedListener(new PlaceSelectionListener() {
-            @Override
-            public void onPlaceSelected(Place place) {
-                Log.d("Maps", "Place selected: " + place.getName());
-                buildCamera(place.getLatLng(), 18, 70);
-            }
-
-            @Override
-            public void onError(Status status) {
-                Log.d("Maps", "An error occurred: " + status);
-            }
-        });
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         if (mapFragment != null) {
@@ -217,6 +213,7 @@ public class UserInterfaceActivity
                 Log.d("TAG", response.raw() + "");
                 Log.d("TAG", response.body() + "");
                 Log.d("TAG", getResources().getString(R.string.success_message));
+                parkingLots = new ArrayList<>();
                 try {
                     for (int i = 0; i < ((List) response.body().getObjectResponse()).size(); i++) {
                         parkingLots.add((ParkingLot) apiClient.ObjectConverter(((List) response.body().getObjectResponse()).get(i), new ParkingLot()));
@@ -345,7 +342,7 @@ public class UserInterfaceActivity
 
     public void backButton(View view) {
         currentAvatar.setImageBitmap(apiClient.byteToBitmap(account.getAvatar()));
-        vf.setDisplayedChild(getResources().getInteger(R.integer.MAP_SCREEN));getAllParkingLots();
+        vf.setDisplayedChild(getResources().getInteger(R.integer.MAP_SCREEN));
         header.setText(getResources().getString(R.string.home));
     }
 
@@ -356,7 +353,7 @@ public class UserInterfaceActivity
     }
 
     @SuppressLint("DefaultLocale")
-    public void viewParkingLot(ParkingLot parkingLot) {
+    public void viewParkingLot(final ParkingLot parkingLot) {
         freeSlots = 0;
         apiInterface.doGetCarparkSlots(parkingLot.getParkingLotId()).enqueue(new Callback<ResponseTemplate>() {
              @Override
@@ -367,14 +364,16 @@ public class UserInterfaceActivity
                  Log.d("TAG", getResources().getString(R.string.success_message));
                  try {
                      parkingSlots = new ArrayList<ParkingSlot>();
-                     for (int i = 0; i < ((List) response.body().getObjectResponse()).size(); i++) {
-                         currentSlot = (ParkingSlot) apiClient.ObjectConverter(((List) response.body().getObjectResponse()).get(i), new ParkingSlot());
-                         if(currentSlot.getStatus().toString().equals(getResources().getString(R.string.available))){
-                             freeSlots = freeSlots + 1;
+                     if (response.body().getObjectResponse() != null){
+                         for (int i = 0; i < ((List) response.body().getObjectResponse()).size(); i++) {
+                             currentSlot = (ParkingSlot) apiClient.ObjectConverter(((List) response.body().getObjectResponse()).get(i), new ParkingSlot());
+                             if (currentSlot.getStatus().equals(getResources().getString(R.string.available))) {
+                                 freeSlots = freeSlots + 1;
+                             }
+                             parkingSlots.add(currentSlot);
                          }
-                         parkingSlots.add(currentSlot);
                      }
-                  slotText.setText(freeSlots + " Free / " + ((List) response.body().getObjectResponse()).size() + " slots");
+                  slotText.setText(freeSlots + " Empty / " + parkingSlots.size() + " Slots");
                  } catch (Exception e) {
                      Log.d("TAG", getResources().getString(R.string.fail_message));
                      Log.d("TAG", e.toString());
@@ -391,6 +390,7 @@ public class UserInterfaceActivity
         vf.setDisplayedChild(getResources().getInteger(R.integer.CARPARK_SCREEN));
         Owner owner = parkingLot.getOwner();
         ownerText.setText(owner.getFullName());
+        carparkText.setText(parkingLot.getDisplayName());
         addressText.setText(parkingLot.getAddress());
         telText.setText(parkingLot.getPhoneNumber());
         slotText.setText("Calculating...");
@@ -452,7 +452,7 @@ public class UserInterfaceActivity
             reminder.setText(getResources().getString(R.string.empty_field));
             blackScreen.setVisibility(View.INVISIBLE);
             resumeClick();
-        } else if (!Patterns.PHONE.matcher(phoneNumberText.getText().toString()).matches()) {
+        } else if (!phoneNumberText.getText().toString().matches("^[+]?[0-9]{10,13}$") || !Patterns.PHONE.matcher(phoneNumberText.getText().toString()).matches() || !PhoneNumberUtils.isGlobalPhoneNumber(phoneNumberText.getText().toString())) {
             reminder.setText(getResources().getString(R.string.invalid_phone));
             blackScreen.setVisibility(View.INVISIBLE);
             resumeClick();
@@ -574,6 +574,19 @@ public class UserInterfaceActivity
         if (currentLocation != null) {
             getDirection(new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude()), selectedMarker.getPosition());
         }
+        else{
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                    || ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                    || ActivityCompat.checkSelfPermission(this, Manifest.permission.INTERNET) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION,
+                        Manifest.permission.ACCESS_COARSE_LOCATION,
+                        Manifest.permission.INTERNET,
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
+            }
+            callForLocation();
+            mFusedLocationClient.requestLocationUpdates(mLocationRequest,
+                    mLocationCallback, null);
+        }
     }
 
     public void getDirection(LatLng from, LatLng to) {
@@ -657,17 +670,18 @@ public class UserInterfaceActivity
 
     private void addMarkers() {
         map.clear();
+        LatLng marker;
         if (isLotsReady && isMapReady) {
             LatLngBounds.Builder builder = new LatLngBounds.Builder();
             for (ParkingLot lot : parkingLots) {
-                LatLng marker = new LatLng(lot.getLatitude(), lot.getLongitude());
+                marker = new LatLng(lot.getLatitude(), lot.getLongitude());
                 MarkerOptions option = new MarkerOptions();
                 option.position(marker);
 
                 float color = lot.isActive() ? BitmapDescriptorFactory.HUE_GREEN : BitmapDescriptorFactory.HUE_RED;
                 option.icon(BitmapDescriptorFactory.defaultMarker(color));
                 option.title(lot.getDisplayName());
-                option.snippet("Total slots: " + lot.getTotalSlot());
+                option.snippet(lot.getEmptySlot() + " Empty / " + lot.getTotalSlot() + " Slots");
 
                 map.addMarker(option);
                 builder.include(marker);
@@ -700,6 +714,15 @@ public class UserInterfaceActivity
             }
         });
 
+        btnRefreshMap = findViewById(R.id.btnRefreshMap);
+        btnRefreshMap.setBackgroundColor(Color.WHITE);
+        btnRefreshMap.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getAllParkingLots();
+            }
+        });
+
         vf = findViewById(R.id.vfu);
         Toolbar toolbar = findViewById(R.id.toolbar);
         toolbar.setBackgroundColor(Color.parseColor("#4F515C"));
@@ -711,8 +734,11 @@ public class UserInterfaceActivity
         navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
+        placeAutoComplete = (PlaceAutocompleteFragment) getFragmentManager().findFragmentById(R.id.place_autocomplete);
+
         header = findViewById(R.id.toolbar_title);
         ownerText = findViewById(R.id.owner_text);
+        carparkText = findViewById(R.id.carpark_text);
         addressText = findViewById(R.id.address_text);
         telText = findViewById(R.id.tel_text);
         slotText = findViewById(R.id.slot_text);
@@ -750,7 +776,7 @@ public class UserInterfaceActivity
         NavigationView navigationView = findViewById(R.id.nav_view);
         View hView = navigationView.getHeaderView(0);
         header.setText(getResources().getString(R.string.home));
-        vf.setDisplayedChild(getResources().getInteger(R.integer.MAP_SCREEN));getAllParkingLots();
+        vf.setDisplayedChild(getResources().getInteger(R.integer.MAP_SCREEN));
         showDirection(hView);
     }
 
@@ -849,16 +875,34 @@ public class UserInterfaceActivity
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         mSettingsClient = LocationServices.getSettingsClient(this);
 
+        //gpstracker = new GPSTracker(UserInterfaceActivity.this);
+        //currentLocation = new Location(gpstracker.getLocation());
+
+        placeAutoComplete.setOnPlaceSelectedListener(new PlaceSelectionListener() {
+            @Override
+            public void onPlaceSelected(Place place) {
+                Log.d("Maps", "Place selected: " + place.getName());
+                buildCamera(place.getLatLng(), 15, 0);
+            }
+
+            @Override
+            public void onError(Status status) {
+                Log.d("Maps", "An error occurred: " + status);
+            }
+        });
+
+
         mLocationCallback = new LocationCallback() {
             @Override
             public void onLocationResult(LocationResult locationResult) {
                 super.onLocationResult(locationResult);
                 currentLocation = locationResult.getLastLocation();
-                if (directionPolyline != null) {
-                    List<LatLng> points = directionPolyline.getPoints();
-                    LatLng to = points.get(points.size() - 1);
-                    getDirection(new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude()), to);
-                }
+
+                if (directionPolyline != null && currentLocation != null) {
+                        List<LatLng> points = directionPolyline.getPoints();
+                        LatLng to = points.get(points.size() - 1);
+                        getDirection(new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude()), to);
+                    }
             }
         };
 
@@ -867,6 +911,7 @@ public class UserInterfaceActivity
         mLocationRequest.setFastestInterval(FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS);
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
         mLocationRequest.setSmallestDisplacement(SMALLEST_DISPLACEMENT);
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
         LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder();
         builder.addLocationRequest(mLocationRequest);
@@ -886,4 +931,32 @@ public class UserInterfaceActivity
                 });
     }
 
+    private void callForLocation(){
+        AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
+
+        // Setting Dialog Title
+        alertDialog.setTitle("Carpark finding require GPS with high accuracy");
+
+        // Setting Dialog Message
+        alertDialog.setMessage("GPS is not enabled. Do you want to go to settings menu?");
+
+        // On pressing Settings button
+        alertDialog.setPositiveButton("Settings", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog,int which) {
+                Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                UserInterfaceActivity.this.startActivity(intent);
+            }
+        });
+
+        // on pressing cancel button
+        alertDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+
+        // Showing Alert Message
+        alertDialog.show();
+    }
 }
+

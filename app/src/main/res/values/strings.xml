@@ -13,7 +13,7 @@
     <string name="map_description">Google Maps</string>
 
     <!--Main resources-->
-    <string name="main_link">http://192.168.1.47:8080/</string>
+    <string name="main_link">http://10.10.16.63:8080/</string>
     <string name="google_api_link">https://maps.googleapis.com/maps/api/directions/json</string>
     <string name="fail_message">FAILED</string>
     <string name="success_message">DONE</string>
