@@ -198,7 +198,7 @@ public class LoginActivity extends AppCompatActivity {
             newReminder.setText(getResources().getString(R.string.invalid_email));
             newBlackScreen.setVisibility(View.INVISIBLE);
             resumeClick();
-        } else if (phoneNumber.getText().toString().matches("^[+]?[0-9]{10,13}$") || !Patterns.PHONE.matcher(phoneNumber.getText().toString()).matches() || !PhoneNumberUtils.isGlobalPhoneNumber(phoneNumber.getText().toString())) {
+        } else if (!phoneNumber.getText().toString().matches("^[+]?[0-9]{10,13}$") || !Patterns.PHONE.matcher(phoneNumber.getText().toString()).matches() || !PhoneNumberUtils.isGlobalPhoneNumber(phoneNumber.getText().toString())) {
             newReminder.setText(getResources().getString(R.string.invalid_phone));
             newBlackScreen.setVisibility(View.INVISIBLE);
             resumeClick();
