@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.location.Location;
 import android.location.LocationManager;
@@ -165,6 +166,7 @@ public class UserInterfaceActivity
     private boolean isLotsReady = false;
     private boolean isMapReady = false;
     private boolean existCheck = false;
+    private boolean withSlotRender;
 
     //Slot scroll view
     ScrollView slotScrollView;
@@ -368,38 +370,7 @@ public class UserInterfaceActivity
     public void viewParkingLot(final ParkingLot parkingLot) {
         slotButton.setClickable(false);
         freeSlots = 0;
-        apiInterface.doGetCarparkSlots(parkingLot.getParkingLotId()).enqueue(new Callback<ResponseTemplate>() {
-             @Override
-             public void onResponse(Call<ResponseTemplate> call, Response<ResponseTemplate> response) {
-                 Log.d("TAG", response.code() + "");
-                 Log.d("TAG", response.raw() + "");
-                 Log.d("TAG", response.body() + "");
-                 Log.d("TAG", getResources().getString(R.string.success_message));
-                 try {
-                     parkingSlots = new ArrayList<ParkingSlot>();
-                     if (response.body().getObjectResponse() != null){
-                         for (int i = 0; i < ((List) response.body().getObjectResponse()).size(); i++) {
-                             currentSlot = (ParkingSlot) apiClient.ObjectConverter(((List) response.body().getObjectResponse()).get(i), new ParkingSlot());
-                             if (currentSlot.getStatus().equals(getResources().getString(R.string.available))) {
-                                 freeSlots = freeSlots + 1;
-                             }
-                             parkingSlots.add(currentSlot);
-                         }
-                     }
-                  slotButton.setText("  " + freeSlots + " Empty / " + parkingSlots.size() + " Slots");
-                     slotButton.setClickable(true);
-                 } catch (Exception e) {
-                     Log.d("TAG", getResources().getString(R.string.fail_message));
-                     Log.d("TAG", e.toString());
-                 }
-             }
-             @Override
-             public void onFailure(Call<ResponseTemplate> call, Throwable t) {
-                 String displayResponse = t.toString();
-                 Log.d("TAG", displayResponse);
-                 Log.d("TAG", getResources().getString(R.string.fail_message));
-             }
-         });
+        getSlotFromALot(parkingLot.getParkingLotId());
         header.setText(parkingLot.getDisplayName());
         vf.setDisplayedChild(getResources().getInteger(R.integer.CARPARK_SCREEN));
         Owner owner = parkingLot.getOwner();
@@ -415,6 +386,45 @@ public class UserInterfaceActivity
             carparkImage.setImageResource(R.drawable.persuo_carpark);
         }
 
+    }
+
+    public void getSlotFromALot(int id){
+        apiInterface.doGetCarparkSlots(id).enqueue(new Callback<ResponseTemplate>() {
+            @Override
+            public void onResponse(Call<ResponseTemplate> call, Response<ResponseTemplate> response) {
+                Log.d("TAG", response.code() + "");
+                Log.d("TAG", response.raw() + "");
+                Log.d("TAG", response.body() + "");
+                Log.d("TAG", getResources().getString(R.string.success_message));
+                try {
+                    parkingSlots = new ArrayList<ParkingSlot>();
+                    if (response.body().getObjectResponse() != null){
+                        for (int i = 0; i < ((List) response.body().getObjectResponse()).size(); i++) {
+                            currentSlot = (ParkingSlot) apiClient.ObjectConverter(((List) response.body().getObjectResponse()).get(i), new ParkingSlot());
+                            if (currentSlot.getStatus().equals(getResources().getString(R.string.available))) {
+                                freeSlots = freeSlots + 1;
+                            }
+                            parkingSlots.add(currentSlot);
+                        }
+                    }
+                    slotButton.setText("  " + freeSlots + " Empty / " + parkingSlots.size() + " Slots");
+                    slotButton.setClickable(true);
+                    if(withSlotRender == true){
+                        carSlotDetail();
+                        withSlotRender = false;
+                    }
+                } catch (Exception e) {
+                    Log.d("TAG", getResources().getString(R.string.fail_message));
+                    Log.d("TAG", e.toString());
+                }
+            }
+            @Override
+            public void onFailure(Call<ResponseTemplate> call, Throwable t) {
+                String displayResponse = t.toString();
+                Log.d("TAG", displayResponse);
+                Log.d("TAG", getResources().getString(R.string.fail_message));
+            }
+        });
     }
 
     public void viewInfo(View view) {
@@ -978,16 +988,19 @@ public class UserInterfaceActivity
     }
 
     public void requestSlotDetail(View view) {
-        if(!parkingSlots.isEmpty()) {
-            carSlotDetail();
+        if(selectedLot != null) {
+            withSlotRender = true;
+            getSlotFromALot(selectedLot.getParkingLotId());
             vf.setDisplayedChild(5);
             header.setText("Slot detail");
         }
     }
 
     public void refreshCarSlot(View view){
-        getAllParkingLots();
-        carSlotDetail();
+        if(selectedLot != null) {
+            withSlotRender = true;
+            getSlotFromALot(selectedLot.getParkingLotId());
+        }
     }
 
     private void carSlotDetail(){
@@ -1024,20 +1037,24 @@ public class UserInterfaceActivity
                     CardView currentCard = new CardView(this);
                     TextView currentText = new TextView(this);
                     currentText.setLayoutParams(params);
+                    currentText.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
                     currentText.setText(organizeSlots.get(k).getLaneCharacter() + " - " + organizeSlots.get(k).getSlotInLane().get(l).getRow());
                     currentCard.addView(currentText);
                     currentCard.setLayoutParams(new LinearLayout.LayoutParams(120, 140));
+                    currentCard.setRadius(5);
+                    currentCard.setElevation(10);
                     ViewGroup.MarginLayoutParams layoutParams =
                             (ViewGroup.MarginLayoutParams) currentCard.getLayoutParams();
                     layoutParams.setMargins(5, 5, 5, 5);
                     currentCard.requestLayout();
                     if(organizeSlots.get(k).getSlotInLane().get(l).getStatus().equals("empty")){
-                        currentCard.setBackgroundColor(0xff5fe86c);
+                        currentCard.setCardBackgroundColor(0xff63ff60);
                     }
                     else{
-                        currentCard.setBackgroundColor(0xffff5468);
+                        currentCard.setCardBackgroundColor(0xff75ff72);
                     }
                     currentText.setText(currentText.getText() + "\n" + organizeSlots.get(k).getSlotInLane().get(l).getStatus());
+                    currentText.setTypeface(null, Typeface.BOLD);
                     currentLinear.addView(currentCard);
                 }
                 currentLinear.setLayoutParams(params);
