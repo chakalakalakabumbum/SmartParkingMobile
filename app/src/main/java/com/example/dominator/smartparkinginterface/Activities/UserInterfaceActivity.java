@@ -26,6 +26,7 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
 import android.telephony.PhoneNumberUtils;
 import android.text.Editable;
@@ -35,14 +36,20 @@ import android.util.Patterns;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ScrollView;
+import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewFlipper;
 
+import com.example.dominator.smartparkinginterface.Entities.CarSlotCounter;
 import com.example.dominator.smartparkinginterface.Entities.InformationAccount;
 import com.example.dominator.smartparkinginterface.Entities.Owner;
 import com.example.dominator.smartparkinginterface.Entities.ParkingLot;
@@ -114,7 +121,7 @@ public class UserInterfaceActivity
     private TextView carparkText;
     private TextView addressText;
     private TextView telText;
-    private TextView slotText;
+    private Button slotButton;
     private TextView timeText;
     private EditText phoneNumberText;
     private TextView emailText;
@@ -157,6 +164,10 @@ public class UserInterfaceActivity
     private ParkingLot selectedLot = null;
     private boolean isLotsReady = false;
     private boolean isMapReady = false;
+    private boolean existCheck = false;
+
+    //Slot scroll view
+    ScrollView slotScrollView;
 
     //Extra values
     int freeSlots;
@@ -343,6 +354,7 @@ public class UserInterfaceActivity
     public void backButton(View view) {
         currentAvatar.setImageBitmap(apiClient.byteToBitmap(account.getAvatar()));
         vf.setDisplayedChild(getResources().getInteger(R.integer.MAP_SCREEN));
+        getAllParkingLots();
         header.setText(getResources().getString(R.string.home));
     }
 
@@ -354,6 +366,7 @@ public class UserInterfaceActivity
 
     @SuppressLint("DefaultLocale")
     public void viewParkingLot(final ParkingLot parkingLot) {
+        slotButton.setClickable(false);
         freeSlots = 0;
         apiInterface.doGetCarparkSlots(parkingLot.getParkingLotId()).enqueue(new Callback<ResponseTemplate>() {
              @Override
@@ -373,7 +386,8 @@ public class UserInterfaceActivity
                              parkingSlots.add(currentSlot);
                          }
                      }
-                  slotText.setText(freeSlots + " Empty / " + parkingSlots.size() + " Slots");
+                  slotButton.setText("  " + freeSlots + " Empty / " + parkingSlots.size() + " Slots");
+                     slotButton.setClickable(true);
                  } catch (Exception e) {
                      Log.d("TAG", getResources().getString(R.string.fail_message));
                      Log.d("TAG", e.toString());
@@ -393,7 +407,7 @@ public class UserInterfaceActivity
         carparkText.setText(parkingLot.getDisplayName());
         addressText.setText(parkingLot.getAddress());
         telText.setText(parkingLot.getPhoneNumber());
-        slotText.setText("Calculating...");
+        slotButton.setText("Calculating...");
         timeText.setText(parkingLot.getTimeOfOperation());
         if (parkingLot.getParklotImage() != null) {
             carparkImage.setImageBitmap(apiClient.byteToBitmap(parkingLot.getParklotImage()));
@@ -741,7 +755,7 @@ public class UserInterfaceActivity
         carparkText = findViewById(R.id.carpark_text);
         addressText = findViewById(R.id.address_text);
         telText = findViewById(R.id.tel_text);
-        slotText = findViewById(R.id.slot_text);
+        slotButton = findViewById(R.id.slotButton);
         timeText = findViewById(R.id.time_text);
         phoneNumberText = findViewById(R.id.phone_number);
         emailText = findViewById(R.id.email);
@@ -761,6 +775,10 @@ public class UserInterfaceActivity
         sidebarAvatar = navigationView.getHeaderView(0).findViewById(R.id.user_sidebar_avatar);
         sidebarEmail = navigationView.getHeaderView(0).findViewById(R.id.user_sidebar_email);
         sidebarName = navigationView.getHeaderView(0).findViewById(R.id.user_sidebar_name);
+
+
+        //slot scroll view
+        slotScrollView = findViewById(R.id.slotScrollView);
 
         //Entities
         account = new InformationAccount();
@@ -958,5 +976,77 @@ public class UserInterfaceActivity
         // Showing Alert Message
         alertDialog.show();
     }
+
+    public void requestSlotDetail(View view) {
+        if(!parkingSlots.isEmpty()) {
+            carSlotDetail();
+            vf.setDisplayedChild(5);
+            header.setText("Slot detail");
+        }
+    }
+
+    public void refreshCarSlot(View view){
+        getAllParkingLots();
+        carSlotDetail();
+    }
+
+    private void carSlotDetail(){
+            List<CarSlotCounter> organizeSlots = new ArrayList<>();
+            int callingLane = -1;
+            for(int i = 0; i < parkingSlots.size(); i++){
+                existCheck = false;
+                for(int j = 0; j < organizeSlots.size(); j++){
+                    if(organizeSlots.get(j)!= null) {
+                        if (parkingSlots.get(i).getLane().equals(organizeSlots.get(j).getLaneCharacter())) {
+                            existCheck = true;
+                            callingLane = j;
+                        }
+                    }
+                }
+                if(existCheck == false){
+                    organizeSlots.add(new CarSlotCounter(parkingSlots.get(i).getLane(), new ArrayList<ParkingSlot>()));
+                    callingLane = organizeSlots.size() - 1;
+                }
+                        organizeSlots.get(callingLane).getSlotInLane().add(parkingSlots.get(i));
+                }
+
+
+            slotScrollView.removeAllViews();
+            TableLayout slotTable = new TableLayout(this);
+            WindowManager.LayoutParams params = new WindowManager.LayoutParams(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.WRAP_CONTENT);
+            slotTable.setLayoutParams(new TableLayout.LayoutParams(params));
+            LinearLayout outerLinear = new LinearLayout(this);
+            outerLinear.setLayoutParams(params);
+            for(int k = 0; k < organizeSlots.size() ; k++){
+                HorizontalScrollView currentScrollView = new HorizontalScrollView(this);
+                LinearLayout currentLinear = new LinearLayout(this);
+                for(int l = 0; l < organizeSlots.get(k).getSlotInLane().size(); l++){
+                    CardView currentCard = new CardView(this);
+                    TextView currentText = new TextView(this);
+                    currentText.setLayoutParams(params);
+                    currentText.setText(organizeSlots.get(k).getLaneCharacter() + " - " + organizeSlots.get(k).getSlotInLane().get(l).getRow());
+                    currentCard.addView(currentText);
+                    currentCard.setLayoutParams(new LinearLayout.LayoutParams(120, 140));
+                    ViewGroup.MarginLayoutParams layoutParams =
+                            (ViewGroup.MarginLayoutParams) currentCard.getLayoutParams();
+                    layoutParams.setMargins(5, 5, 5, 5);
+                    currentCard.requestLayout();
+                    if(organizeSlots.get(k).getSlotInLane().get(l).getStatus().equals("empty")){
+                        currentCard.setBackgroundColor(0xff5fe86c);
+                    }
+                    else{
+                        currentCard.setBackgroundColor(0xffff5468);
+                    }
+                    currentText.setText(currentText.getText() + "\n" + organizeSlots.get(k).getSlotInLane().get(l).getStatus());
+                    currentLinear.addView(currentCard);
+                }
+                currentLinear.setLayoutParams(params);
+                currentScrollView.addView(currentLinear);
+                slotTable.addView(currentScrollView);
+            }
+
+            slotScrollView.addView(slotTable);
+        }
+
 }
 

@@ -47,6 +47,7 @@
             <include android:id="@+id/carpark_screen" layout="@layout/carpark_screen" />
             <include android:id="@+id/change_pass_screen" layout="@layout/change_pass_screen" />
             <include android:id="@+id/avatar_click" layout="@layout/avatar_choosing_screen" />
+            <include android:id="@+id/car_slot_detail" layout="@layout/park_slot_view_screen" />
         </ViewFlipper>
 
     </android.support.design.widget.AppBarLayout>

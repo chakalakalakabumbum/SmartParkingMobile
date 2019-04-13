@@ -7,7 +7,8 @@ package com.example.dominator.smartparkinginterface.Entities;
  */
 public class ParkingSlot {
     private Integer slotId;
-    private String name;
+    private String lane;
+    private String row;
     private String status;
     private Integer parkingLotId;
 
@@ -17,13 +18,15 @@ public class ParkingSlot {
     /**
      * Constructor full arguments
      * @param slotId
-     * @param name
+     * @param lane
+     * @param row
      * @param status
      * @param parkingLotId
      */
-    public ParkingSlot(Integer slotId, String name, String status, Integer parkingLotId) {
+    public ParkingSlot(Integer slotId, String lane, String row, String status, Integer parkingLotId) {
         this.slotId = slotId;
-        this.name = name;
+        this.lane = lane;
+        this.row = row;
         this.status = status;
         this.parkingLotId = parkingLotId;
     }
@@ -36,12 +39,20 @@ public class ParkingSlot {
         this.slotId = slotId;
     }
 
-    public String getName() {
-        return name;
+    public String getLane() {
+        return lane;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setLane(String lane) {
+        this.lane = lane;
+    }
+
+    public String getRow() {
+        return row;
+    }
+
+    public void setRow(String row) {
+        this.row = row;
     }
 
     public String getStatus() {

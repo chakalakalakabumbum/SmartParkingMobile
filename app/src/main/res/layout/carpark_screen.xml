@@ -140,10 +140,11 @@
             </TableRow>
 
             <TableRow>
+
                 <TextView
                     android:id="@+id/slot"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
                     android:layout_marginStart="16dp"
                     android:layout_marginLeft="16dp"
                     android:fontFamily="@font/champagnelimousinesbold"
@@ -151,19 +152,18 @@
                     android:textColor="@color/foregroundText"
                     android:textSize="20dp" />
 
-                <TextView
-                    android:id="@+id/slot_text"
-                    android:layout_weight="1"
+
+
+                <Button
+                    android:id="@+id/slotButton"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginLeft="8dp"
-                    android:layout_marginEnd="16dp"
-                    android:layout_marginRight="16dp"
-                    android:fontFamily="@font/champagnelimousinesbold"
-                    android:text="10 empty / 55 slot(s)"
-                    android:textColor="@color/foregroundText"
-                    android:textSize="20dp" />
+                    android:layout_height="match_parent"
+                    android:text="  Calculating..."
+                    android:onClick="requestSlotDetail"
+                    android:background="@drawable/button_color"
+                    android:textAlignment="textStart"
+                    android:textColor="@color/foregroundText"/>
+
             </TableRow>
 
             <TableRow>
