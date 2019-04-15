@@ -1,8 +1,9 @@
 package com.example.dominator.smartparkinginterface.Entities;
 
+import java.util.Comparator;
 import java.util.List;
 
-public class CarSlotCounter {
+public class CarSlotCounter implements Comparator<CarSlotCounter> {
     private String laneCharacter;
     private List<ParkingSlot> slotInLane;
 
@@ -28,5 +29,10 @@ public class CarSlotCounter {
 
     public void setSlotInLane(List<ParkingSlot> slotInLane) {
         this.slotInLane = slotInLane;
+    }
+
+    @Override
+    public int compare(CarSlotCounter o1, CarSlotCounter o2) {
+        return o1.getLaneCharacter().compareTo(o2.getLaneCharacter());
     }
 }

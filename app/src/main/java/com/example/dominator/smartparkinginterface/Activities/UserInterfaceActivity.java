@@ -97,6 +97,7 @@ import com.loopj.android.http.RequestParams;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -356,7 +357,6 @@ public class UserInterfaceActivity
     public void backButton(View view) {
         currentAvatar.setImageBitmap(apiClient.byteToBitmap(account.getAvatar()));
         vf.setDisplayedChild(getResources().getInteger(R.integer.MAP_SCREEN));
-        getAllParkingLots();
         header.setText(getResources().getString(R.string.home));
     }
 
@@ -1023,7 +1023,7 @@ public class UserInterfaceActivity
                         organizeSlots.get(callingLane).getSlotInLane().add(parkingSlots.get(i));
                 }
 
-
+            Collections.sort(organizeSlots, new CarSlotCounter());
             slotScrollView.removeAllViews();
             TableLayout slotTable = new TableLayout(this);
             WindowManager.LayoutParams params = new WindowManager.LayoutParams(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.WRAP_CONTENT);
@@ -1034,13 +1034,13 @@ public class UserInterfaceActivity
                 HorizontalScrollView currentScrollView = new HorizontalScrollView(this);
                 LinearLayout currentLinear = new LinearLayout(this);
                 for(int l = 0; l < organizeSlots.get(k).getSlotInLane().size(); l++){
-                    CardView currentCard = new CardView(this);
+                    CardView currentCard = new CardView(this,null, R.drawable.button_color);
                     TextView currentText = new TextView(this);
                     currentText.setLayoutParams(params);
                     currentText.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
                     currentText.setText(organizeSlots.get(k).getLaneCharacter() + " - " + organizeSlots.get(k).getSlotInLane().get(l).getRow());
                     currentCard.addView(currentText);
-                    currentCard.setLayoutParams(new LinearLayout.LayoutParams(120, 140));
+                    currentCard.setLayoutParams(new LinearLayout.LayoutParams(130, 150));
                     currentCard.setRadius(5);
                     currentCard.setElevation(10);
                     ViewGroup.MarginLayoutParams layoutParams =
@@ -1048,10 +1048,13 @@ public class UserInterfaceActivity
                     layoutParams.setMargins(5, 5, 5, 5);
                     currentCard.requestLayout();
                     if(organizeSlots.get(k).getSlotInLane().get(l).getStatus().equals("empty")){
-                        currentCard.setCardBackgroundColor(0xff63ff60);
+                        currentCard.setCardBackgroundColor(0xcfa3ff75);
+                    }
+                    else if (organizeSlots.get(k).getSlotInLane().get(l).getStatus().equals("occupied")){
+                        currentCard.setCardBackgroundColor(0xcfff8c9b);
                     }
                     else{
-                        currentCard.setCardBackgroundColor(0xff75ff72);
+                        currentCard.setCardBackgroundColor(0xcffcff82);
                     }
                     currentText.setText(currentText.getText() + "\n" + organizeSlots.get(k).getSlotInLane().get(l).getStatus());
                     currentText.setTypeface(null, Typeface.BOLD);
