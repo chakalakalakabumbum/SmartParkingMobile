@@ -35,7 +35,7 @@
 
         <include
             android:id="@+id/avatar_click"
-            layout="@layout/avatar_choosing_screen" />
+            layout="@layout/slot_booking_screen" />
 
         <include
             android:id="@+id/confirm_account"

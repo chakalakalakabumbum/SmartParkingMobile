@@ -14,11 +14,17 @@ import retrofit2.http.Query;
 
 public interface APIInterface {
 
-    @HTTP(method = "GET", path = "/account/{id}")
-    Call<ResponseTemplate> doGetUser(@Path("id") String id);
+    @HTTP(method = "GET", path = "/driver/{id}")
+    Call<ResponseTemplate> doGetDriver(@Path("id") int id);
+
+    @HTTP(method = "GET", path = "/driver/get_parking_lot/{id}")
+    Call<ResponseTemplate> doGetACarPark(@Path("id") int id);
 
     @HTTP(method = "GET", path = "/parking_lot/list_parking_slot")
     Call<ResponseTemplate> doGetCarparkSlots(@Query("parkingLotId") int parkingLotId);
+
+    @HTTP(method = "PUT", path = "/driver/add_cash", hasBody = true)
+    Call<ResponseTemplate> doAddMoreMoney(@Query("accountId") int accountID, @Query("amountOfCash") int amountOfCash);
 
     @HTTP(method = "GET", path = "/driver/all_parking_lot")
     Call<ResponseTemplate> doGetAllParkingLot();
@@ -37,4 +43,13 @@ public interface APIInterface {
 
     @HTTP(method = "PUT", path = "/account/change_password", hasBody = true)
     Call<ResponseTemplate> doChangePassword(@Body PasswordChanger changePassword);
+
+    @HTTP(method = "POST", path = "/driver/booking_slot", hasBody = true)
+    Call<ResponseTemplate> doBookSlot(@Query("accountId") int accountID, @Query("parkingLotId") int parkingLotId, @Query("bookingTime") String bookingTime);
+
+    @HTTP(method = "GET", path = "/driver/list_booking/{id}")
+    Call<ResponseTemplate> doGetBookByStatus(@Path("id") int id, @Query("statusName") String statusName, @Query("quantity") int quantity);
+
+    @HTTP(method = "PUT", path = "/driver/booking_cancel", hasBody = true)
+    Call<ResponseTemplate> doCancelOrder(@Query("bookingId") int bookingId);
 }

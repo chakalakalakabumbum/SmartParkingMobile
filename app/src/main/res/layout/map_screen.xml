@@ -65,9 +65,10 @@
     <fragment
         android:id="@+id/place_autocomplete"
         android:name="com.google.android.gms.location.places.ui.PlaceAutocompleteFragment"
-        android:layout_width="200dp"
+        android:layout_width="250dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="40dp"/>
+        android:background="@color/foregroundText"
+        android:layout_marginStart="40dp" />
 
     <!--<ImageView-->
         <!--android:id="@+id/loadingLogo"-->

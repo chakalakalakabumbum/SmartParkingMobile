@@ -4,5 +4,6 @@
     <color name="colorPrimaryDark">#00574B</color>
     <color name="colorAccent">#D81B60</color>
     <color name="foregroundText">#FFFFFF</color>
+    <color name="momobuton">#3ac13f</color>
     <color name="black">#000000</color>
 </resources>

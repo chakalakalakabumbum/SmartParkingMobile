@@ -85,30 +85,59 @@
             </TableRow>
 
             <TableRow>
-
                 <TextView
-                    android:id="@+id/owner_name"
+                    android:id="@+id/price"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="16dp"
+                    android:layout_marginLeft="16dp"
+                    android:layout_marginBottom="16dp"
                     android:fontFamily="@font/champagnelimousinesbold"
-                    android:text="Owner"
+                    android:text="Price"
                     android:textColor="@color/foregroundText"
-                    android:textSize="20dp"
-                    app:layout_constraintBottom_toTopOf="@+id/address"
-                    app:layout_constraintStart_toStartOf="parent" />
+                    android:textSize="20dp" />
 
                 <TextView
-                    android:id="@+id/owner_text"
+                    android:id="@+id/price_text"
                     android:layout_weight="1"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
+                    android:layout_marginLeft="8dp"
                     android:layout_marginEnd="16dp"
+                    android:layout_marginRight="16dp"
+                    android:layout_marginBottom="16dp"
                     android:fontFamily="@font/champagnelimousinesbold"
-                    android:text="MR Dang"
+                    android:text="20 000 VND"
                     android:textColor="@color/foregroundText"
                     android:textSize="20dp" />
+            </TableRow>
+
+            <TableRow>
+
+                <TextView
+                    android:id="@+id/slot"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginLeft="16dp"
+                    android:fontFamily="@font/champagnelimousinesbold"
+                    android:text="Available"
+                    android:textColor="@color/foregroundText"
+                    android:textSize="20dp" />
+
+
+
+                <Button
+                    android:id="@+id/slotButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:text="  Calculating..."
+                    android:onClick="requestSlotDetail"
+                    android:background="@drawable/button_color"
+                    android:textAlignment="textStart"
+                    android:textColor="@color/foregroundText"/>
+
             </TableRow>
 
             <TableRow>
@@ -142,28 +171,28 @@
             <TableRow>
 
                 <TextView
-                    android:id="@+id/slot"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
+                    android:id="@+id/owner_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:layout_marginStart="16dp"
-                    android:layout_marginLeft="16dp"
                     android:fontFamily="@font/champagnelimousinesbold"
-                    android:text="Available"
+                    android:text="Owner"
+                    android:textColor="@color/foregroundText"
+                    android:textSize="20dp"
+                    app:layout_constraintBottom_toTopOf="@+id/address"
+                    app:layout_constraintStart_toStartOf="parent" />
+
+                <TextView
+                    android:id="@+id/owner_text"
+                    android:layout_weight="1"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="16dp"
+                    android:fontFamily="@font/champagnelimousinesbold"
+                    android:text="MR Dang"
                     android:textColor="@color/foregroundText"
                     android:textSize="20dp" />
-
-
-
-                <Button
-                    android:id="@+id/slotButton"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:text="  Calculating..."
-                    android:onClick="requestSlotDetail"
-                    android:background="@drawable/button_color"
-                    android:textAlignment="textStart"
-                    android:textColor="@color/foregroundText"/>
-
             </TableRow>
 
             <TableRow>
@@ -259,6 +288,19 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
+
+    <ImageView
+        android:id="@+id/park_detail_loading_image"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="fitXY"
+        android:alpha="0.4"
+        android:visibility="invisible"
+        android:background="@color/black"
+        app:layout_constraintBottom_toBottomOf="@+id/background"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
 
 </android.support.constraint.ConstraintLayout>

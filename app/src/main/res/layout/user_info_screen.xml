@@ -9,19 +9,15 @@
 
     <ImageView
         android:id="@+id/background"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:scaleType="fitXY"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/imageView2"
         app:srcCompat="@drawable/background" />
 
     <ImageView
         android:id="@+id/imageView2"
         android:layout_width="wrap_content"
-        android:layout_height="0dp"
-        android:layout_marginBottom="439dp"
-        app:layout_constraintBottom_toTopOf="@+id/back"
+        android:layout_height="67dp"
         app:layout_constraintStart_toStartOf="@+id/background"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/logo_name" />
@@ -58,7 +54,7 @@
     <EditText
         android:id="@+id/phone_number"
         android:layout_width="251dp"
-        android:layout_height="48dp"
+        android:layout_height="40dp"
         android:layout_marginStart="44dp"
         android:layout_marginLeft="44dp"
         android:fontFamily="@font/champagnelimousines"
@@ -73,9 +69,7 @@
     <TextView
         android:id="@+id/email"
         android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
+        android:layout_height="wrap_content"
         android:fontFamily="@font/champagnelimousines"
         android:hint="Email"
         android:inputType="textEmailAddress"
@@ -91,7 +85,7 @@
     <EditText
         android:id="@+id/last_name"
         android:layout_width="251dp"
-        android:layout_height="48dp"
+        android:layout_height="40dp"
         android:layout_marginStart="44dp"
         android:layout_marginLeft="44dp"
         android:fontFamily="@font/champagnelimousines"
@@ -103,14 +97,30 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/first_name" />
 
+    <TextView
+        android:id="@+id/account_money"
+        android:layout_width="224dp"
+        android:layout_height="30dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:fontFamily="@font/champagnelimousinesbold"
+        android:inputType="text"
+        android:text="Wallet: 0 VND"
+        android:gravity="center_vertical"
+        android:textColor="@color/foregroundText"
+        android:textSize="15dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.21"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/last_name" />
+
     <EditText
-        android:id="@+id/first_name"
+        android:id="@+id/plate_number"
         android:layout_width="251dp"
-        android:layout_height="48dp"
+        android:layout_height="40dp"
         android:layout_marginStart="44dp"
-        android:layout_marginLeft="44dp"
         android:fontFamily="@font/champagnelimousines"
-        android:hint="first name"
+        android:hint="Car plate number"
         android:inputType="text"
         android:textColor="@color/foregroundText"
         android:textColorHint="@color/foregroundText"
@@ -118,18 +128,43 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/phone_number" />
 
+    <EditText
+        android:id="@+id/first_name"
+        android:layout_width="251dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="44dp"
+        android:fontFamily="@font/champagnelimousines"
+        android:hint="first name"
+        android:inputType="text"
+        android:textColor="@color/foregroundText"
+        android:textColorHint="@color/foregroundText"
+        android:textSize="15dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/plate_number" />
+
     <ImageView
         android:id="@+id/imageView6"
         android:layout_width="30dp"
         android:layout_height="25dp"
         android:layout_marginStart="8dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="16dp"
         android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toEndOf="@+id/first_name"
+        app:layout_constraintTop_toBottomOf="@+id/imageView11"
+        app:srcCompat="@drawable/pen" />
+
+    <ImageView
+        android:id="@+id/imageView11"
+        android:layout_width="30dp"
+        android:layout_height="25dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toEndOf="@+id/plate_number"
         app:layout_constraintTop_toBottomOf="@+id/imageView7"
         app:srcCompat="@drawable/pen" />
 
@@ -138,17 +173,15 @@
         android:layout_width="30dp"
         android:layout_height="25dp"
         android:layout_marginStart="8dp"
-        android:layout_marginLeft="8dp"
         android:layout_marginTop="20dp"
         android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
         android:layout_marginBottom="8dp"
         app:layout_constraintBottom_toBottomOf="@+id/last_name"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toEndOf="@+id/last_name"
         app:layout_constraintTop_toBottomOf="@+id/imageView6"
-        app:layout_constraintVertical_bias="0.687"
+        app:layout_constraintVertical_bias="1.0"
         app:srcCompat="@drawable/pen" />
 
     <ImageView
@@ -171,21 +204,37 @@
         android:layout_width="315dp"
         android:layout_height="32dp"
         android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="8dp"
-        android:onClick="backButton"
         android:text=""
         android:theme="@style/WaringMessage"
         app:layout_constraintBottom_toTopOf="@+id/change_password"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/last_name"
-        app:layout_constraintVertical_bias="0.333" />
+        app:layout_constraintTop_toBottomOf="@+id/account_money" />
+
+    <Button
+        android:id="@+id/recharge_button"
+        android:layout_width="82dp"
+        android:layout_height="27dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:background="@drawable/button_color"
+        android:onClick="topUpAction"
+        android:text="Top up"
+        android:textColor="@color/foregroundText"
+        app:layout_constraintBottom_toBottomOf="@+id/account_money"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.088"
+        app:layout_constraintStart_toEndOf="@+id/account_money"
+        app:layout_constraintTop_toTopOf="@+id/account_money"
+        app:layout_constraintVertical_bias="1.0" />
 
     <Button
         android:id="@+id/change_password"
         android:layout_width="188dp"
-        android:layout_height="40dp"
+        android:layout_height="35dp"
         android:layout_marginStart="8dp"
         android:layout_marginLeft="8dp"
         android:layout_marginEnd="8dp"
@@ -201,7 +250,7 @@
     <Button
         android:id="@+id/save_info"
         android:layout_width="188dp"
-        android:layout_height="40dp"
+        android:layout_height="35dp"
         android:layout_marginStart="8dp"
         android:layout_marginLeft="8dp"
         android:layout_marginEnd="8dp"
@@ -217,7 +266,7 @@
     <Button
         android:id="@+id/back"
         android:layout_width="188dp"
-        android:layout_height="40dp"
+        android:layout_height="35dp"
         android:layout_marginStart="8dp"
         android:layout_marginLeft="8dp"
         android:layout_marginEnd="8dp"

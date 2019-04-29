@@ -9,6 +9,10 @@
     <string name="forget_password"><u>Forget password?</u></string>
     <string name="no_account"><u>Don\'t have an account?</u></string>
     <string name="testTitle"><font color="#FFFFFF">-------------------------------------------------------------</font></string>
+    <string name="Account"><b>Account Option</b></string>
+    <string name="Booking"><b>Booking</b></string>
+    <string name="Parking"><b>Parking</b></string>
+    <string name="Others"><b>Others</b></string>
     <string name="title_activity_user_interface">UserInterfaceActivity</string>
     <string name="map_description">Google Maps</string>
 
@@ -17,6 +21,9 @@
     <string name="google_api_link">https://maps.googleapis.com/maps/api/directions/json</string>
     <string name="fail_message">FAILED</string>
     <string name="success_message">DONE</string>
+    <integer name="current_connection">100</integer>
+    <string name="main_host">localhost</string>
+    <integer name="using_socket">443</integer>
 
     <!--Errors-->
     <string name="empty_field">Some required fields are empty</string>
@@ -29,6 +36,7 @@
     <string name="home">Home</string>
     <string name="change_password">Change password</string>
     <string name="user_info">User info</string>
+    <string name="history">History</string>
     <string name="change_avatar_header_text">Change avatar</string>
 
     <!--UserInterfaceActivity String-->
@@ -49,8 +57,27 @@
     <string name="account_exist">This account is already exist</string>
     <string name="email_sent">Email sent, please check your box</string>
 
+    <!--BookingStatus-->
+    <string name="status_booking">BOOK</string>
+    <string name="status_in_use">USE</string>
+    <string name="status_finish">FINISH</string>
+    <integer name="book_limit">5</integer>
+    <integer name="parking_limit">5</integer>
+    <integer name="history_limit">25</integer>
+
     <!--Slot status-->
     <string name="available">empty</string>
     <string name="busy">occupied</string>
+
+    <!--Payment-->
+
+    <string-array name="payment_arrays">
+        <item name="10">10 000</item>
+        <item name="20">20 000</item>
+        <item name="50">50 000</item>
+        <item name="100">100 000</item>
+        <item name="200">200 000</item>
+        <item name="500">500 000</item>
+    </string-array>
 
 </resources>

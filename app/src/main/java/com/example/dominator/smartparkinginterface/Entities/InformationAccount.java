@@ -11,11 +11,13 @@ public class InformationAccount implements Serializable {
     private String firstName;
     private String lastName;
     private byte[] avatar;
+    private Integer cash;
+    private String plateNumber;
 
     public InformationAccount() {
     }
 
-    public InformationAccount(Integer accountId, String email, String password, String phoneNumber, String firstName, String lastName, byte[] avatar) {
+    public InformationAccount(Integer accountId, String email, String password, String phoneNumber, String firstName, String lastName, byte[] avatar, Integer cash, String plateNumber) {
         this.accountId = accountId;
         this.email = email;
         this.password = password;
@@ -23,6 +25,8 @@ public class InformationAccount implements Serializable {
         this.firstName = firstName;
         this.lastName = lastName;
         this.avatar = avatar;
+        this.cash = cash;
+        this.plateNumber = plateNumber;
     }
 
     public Integer getAccountId() {
@@ -83,5 +87,21 @@ public class InformationAccount implements Serializable {
 
     public String getFullName() {
         return firstName + " " + lastName;
+    }
+
+    public Integer getCash() {
+        return cash;
+    }
+
+    public void setCash(Integer cash) {
+        this.cash = cash;
+    }
+
+    public String getPlateNumber() {
+        return plateNumber;
+    }
+
+    public void setPlateNumber(String plateNumber) {
+        this.plateNumber = plateNumber;
     }
 }

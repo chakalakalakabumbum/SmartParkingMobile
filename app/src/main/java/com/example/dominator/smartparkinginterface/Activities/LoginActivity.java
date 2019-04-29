@@ -61,6 +61,8 @@ public class LoginActivity extends AppCompatActivity {
     private TextView newReminder;
     private TextView reminder;
     private EditText email;
+    private EditText plateNumber;
+    private TextView checkPlateNumber;
     private EditText firstName;
     private EditText lastName;
     private EditText phoneNumber;
@@ -186,6 +188,7 @@ public class LoginActivity extends AppCompatActivity {
         preventClick();
 
         if (email.getText().toString().isEmpty() ||
+                plateNumber.getText().toString().isEmpty() ||
                 firstName.getText().toString().isEmpty() ||
                 lastName.getText().toString().isEmpty() ||
                 phoneNumber.getText().toString().isEmpty() ||
@@ -205,6 +208,7 @@ public class LoginActivity extends AppCompatActivity {
         } else if (password.getText().toString().equals(confirmPassword.getText().toString())) {
             account = new Account();
             account.setEmail(email.getText().toString());
+            account.setPlateNumber(plateNumber.getText().toString());
             account.setFirstName(firstName.getText().toString());
             account.setLastName(lastName.getText().toString());
             account.setPhoneNumber(phoneNumber.getText().toString());
@@ -225,6 +229,7 @@ public class LoginActivity extends AppCompatActivity {
                     if (response.body().isStatus()) {
                         resumeClick();
                         checkEmail.setText(account.getEmail());
+                        checkPlateNumber.setText(account.getPlateNumber());
                         checkFirstName.setText(account.getFirstName());
                         checkLastName.setText(account.getLastName());
                         checkPhoneNumber.setText(account.getPhoneNumber());
@@ -330,6 +335,7 @@ public class LoginActivity extends AppCompatActivity {
         forgetReminder = findViewById(R.id.forget_reminder);
         newReminder = findViewById(R.id.new_reminder);
         email = findViewById(R.id.new_email);
+        plateNumber=findViewById(R.id.new_plate_number);
         firstName = findViewById(R.id.new_firstname);
         lastName = findViewById(R.id.new_lastname);
         phoneNumber = findViewById(R.id.new_phone_number);
@@ -339,6 +345,7 @@ public class LoginActivity extends AppCompatActivity {
         newUserAvatar = findViewById(R.id.new_user_avatar);
         choosingAvatarImage = findViewById(R.id.choosing_user_avatar);
         checkEmail = findViewById(R.id.check_email);
+        checkPlateNumber=findViewById(R.id.check_plate_number);
         checkFirstName = findViewById(R.id.check_firstname);
         checkLastName = findViewById(R.id.check_lastname);
         checkPhoneNumber = findViewById(R.id.check_phone_number);

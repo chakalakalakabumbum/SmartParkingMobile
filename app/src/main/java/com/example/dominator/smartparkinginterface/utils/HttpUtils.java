@@ -1,9 +1,14 @@
 
 package com.example.dominator.smartparkinginterface.utils;
 
+import android.util.Log;
+
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
+
+import java.net.InetAddress;
+import java.net.Socket;
 
 public class HttpUtils {
     private String BASE_URL;
@@ -28,6 +33,26 @@ public class HttpUtils {
 
     public static void postByUrl(String url, RequestParams params, AsyncHttpResponseHandler responseHandler) {
         client.post(url, params, responseHandler);
+    }
+
+    public static void setClient(AsyncHttpClient newClient){
+        client = newClient;
+    }
+
+    public static AsyncHttpClient getClient(){
+        return client;
+    }
+
+    public static void clearSocket(int port) {
+        try {
+            Socket s = new Socket(InetAddress.getLocalHost().getHostName(), port);
+            s.setReuseAddress(true);
+            //s.close();
+
+        }
+        catch(Exception e) {
+            Log.d("TAG", e.toString());
+        }
     }
 
     private String getAbsoluteUrl(String relativeUrl) {

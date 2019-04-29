@@ -27,11 +27,13 @@ public class ParkingLot {
     private Owner owner;
     private byte[] parklotImage;
     private Integer emptySlot;
+    private float price;
+    private int bookingSlot;
 
     public ParkingLot() {
     }
 
-    public ParkingLot(Integer parkingLotId, String displayName, Account ownedBy, float longitude, float latitude, Integer totalSlot, String address, String phoneNumber, String timeOfOperation, boolean active, Integer createdBy, Date createdDate, Integer editedBy, Date lastEdited, Owner owner, byte[] parklotImage, Integer emptySlot) {
+    public ParkingLot(Integer parkingLotId, String displayName, Account ownedBy, float longitude, float latitude, Integer totalSlot, String address, String phoneNumber, String timeOfOperation, boolean active, Integer createdBy, Date createdDate, Integer editedBy, Date lastEdited, Owner owner, byte[] parklotImage, Integer emptySlot, float price, int bookingSlot) {
         this.parkingLotId = parkingLotId;
         this.displayName = displayName;
         this.ownedBy = ownedBy;
@@ -49,6 +51,8 @@ public class ParkingLot {
         this.owner = owner;
         this.parklotImage = parklotImage;
         this.emptySlot = emptySlot;
+        this.price = price;
+        this.bookingSlot = bookingSlot;
     }
 
     /**
@@ -190,5 +194,21 @@ public class ParkingLot {
 
     public void setEmptySlot(Integer emptySlot) {
         this.emptySlot = emptySlot;
+    }
+
+    public float getPrice() {
+        return price;
+    }
+
+    public void setPrice(float price) {
+        this.price = price;
+    }
+
+    public int getBookingSlot() {
+        return bookingSlot;
+    }
+
+    public void setBookingSlot(int bookingSlot) {
+        this.bookingSlot = bookingSlot;
     }
 }

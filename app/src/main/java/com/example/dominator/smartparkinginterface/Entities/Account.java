@@ -18,6 +18,8 @@ public class Account {
     private Integer roleId;
     private boolean active;
     private byte[] avatar;
+    private Integer cash;
+    private String plateNumber;
 
     public Account() {
     }
@@ -32,10 +34,10 @@ public class Account {
      * @param lastName
      * @param createdDate
      * @param roleId
-     * @param isActive
      */
-    public Account(Integer accountId, String email, String password, String phoneNumber, String firstName,
-                   String lastName, Date createdDate, Integer roleId, boolean isActive, byte[] avatar) {
+
+
+    public Account(Integer accountId, String email, String password, String phoneNumber, String firstName, String lastName, Date createdDate, Integer roleId, boolean active, byte[] avatar, Integer cash, String plateNumber) {
         this.accountId = accountId;
         this.email = email;
         this.password = password;
@@ -46,6 +48,8 @@ public class Account {
         this.roleId = roleId;
         this.active = active;
         this.avatar = avatar;
+        this.cash = cash;
+        this.plateNumber = plateNumber;
     }
 
     public Integer getAccountId() {
@@ -128,4 +132,19 @@ public class Account {
         this.avatar = avatar;
     }
 
+    public Integer getCash() {
+        return cash;
+    }
+
+    public void setCash(Integer cash) {
+        this.cash = cash;
+    }
+
+    public String getPlateNumber() {
+        return plateNumber;
+    }
+
+    public void setPlateNumber(String plateNumber) {
+        this.plateNumber = plateNumber;
+    }
 }

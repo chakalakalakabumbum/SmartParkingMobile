@@ -2,19 +2,28 @@ package com.example.dominator.smartparkinginterface.Activities;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Dialog;
 import android.content.ActivityNotFoundException;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.ShapeDrawable;
+import android.graphics.drawable.shapes.RectShape;
 import android.location.Location;
 import android.location.LocationManager;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.os.Looper;
+import android.os.SystemClock;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
@@ -34,22 +43,27 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.util.Patterns;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.Chronometer;
 import android.widget.EditText;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
+import android.widget.Spinner;
 import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewFlipper;
 
+import com.example.dominator.smartparkinginterface.Entities.Booking;
 import com.example.dominator.smartparkinginterface.Entities.CarSlotCounter;
 import com.example.dominator.smartparkinginterface.Entities.InformationAccount;
 import com.example.dominator.smartparkinginterface.Entities.Owner;
@@ -63,6 +77,8 @@ import com.example.dominator.smartparkinginterface.Retrofit.APIInterface;
 import com.example.dominator.smartparkinginterface.utils.DirectionsJSONParser;
 import com.example.dominator.smartparkinginterface.utils.HttpUtils;
 import com.example.dominator.smartparkinginterface.utils.NumberUtil;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
@@ -91,20 +107,42 @@ import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.maps.model.RoundCap;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.maps.DirectionsApi;
+import com.google.maps.GeoApiContext;
+import com.google.maps.errors.ApiException;
+import com.google.maps.model.DirectionsLeg;
+import com.google.maps.model.DirectionsResult;
+import com.google.maps.model.DirectionsRoute;
+import com.google.maps.model.Duration;
+import com.google.maps.model.TravelMode;
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.MultiFormatWriter;
+import com.google.zxing.common.BitMatrix;
+import com.journeyapps.barcodescanner.BarcodeEncoder;
+import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.JsonHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
 
 import org.json.JSONObject;
 
+import java.io.IOException;
+import java.lang.ref.WeakReference;
+import java.net.InetAddress;
+import java.net.Socket;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import cz.msebera.android.httpclient.Header;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+
 
 public class UserInterfaceActivity
         extends
@@ -115,6 +153,7 @@ public class UserInterfaceActivity
         GoogleMap.OnMarkerClickListener {
 
     //View
+    private View hView;
     private ViewFlipper vf;
     private FloatingActionButton btnShowDirection;
     private FloatingActionButton btnRefreshMap;
@@ -126,6 +165,7 @@ public class UserInterfaceActivity
     private Button slotButton;
     private TextView timeText;
     private EditText phoneNumberText;
+    private EditText plateNumberText;
     private TextView emailText;
     private EditText firstNameText;
     private EditText lastNameText;
@@ -137,7 +177,6 @@ public class UserInterfaceActivity
     private EditText confirmNewPass;
     private ImageView blackScreen;
     private ImageView passBlackScreen;
-    private ImageView choosingAvatar;
     private ImageView currentAvatar;
     private ImageView sidebarAvatar;
     private TextView sidebarName;
@@ -145,6 +184,9 @@ public class UserInterfaceActivity
     private DrawerLayout drawer;
     private NavigationView navigationView;
     private ImageView carparkImage;
+    private TextView priceText;
+    private TextView totalSlot;
+    private ImageView parkBlackScreen;
 
     //API
     private APIClient apiClient;
@@ -189,6 +231,42 @@ public class UserInterfaceActivity
     private static final long UPDATE_INTERVAL_IN_MILLISECONDS = 10000;
     private static final long SMALLEST_DISPLACEMENT = 10;
 
+    //QR code
+    MultiFormatWriter multiFormatWriter;
+    BitMatrix bitMatrix;
+    BarcodeEncoder barcodeEncoder;
+
+    //avatar
+    private Bitmap avatar;
+    private Dialog fbDialogue;
+
+    //user payment
+    private TextView cashText;
+    private CheckBox reviewBox;
+    private Button acceptButton;
+    private TextView paymentReminder;
+    private Spinner amountSpinner;
+    private int topupAmount;
+    private ImageView momoLoading;
+    private TextView momoPassword;
+
+    // Booking
+    private Booking booking;
+    private List<Booking> bookList;
+    private List<Booking> useList;
+    private List<Booking> finishList;
+    String counter = "";
+    Menu bookingMenu;
+    Menu usingMenu;
+    long remainTime;
+    int positionInABookList;
+    int sizeOfABookList;
+    int positionInAParkList;
+    int sizeOfAParkList;
+    ImageView showImage;
+    List<CountDownTimer> existTimer;
+    ScrollView historyScrollView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -205,18 +283,25 @@ public class UserInterfaceActivity
         }
 
         bindView();
-
         account = (InformationAccount) getIntent().getSerializableExtra("ACCOUNT_INFO");
-
-        getAllParkingLots();
-
-        currentAvatar.setImageBitmap(apiClient.byteToBitmap(account.getAvatar()));
-        choosingAvatar.setImageBitmap(apiClient.byteToBitmap(account.getAvatar()));
-        sidebarAvatar.setImageBitmap(apiClient.byteToBitmap(account.getAvatar()));
+        if(account.getAvatar() == null && avatar == null){
+            avatar = BitmapFactory.decodeResource(getResources(),R.drawable.default_avatar);
+            account.setAvatar(apiClient.bitmapToByte(avatar));
+        }
+        else{
+            avatar = apiClient.byteToBitmap(account.getAvatar());
+        }
+        currentAvatar.setImageBitmap(avatar);
+        sidebarAvatar.setImageBitmap(avatar);
         sidebarEmail.setText(account.getEmail());
         sidebarName.setText(account.getFullName());
         init();
         startLocationUpdates();
+        getAllParkingLots();
+        getBooking();
+        getParking();
+        new clearPort(this).execute();
+
     }
 
     public void getAllParkingLots(){
@@ -291,7 +376,6 @@ public class UserInterfaceActivity
             }
             map.setMyLocationEnabled(true);
             map.getUiSettings().setMapToolbarEnabled(false);
-
         }
     }
 
@@ -336,15 +420,11 @@ public class UserInterfaceActivity
             this.startActivity(intent);
 
         } else if (id == R.id.nav_profile) {
-            View hView = navigationView.getHeaderView(0);
             viewInfo(hView);
         }
-        /*
-        else if (id == R.id.nav_images) {
-            // Handle the camera action
-        } else if (id == R.id.nav_help) {
-
-        } else if (id == R.id.nav_news) {
+        else if (id == R.id.nav_history) {
+            makeHistory(hView);
+        } /*else if (id == R.id.nav_news) {
 
         } else if (id == R.id.nav_rate_us) {
 
@@ -355,7 +435,7 @@ public class UserInterfaceActivity
     }
 
     public void backButton(View view) {
-        currentAvatar.setImageBitmap(apiClient.byteToBitmap(account.getAvatar()));
+        currentAvatar.setImageBitmap(avatar);
         vf.setDisplayedChild(getResources().getInteger(R.integer.MAP_SCREEN));
         header.setText(getResources().getString(R.string.home));
     }
@@ -370,7 +450,7 @@ public class UserInterfaceActivity
     public void viewParkingLot(final ParkingLot parkingLot) {
         slotButton.setClickable(false);
         freeSlots = 0;
-        getSlotFromALot(parkingLot.getParkingLotId());
+        getSlotFromALot(parkingLot.getParkingLotId(), parkingLot.getBookingSlot());
         header.setText(parkingLot.getDisplayName());
         vf.setDisplayedChild(getResources().getInteger(R.integer.CARPARK_SCREEN));
         Owner owner = parkingLot.getOwner();
@@ -380,6 +460,7 @@ public class UserInterfaceActivity
         telText.setText(parkingLot.getPhoneNumber());
         slotButton.setText("Calculating...");
         timeText.setText(parkingLot.getTimeOfOperation());
+        priceText.setText(parkingLot.getPrice() + " VND");
         if (parkingLot.getParklotImage() != null) {
             carparkImage.setImageBitmap(apiClient.byteToBitmap(parkingLot.getParklotImage()));
         } else {
@@ -388,7 +469,7 @@ public class UserInterfaceActivity
 
     }
 
-    public void getSlotFromALot(int id){
+    public void getSlotFromALot(int id, final int bookingSlot){
         apiInterface.doGetCarparkSlots(id).enqueue(new Callback<ResponseTemplate>() {
             @Override
             public void onResponse(Call<ResponseTemplate> call, Response<ResponseTemplate> response) {
@@ -407,9 +488,17 @@ public class UserInterfaceActivity
                             parkingSlots.add(currentSlot);
                         }
                     }
-                    slotButton.setText("  " + freeSlots + " Empty / " + parkingSlots.size() + " Slots");
-                    slotButton.setClickable(true);
+                    slotButton.setText(" "+ (freeSlots - bookingSlot) + " bookable / " + freeSlots + " Available");
+                    if(freeSlots == 0 || freeSlots - bookingSlot <=0){
+                        slotButton.setEnabled(false);
+                        slotButton.setClickable(false);
+                    }
+                    else {
+                        slotButton.setEnabled(true);
+                        slotButton.setClickable(true);
+                    }
                     if(withSlotRender == true){
+                        totalSlot.setText("Total slot: " + parkingSlots.size());
                         carSlotDetail();
                         withSlotRender = false;
                     }
@@ -428,42 +517,65 @@ public class UserInterfaceActivity
     }
 
     public void viewInfo(View view) {
-        currentAvatar.setImageBitmap(apiClient.byteToBitmap(account.getAvatar()));
-        choosingAvatar.setImageBitmap(apiClient.byteToBitmap(account.getAvatar()));
-        sidebarAvatar.setImageBitmap(apiClient.byteToBitmap(account.getAvatar()));
-        drawer.closeDrawer(GravityCompat.START);
-        header.setText(getResources().getString(R.string.user_info));
-        vf.setDisplayedChild(getResources().getInteger(R.integer.USER_INFO_SCREEN));
-        //get info from outer resource
-        phoneNumberText.setText(account.getPhoneNumber());
-        emailText.setText(account.getEmail());
-        firstNameText.setText(account.getFirstName());
-        lastNameText.setText(account.getLastName());
-
-        changeButton.setEnabled(false);
-        changeButton.setTextColor(Color.parseColor("#999999"));
-        reminder.setText("");
-
-        TextWatcher textWatcher = new TextWatcher() {
+        apiInterface.doGetDriver(account.getAccountId()).enqueue(new Callback<ResponseTemplate>() {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            public void onResponse(Call<ResponseTemplate> call, Response<ResponseTemplate> response) {
+                if (response.isSuccessful() == true) {
+                    account = (InformationAccount) apiClient.ObjectConverter((response.body().getObjectResponse()), new InformationAccount());
+                    avatar = apiClient.byteToBitmap(account.getAvatar());
+                    currentAvatar.setImageBitmap(avatar);
+                    sidebarAvatar.setImageBitmap(avatar);
+                    drawer.closeDrawer(GravityCompat.START);
+                    header.setText(getResources().getString(R.string.user_info));
+                    vf.setDisplayedChild(getResources().getInteger(R.integer.USER_INFO_SCREEN));
+                    //get info from outer resource
+                    plateNumberText.setText(account.getPlateNumber());
+                    phoneNumberText.setText(account.getPhoneNumber());
+                    emailText.setText(account.getEmail());
+                    firstNameText.setText(account.getFirstName());
+                    lastNameText.setText(account.getLastName());
 
+                    cashText.setText("Wallet: " + account.getCash() + " VND");
+
+                    changeButton.setEnabled(false);
+                    changeButton.setTextColor(Color.parseColor("#999999"));
+                    reminder.setText("");
+
+                    TextWatcher textWatcher = new TextWatcher() {
+                        @Override
+                        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+                        }
+
+                        @Override
+                        public void onTextChanged(CharSequence s, int start, int before, int count) {
+                            changeButton.setEnabled(true);
+                            changeButton.setTextColor(Color.parseColor("#ffffff"));
+                        }
+
+                        @Override
+                        public void afterTextChanged(Editable s) {
+
+                        }
+                    };
+                    phoneNumberText.addTextChangedListener(textWatcher);
+                    firstNameText.addTextChangedListener(textWatcher);
+                    lastNameText.addTextChangedListener(textWatcher);
+                    plateNumberText.addTextChangedListener(textWatcher);
+                } else {
+                    Toast.makeText(UserInterfaceActivity.this, "User session doesn't exist", Toast.LENGTH_SHORT).show();
+                    Intent intent = new Intent(UserInterfaceActivity.this, LoginActivity.class);
+                    UserInterfaceActivity.this.startActivity(intent);
+                }
             }
 
             @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                changeButton.setEnabled(true);
-                changeButton.setTextColor(Color.parseColor("#ffffff"));
+            public void onFailure(Call<ResponseTemplate> call, Throwable t) {
+                String displayResponse = t.toString();
+                Log.d("TAG", displayResponse);
+                Toast.makeText(UserInterfaceActivity.this, "Connection's failed! Please check your connection!", Toast.LENGTH_SHORT).show();
             }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-
-            }
-        };
-        phoneNumberText.addTextChangedListener(textWatcher);
-        firstNameText.addTextChangedListener(textWatcher);
-        lastNameText.addTextChangedListener(textWatcher);
+        });
     }
 
     public void saveInfo(View view) {
@@ -471,7 +583,9 @@ public class UserInterfaceActivity
         reminder.setTextColor(Color.parseColor("#D81B60"));
         reminder.setText("");
         preventClick();
-        if (firstNameText.getText().toString().isEmpty() || lastNameText.getText().toString().isEmpty()
+        if (firstNameText.getText().toString().isEmpty()
+                || lastNameText.getText().toString().isEmpty()
+                || plateNumberText.getText().toString().isEmpty()
                 || phoneNumberText.getText().toString().isEmpty()) {
             reminder.setText(getResources().getString(R.string.empty_field));
             blackScreen.setVisibility(View.INVISIBLE);
@@ -481,8 +595,8 @@ public class UserInterfaceActivity
             blackScreen.setVisibility(View.INVISIBLE);
             resumeClick();
         } else if (changeButton.isEnabled()) {
-
             final InformationAccount user = new InformationAccount();
+            user.setPlateNumber(plateNumberText.getText().toString());
             user.setLastName(lastNameText.getText().toString());
             user.setFirstName(firstNameText.getText().toString());
             user.setPhoneNumber(phoneNumberText.getText().toString());
@@ -596,24 +710,16 @@ public class UserInterfaceActivity
 
     public void showDirection(View view) {
         if (currentLocation != null) {
-            getDirection(new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude()), selectedMarker.getPosition());
+            getDirection(new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude()), new LatLng(selectedLot.getLatitude(), selectedLot.getLongitude()));
         }
         else{
-            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                    || ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                    || ActivityCompat.checkSelfPermission(this, Manifest.permission.INTERNET) != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION,
-                        Manifest.permission.ACCESS_COARSE_LOCATION,
-                        Manifest.permission.INTERNET,
-                        Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
-            }
             callForLocation();
-            mFusedLocationClient.requestLocationUpdates(mLocationRequest,
-                    mLocationCallback, null);
         }
     }
 
+
     public void getDirection(LatLng from, LatLng to) {
+        new clearPort(this).execute();
         RequestParams params = getParams(from, to);
         HttpUtils.getByUrl(getResources().getString(R.string.google_api_link), params, new JsonHttpResponseHandler() {
             @Override
@@ -687,8 +793,9 @@ public class UserInterfaceActivity
             @Override
             public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
 //                super.onFailure(statusCode, headers, responseString, throwable);
-                Toast.makeText(getApplicationContext(), "Connection's failed! Please check your connection!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(UserInterfaceActivity.this, "Connection's failed! Please check your connection!", Toast.LENGTH_SHORT).show();
             }
+
         });
     }
 
@@ -698,21 +805,23 @@ public class UserInterfaceActivity
         if (isLotsReady && isMapReady) {
             LatLngBounds.Builder builder = new LatLngBounds.Builder();
             for (ParkingLot lot : parkingLots) {
-                marker = new LatLng(lot.getLatitude(), lot.getLongitude());
-                MarkerOptions option = new MarkerOptions();
-                option.position(marker);
+                if(lot.isActive()) {
+                    marker = new LatLng(lot.getLatitude(), lot.getLongitude());
+                    MarkerOptions option = new MarkerOptions();
+                    option.position(marker);
 
-                float color = lot.isActive() ? BitmapDescriptorFactory.HUE_GREEN : BitmapDescriptorFactory.HUE_RED;
-                option.icon(BitmapDescriptorFactory.defaultMarker(color));
-                option.title(lot.getDisplayName());
-                option.snippet(lot.getEmptySlot() + " Empty / " + lot.getTotalSlot() + " Slots");
+                    float color = BitmapDescriptorFactory.HUE_GREEN;
+                    option.icon(BitmapDescriptorFactory.defaultMarker(color));
+                    option.title(lot.getDisplayName());
+                    option.snippet("Price: " + lot.getPrice() + "\n" + lot.getEmptySlot() + " Empty / " + lot.getTotalSlot() + " Slots");
 
-                map.addMarker(option);
-                builder.include(marker);
+                    map.addMarker(option);
+                    builder.include(marker);
+                }
             }
             builder.include(new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude()));
             LatLngBounds bounds = builder.build();
-            map.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 100));
+            map.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 0));
         }
 //        lotsList.add(new LatLng(10.8671443, 106.6250343));
 //        lotsList.add(new LatLng(10.8542203, 106.6119883));
@@ -768,6 +877,7 @@ public class UserInterfaceActivity
         slotButton = findViewById(R.id.slotButton);
         timeText = findViewById(R.id.time_text);
         phoneNumberText = findViewById(R.id.phone_number);
+        plateNumberText = findViewById(R.id.plate_number);
         emailText = findViewById(R.id.email);
         firstNameText = findViewById(R.id.first_name);
         lastNameText = findViewById(R.id.last_name);
@@ -778,14 +888,15 @@ public class UserInterfaceActivity
         confirmNewPass = findViewById(R.id.confirm_password);
         blackScreen = findViewById(R.id.loading_image);
         passBlackScreen = findViewById(R.id.change_pass_loading_image);
-        choosingAvatar = findViewById(R.id.choosing_user_avatar);
         currentAvatar = findViewById(R.id.current_user_avatar);
         changeReminder = findViewById(R.id.change_reminder);
         carparkImage = findViewById(R.id.carparkImage);
+        priceText = findViewById(R.id.price_text);
+        parkBlackScreen = findViewById(R.id.park_detail_loading_image);
+        totalSlot = findViewById(R.id.total_slot);
         sidebarAvatar = navigationView.getHeaderView(0).findViewById(R.id.user_sidebar_avatar);
         sidebarEmail = navigationView.getHeaderView(0).findViewById(R.id.user_sidebar_email);
         sidebarName = navigationView.getHeaderView(0).findViewById(R.id.user_sidebar_name);
-
 
         //slot scroll view
         slotScrollView = findViewById(R.id.slotScrollView);
@@ -798,11 +909,32 @@ public class UserInterfaceActivity
         apiInterface = APIClient.getClient(getResources().getString(R.string.main_link)).create(APIInterface.class);
         parkingLots = new ArrayList<>();
 
+        //Momo bound
+        cashText = findViewById(R.id.account_money);
+
+        fbDialogue = new Dialog(UserInterfaceActivity.this, android.R.style.Theme_Black_NoTitleBar);
+        fbDialogue.setContentView(R.layout.momo_popup);
+        fbDialogue.setCancelable(true);
+        reviewBox = fbDialogue.findViewById(R.id.accept_checkbox);
+        acceptButton = fbDialogue.findViewById(R.id.accept_btn);
+        paymentReminder = fbDialogue.findViewById(R.id.payment_reminder);
+        momoLoading = fbDialogue.findViewById(R.id.momo_loading);
+
+        amountSpinner = fbDialogue.findViewById(R.id.amount_input);
+        momoPassword = fbDialogue.findViewById(R.id.momo_password);
+
+
+        //location manager
+        locationManager = (LocationManager) getSystemService( Context.LOCATION_SERVICE );
+
+        //Book info
+        bookingMenu = navigationView.getMenu().findItem(R.id.booking_timer).getSubMenu();
+        usingMenu = navigationView.getMenu().findItem(R.id.parking_timer).getSubMenu();
+        historyScrollView = findViewById(R.id.historyScrollView);
     }
 
     public void infoNavigate(View view) {
         NavigationView navigationView = findViewById(R.id.nav_view);
-        View hView = navigationView.getHeaderView(0);
         header.setText(getResources().getString(R.string.home));
         vf.setDisplayedChild(getResources().getInteger(R.integer.MAP_SCREEN));
         showDirection(hView);
@@ -815,17 +947,6 @@ public class UserInterfaceActivity
         changeButton.setTextColor(Color.parseColor("#ffffff"));
         header.setText(getResources().getString(R.string.change_avatar_header_text));
         vf.setDisplayedChild(getResources().getInteger(R.integer.AVATAR_SCREEN));
-    }
-
-    public void choosingImage(View view) {
-        String pageImage = view.getTag().toString();
-        choosingAvatar.setImageResource(APIClient.getResId(pageImage, R.drawable.class));
-        choosingAvatar.setTag(pageImage);
-    }
-
-    public void saveImage(View view) {
-        currentAvatar.setImageResource(APIClient.getResId(choosingAvatar.getTag().toString(), R.drawable.class));
-        vf.setDisplayedChild(getResources().getInteger(R.integer.USER_INFO_SCREEN));
     }
 
     public void preventClick() {
@@ -899,9 +1020,11 @@ public class UserInterfaceActivity
 
     }
 
+
     private void init() {
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         mSettingsClient = LocationServices.getSettingsClient(this);
+        hView = navigationView.getHeaderView(0);
 
         //gpstracker = new GPSTracker(UserInterfaceActivity.this);
         //currentLocation = new Location(gpstracker.getLocation());
@@ -925,7 +1048,8 @@ public class UserInterfaceActivity
             public void onLocationResult(LocationResult locationResult) {
                 super.onLocationResult(locationResult);
                 currentLocation = locationResult.getLastLocation();
-
+                buildCamera(new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude()), 15, 0);
+                focusNearestCarPark();
                 if (directionPolyline != null && currentLocation != null) {
                         List<LatLng> points = directionPolyline.getPoints();
                         LatLng to = points.get(points.size() - 1);
@@ -944,9 +1068,54 @@ public class UserInterfaceActivity
         LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder();
         builder.addLocationRequest(mLocationRequest);
         mLocationSettingsRequest = builder.build();
+
+        //QR action
+        multiFormatWriter = new MultiFormatWriter();
+        barcodeEncoder = new BarcodeEncoder();
+
+        //Timer
+        existTimer = new ArrayList<CountDownTimer>();
+
+        //book
+        bookList = new ArrayList<>();
+        useList = new ArrayList<>();
+
+    }
+
+    private static class clearPort extends AsyncTask<Void, Void, String> {
+
+        private WeakReference<UserInterfaceActivity> activityReference;
+
+        // only retain a weak reference to the activity
+        clearPort(UserInterfaceActivity context) {
+            activityReference = new WeakReference<>(context);
+        }
+        @Override
+        protected String doInBackground(Void... params) {
+            try {
+                Socket s = new Socket(InetAddress.getLocalHost().getHostAddress(), 443);
+                s.setReuseAddress(true);
+                AsyncHttpClient client = HttpUtils.getClient();
+                client.setMaxConnections(100);
+                HttpUtils.setClient(client);
+                return "task finished";
+            }
+            catch (Exception e){
+                return null;
+            }
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+
+            // get a reference to the activity if it is still there
+            UserInterfaceActivity activity = activityReference.get();
+            if (activity == null || activity.isFinishing()) return;
+        }
     }
 
     private void startLocationUpdates() {
+        permissionCheck();
         mSettingsClient
                 .checkLocationSettings(mLocationSettingsRequest)
                 .addOnSuccessListener(this, new OnSuccessListener<LocationSettingsResponse>() {
@@ -957,6 +1126,24 @@ public class UserInterfaceActivity
                                 mLocationCallback, Looper.myLooper());
                     }
                 });
+    }
+
+    private boolean permissionCheck(){
+        boolean check = false;
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                || ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                || ActivityCompat.checkSelfPermission(this, Manifest.permission.INTERNET) != PackageManager.PERMISSION_GRANTED
+        ||  !locationManager.isProviderEnabled( LocationManager.GPS_PROVIDER )) {
+            callForLocation();
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION,
+                    Manifest.permission.INTERNET,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
+        }
+        else{
+            check = true;
+        }
+        return check;
     }
 
     private void callForLocation(){
@@ -990,8 +1177,8 @@ public class UserInterfaceActivity
     public void requestSlotDetail(View view) {
         if(selectedLot != null) {
             withSlotRender = true;
-            getSlotFromALot(selectedLot.getParkingLotId());
-            vf.setDisplayedChild(5);
+            getSlotFromALot(selectedLot.getParkingLotId(), selectedLot.getBookingSlot());
+            vf.setDisplayedChild(getResources().getInteger(R.integer.SLOT_DETAIL_SCREEN));
             header.setText("Slot detail");
         }
     }
@@ -999,7 +1186,35 @@ public class UserInterfaceActivity
     public void refreshCarSlot(View view){
         if(selectedLot != null) {
             withSlotRender = true;
-            getSlotFromALot(selectedLot.getParkingLotId());
+            getSlotFromALot(selectedLot.getParkingLotId(), selectedLot.getBookingSlot());
+        }
+    }
+
+    public void focusNearestCarPark(){
+        if(currentLocation != null && parkingSlots != null) {
+            if(!parkingSlots.isEmpty()) {
+                Collections.sort(parkingLots, new Comparator<ParkingLot>() {
+
+                    @Override
+                    public int compare(ParkingLot o1, ParkingLot o2) {
+                        Location locationA = new Location("point A");
+                        locationA.setLatitude(o1.getLatitude());
+                        locationA.setLongitude(o1.getLatitude());
+                        Location locationB = new Location("point B");
+                        locationB.setLatitude(o2.getLatitude());
+                        locationB.setLongitude(o2.getLatitude());
+                        float distanceOne = currentLocation.distanceTo(locationA);
+                        float distanceTwo = currentLocation.distanceTo(locationB);
+                        return Float.compare(distanceOne, distanceTwo);
+                    }
+                });
+                LatLngBounds.Builder builder = new LatLngBounds.Builder();
+                builder.include(new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude()));
+                builder.include(new LatLng(parkingLots.get(parkingLots.size() - 1).getLatitude(), parkingLots.get(parkingLots.size() - 1).getLongitude()));
+                LatLngBounds bounds = builder.build();
+                CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, 0);
+                map.animateCamera(cu);
+            }
         }
     }
 
@@ -1067,6 +1282,649 @@ public class UserInterfaceActivity
 
             slotScrollView.addView(slotTable);
         }
+
+    private Bitmap stringToQRImage(String code, int width, int height){
+        Bitmap bitmap = null;
+        try {
+            bitMatrix = multiFormatWriter.encode(code, BarcodeFormat.QR_CODE,width,height);
+            bitmap = barcodeEncoder.createBitmap(bitMatrix);
+        } catch (Exception e) {
+            Log.d("QR", "Invalid QR code: " + e.toString());
+        }
+        return bitmap;
+    }
+
+    public void topUpAction(View view) {
+        if(account != null) {
+            withSlotRender = true;
+            vf.setDisplayedChild(getResources().getInteger(R.integer.PAYMENT_SCREEN));
+            header.setText("Top up");
+        }
+    }
+
+    public void momoAction(View view) {
+        reviewBox.setChecked(false);
+        acceptButton.setEnabled(false);
+        paymentReminder.setText("");
+        reviewBox.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(reviewBox.isChecked() == false) {
+                    acceptButton.setEnabled(false);
+                }
+                else{
+                    acceptButton.setEnabled(true);
+                }
+            }
+        });
+        fbDialogue.show();
+    }
+
+    public void closePopup(View view) {
+        fbDialogue.cancel();
+    }
+
+    public void paymentAction(final View view) {
+        if(!momoPassword.getText().toString().isEmpty()) {
+            momoLoading.setVisibility(View.VISIBLE);
+            preventClick();
+            try {
+                topupAmount = Integer.valueOf(amountSpinner.getSelectedItem().toString().trim().replaceAll("\\s+", ""));
+                Log.d("MONEY", "Test money: " + topupAmount);
+                apiInterface.doAddMoreMoney(account.getAccountId(), topupAmount).enqueue(new Callback<ResponseTemplate>() {
+                    @Override
+                    public void onResponse(Call<ResponseTemplate> call, Response<ResponseTemplate> response) {
+                        Log.d("MOMO", response.code() + "");
+                        Log.d("MOMO", response.raw() + "");
+                        Log.d("MOMO", response.body() + "");
+                        Log.d("MOMO", getResources().getString(R.string.success_message));
+                        if (response.body().getObjectResponse() == null) {
+                            AlertDialog.Builder builder = new AlertDialog.Builder(UserInterfaceActivity.this);
+                            builder.setMessage("Look at this dialog!")
+                                    .setCancelable(false)
+                                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int id) {
+                                            //do things
+                                        }
+                                    });
+                            AlertDialog alert = builder.create();
+                            alert.show();
+                        } else {
+                            paymentReminder.setText("GOOD");
+                            account = (InformationAccount) apiClient.ObjectConverter(response.body().getObjectResponse(), new InformationAccount());
+                        }
+                        momoLoading.setVisibility(View.INVISIBLE);
+                        resumeClick();
+                        viewInfo(view);
+                        fbDialogue.cancel();
+                        Toast.makeText(UserInterfaceActivity.this, "Money top up successfully", Toast.LENGTH_LONG).show();
+                    }
+
+                    @Override
+                    public void onFailure(Call<ResponseTemplate> call, Throwable t) {
+                        String displayResponse = t.toString();
+                        Log.d("MOMO", displayResponse);
+                        paymentReminder.setText(getResources().getString(R.string.connection_failed));
+                        momoLoading.setVisibility(View.INVISIBLE);
+                        resumeClick();
+                    }
+                });
+            } catch (Exception e) {
+                paymentReminder.setText(getResources().getString(R.string.update_fail));
+                Log.d("MOMO", e.toString());
+                momoLoading.setVisibility(View.INVISIBLE);
+                resumeClick();
+            }
+        }
+        else{
+            paymentReminder.setText("Invalid password");
+        }
+    }
+
+    public void bookASlot(final View view) {
+        if (permissionCheck() == true) {
+            if (selectedLot != null) {
+                AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
+
+                // Setting Dialog Title
+                alertDialog.setTitle("Car park booking");
+
+                // Setting Dialog Message
+                alertDialog.setMessage("Price: " + String.format("%.0f", selectedLot.getPrice()) + "\n" + "Are you sure you want to book this car park");
+
+                // On pressing Settings button
+                alertDialog.setPositiveButton("Book", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+
+                        if(bookList.isEmpty() && useList.isEmpty()) {
+                            parkBlackScreen.setVisibility(View.VISIBLE);
+                            preventClick();
+                            Date date = new Date();
+                            apiInterface.doBookSlot(account.getAccountId(), selectedLot.getParkingLotId(), new SimpleDateFormat("dd/MM/yyyy/HH/mm/ss").format(new Date())).enqueue(new Callback<ResponseTemplate>() {
+                                @Override
+                                public void onResponse(Call<ResponseTemplate> call, Response<ResponseTemplate> response) {
+                                    if (response.body().getObjectResponse() == null) {
+                                        AlertDialog.Builder builder = new AlertDialog.Builder(UserInterfaceActivity.this);
+                                        builder.setMessage("The car park is full or out of order")
+                                                .setTitle("Unable to book this car park")
+                                                .setCancelable(false)
+                                                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                                    public void onClick(DialogInterface dialog, int id) {
+                                                        getBooking();
+                                                        getParking();
+                                                    }
+                                                });
+                                        AlertDialog alert = builder.create();
+                                        alert.show();
+                                        parkBlackScreen.setVisibility(View.INVISIBLE);
+                                        resumeClick();
+                                    } else {
+                                        booking = (Booking) apiClient.ObjectConverter(response.body().getObjectResponse(), new Booking());
+                                        AlertDialog.Builder ImageDialog = new AlertDialog.Builder(UserInterfaceActivity.this);
+                                        showImage = new ImageView(UserInterfaceActivity.this);
+                                        showImage.setImageBitmap(stringToQRImage(booking.getUrlApiCheckIn(), 500, 500));
+                                        ImageDialog.setView(showImage);
+                                        ImageDialog.setTitle("Booking successful");
+                                        ImageDialog.setMessage("You have chosen to book: " + selectedLot.getDisplayName() + "\n" +
+                                                "The price is: " + String.format("%.0f", selectedLot.getPrice()) + " VND/h" + "\n" +
+                                                "Use this QR code as a check for the car park" + "\n" +
+                                                "This QR code will expire in 30 minutes");
+                                        ImageDialog.setNegativeButton("ok", new DialogInterface.OnClickListener() {
+                                            public void onClick(DialogInterface arg0, int arg1) {
+                                            }
+                                        });
+                                        ImageDialog.show();
+                                        backButton(view);
+                                        showDirection(view);
+                                        getBooking();
+                                        getParking();
+                                        parkBlackScreen.setVisibility(View.INVISIBLE);
+                                        resumeClick();
+                                    }
+                                }
+
+                                @Override
+                                public void onFailure(Call<ResponseTemplate> call, Throwable t) {
+                                    String displayResponse = t.toString();
+                                    Log.d("MOMO", displayResponse);
+                                    paymentReminder.setText(getResources().getString(R.string.connection_failed));
+                                    parkBlackScreen.setVisibility(View.INVISIBLE);
+                                    resumeClick();
+                                }
+                            });
+                        }
+                        else{
+                            AlertDialog.Builder alertDialog = new AlertDialog.Builder(UserInterfaceActivity.this);
+                            alertDialog.setTitle("Cannot book when a previous booking is still exist");
+                            alertDialog.setMessage("Cancel your previous order if you have one \n" +
+                                    "You cannot book a car park if your car is already parked");
+                            alertDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                    dialog.cancel();
+                                }
+                            });
+                            alertDialog.show();
+                            backButton(view);
+                            getBooking();
+                            getParking();
+                            parkBlackScreen.setVisibility(View.INVISIBLE);
+                            resumeClick();
+                        }
+
+                    }
+                });
+
+                // on pressing cancel button
+                alertDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                });
+
+                // Showing Alert Message
+                alertDialog.show();
+            }
+        }
+        else{
+            Toast.makeText(UserInterfaceActivity.this, "Cannot book without GPS connection", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    public int JsonToSeconds(String JSON){
+        int seconds = 0;
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            Map<String,Object> map = new HashMap<String,Object>();
+            map = mapper.readValue(JSON, new TypeReference(){});
+            System.out.println(map.get("duration_in_traffic").toString());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return seconds;
+    }
+
+    public Long getDurationForRoute(String origin, String destination) throws InterruptedException, ApiException, IOException {
+    // - We need a context to access the API
+    GeoApiContext geoApiContext = new GeoApiContext.Builder()
+            .apiKey(getResources().getString(R.string.google_maps_key))
+            .build();
+
+    // - Perform the actual request
+    DirectionsResult directionsResult = DirectionsApi.newRequest(geoApiContext)
+            .mode(TravelMode.DRIVING)
+            .origin(origin)
+            .destination(destination)
+            .await();
+
+    // - Parse the result
+    DirectionsRoute route = directionsResult.routes[0];
+    DirectionsLeg leg = route.legs[0];
+    Duration duration = leg.duration;
+    return duration.inSeconds;
+}
+
+    public long getRemainTimeInMilliSeconds(Date startDate){
+        long result = (startDate.getTime() - new Date().getTime()) + 1800000;
+        if(result < 0){
+            result = 0;
+        }
+        return result;
+    }
+
+    private void getBooking() {
+        bookingMenu.clear();
+        bookList.clear();
+        apiInterface.doGetBookByStatus(account.getAccountId(), getResources().getString(R.string.status_booking), getResources().getInteger(R.integer.book_limit)).enqueue(new Callback<ResponseTemplate>() {
+            @Override
+            public void onResponse(Call<ResponseTemplate> call, Response<ResponseTemplate> response) {
+                bookingMenu.clear();
+                try {
+                    sizeOfABookList = ((List) response.body().getObjectResponse()).size();
+                }
+                catch(Exception e){
+                    sizeOfABookList = 0;
+                }
+                clearExistTimer();
+                if (sizeOfABookList == 0) {
+                    bookingMenu.add("---Empty---");
+                } else {
+                    try {
+                        for (int i = 0; i < sizeOfABookList; i++) {
+                            positionInABookList = i;
+                            booking = (Booking) apiClient.ObjectConverter(((List) response.body().getObjectResponse()).get(i), new Booking());
+                            bookList.add(booking);
+                            remainTime = getRemainTimeInMilliSeconds(booking.getBookingTime());
+                            if (remainTime > 0) {
+                                final TextView timerText = new TextView(UserInterfaceActivity.this);
+                                timerText.setTextSize(15);
+                                timerText.setTextAlignment(View.TEXT_ALIGNMENT_TEXT_END);
+                                timerText.setGravity(Gravity.CENTER);
+                                timerText.setTextColor(getColor(R.color.foregroundText));
+                                CountDownTimer timer = new CountDownTimer(getRemainTimeInMilliSeconds(booking.getBookingTime()), 1000) {
+
+                                    @Override
+                                    public void onFinish() {
+                                        //TODO Whatever's meant to happen when it finishes
+                                        counter = "Expired";
+                                        timerText.setText(counter);
+                                        apiInterface.doCancelOrder(booking.getBookingId()).enqueue(new Callback<ResponseTemplate>() {
+                                            @Override
+                                            public void onResponse(Call<ResponseTemplate> call, Response<ResponseTemplate> response) {
+                                                Log.d("TAG", response.code() + "");
+                                                Log.d("TAG", response.raw() + "");
+                                                Log.d("TAG", response.body() + "");
+                                                getBooking();
+                                                getParking();
+                                            }
+
+                                            @Override
+                                            public void onFailure(Call<ResponseTemplate> call, Throwable t) {
+                                                String displayResponse = t.toString();
+                                                Log.d("TAG", displayResponse);
+                                            }
+                                        });
+                                    }
+
+                                    @Override
+                                    public void onTick(long millisecondsLeft) {
+                                        int timeLeft = (int) Math.round((millisecondsLeft / (double) 1000));
+                                        long Hours = timeLeft / (60 * 60) % 24;
+                                        long Minutes = timeLeft / 60 % 60;
+                                        long Seconds = timeLeft % 60;
+                                        counter = //String.format("%02d", Hours) + " Hours " +
+                                                String.format("%02d", Minutes) + " m " +
+                                                        String.format("%02d", Seconds) + " s ";
+                                        invalidateOptionsMenu();
+                                        //onPrepareOptionsMenu(menu);
+                                        timerText.setText(counter);
+                                        //timerText.setText(counter);
+                                        Log.d("TAG", "Time is running more!");
+                                    }
+                                };
+                                existTimer.add(timer);
+                                bookingMenu.add(booking.getParkingLotName())
+                                        //.setIcon(getDrawable(R.drawable.logout))
+                                        .setActionView(timerText).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+                                    @Override
+                                    public boolean onMenuItemClick(MenuItem item) {
+                                        AlertDialog.Builder ImageDialog = new AlertDialog.Builder(UserInterfaceActivity.this);
+                                        showImage = new ImageView(UserInterfaceActivity.this);
+                                        showImage.setImageBitmap(stringToQRImage(booking.getUrlApiCheckIn(), 500, 500));
+                                        ImageDialog.setView(showImage);
+                                        ImageDialog.setTitle("Check in QR code");
+                                        ImageDialog.setMessage("You have chosen to book: " + new String(booking.getParkingLotName()) + "\n" +
+                                                "The car plate number is: " + new String(booking.getPlateNumber()) + "\n" +
+                                                "The price is: " + String.format("%.0f", new Float(booking.getPrice())) + " VND/h" + "\n" +
+                                                "Scan this QR code as a check for the car park" + "\n" +
+                                                "If this QR code is expired, it cannot be used");
+                                        ImageDialog.setNegativeButton("ok", new DialogInterface.OnClickListener() {
+                                            public void onClick(DialogInterface arg0, int arg1) {
+                                                getBooking();
+                                                getParking();
+                                            }
+                                        });
+                                        ImageDialog.setPositiveButton("Cancel order", new DialogInterface.OnClickListener() {
+                                            public void onClick(DialogInterface arg0, int arg1) {
+                                                apiInterface.doCancelOrder(new Integer(booking.getBookingId())).enqueue(new Callback<ResponseTemplate>() {
+                                                    @Override
+                                                    public void onResponse(Call<ResponseTemplate> call, Response<ResponseTemplate> response) {
+                                                        Toast.makeText(UserInterfaceActivity.this, "Order canceled", Toast.LENGTH_SHORT).show();
+                                                            getBooking();
+                                                            getParking();
+                                                    }
+
+                                                    @Override
+                                                    public void onFailure(Call<ResponseTemplate> call, Throwable t) {
+                                                        String displayResponse = t.toString();
+                                                        Log.d("TAG", displayResponse);
+                                                    }
+                                                });
+                                            }
+                                        });
+                                        ImageDialog.show();
+                                        return false;
+                                    }
+                                });
+                                timer.start();
+                            } else {
+                                apiInterface.doCancelOrder(booking.getBookingId()).enqueue(new Callback<ResponseTemplate>() {
+                                    @Override
+                                    public void onResponse(Call<ResponseTemplate> call, Response<ResponseTemplate> response) {
+                                        if (positionInABookList == sizeOfABookList - 1) {
+                                            getBooking();
+                                            getParking();
+                                        }
+                                    }
+
+                                    @Override
+                                    public void onFailure(Call<ResponseTemplate> call, Throwable t) {
+                                        String displayResponse = t.toString();
+                                        Log.d("TAG", displayResponse);
+                                    }
+                                });
+                            }
+                        }
+                    } catch (Exception e) {
+                        Log.d("TAG", e.toString());
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseTemplate> call, Throwable t) {
+                String displayResponse = t.toString();
+                Log.d("TAG", displayResponse);
+            }
+        });
+    }
+
+    private void getParking() {
+        usingMenu.clear();
+        useList.clear();
+        apiInterface.doGetBookByStatus(account.getAccountId(), getResources().getString(R.string.status_in_use), getResources().getInteger(R.integer.parking_limit)).enqueue(new Callback<ResponseTemplate>() {
+            @Override
+            public void onResponse(Call<ResponseTemplate> call, Response<ResponseTemplate> response) {
+                usingMenu.clear();
+                try {
+                    sizeOfAParkList = ((List) response.body().getObjectResponse()).size();
+                }
+                catch (Exception e){
+                    sizeOfABookList = 0;
+                }
+                if (sizeOfAParkList == 0) {
+                    usingMenu.add("---Empty---");
+                } else {
+                    try {
+                        for (int i = 0; i < sizeOfAParkList; i++) {
+                            positionInAParkList = i;
+                            booking = (Booking) apiClient.ObjectConverter(((List) response.body().getObjectResponse()).get(i), new Booking());
+                            useList.add(booking);
+                            Chronometer timeElapsed  = new Chronometer(UserInterfaceActivity.this);
+                            timeElapsed.setOnChronometerTickListener(new Chronometer.OnChronometerTickListener(){
+                                @Override
+                                public void onChronometerTick(Chronometer cArg) {
+                                    long time = SystemClock.elapsedRealtime() - cArg.getBase();
+                                    int h   = (int)(time /3600000);
+                                    int m = (int)(time - h*3600000)/60000;
+                                    int s= (int)(time - h*3600000- m*60000)/1000 ;
+                                    String hh = h < 10 ? "0"+h: h+"";
+                                    String mm = m < 10 ? "0"+m: m+"";
+                                    String ss = s < 10 ? "0"+s: s+"";
+                                    cArg.setText(hh+" h "+mm+" m "+ss + " s ");
+                                }
+                            });
+                            timeElapsed.setBase(SystemClock.elapsedRealtime() - (new Date().getTime() - booking.getTimeStart().getTime()));
+                            timeElapsed.setTextSize(15);
+                            timeElapsed.setTextAlignment(View.TEXT_ALIGNMENT_TEXT_END);
+                            timeElapsed.setGravity(Gravity.CENTER);
+                            timeElapsed.setTextColor(getColor(R.color.foregroundText));
+                                usingMenu.add(booking.getParkingLotName())
+                                        //.setIcon(getDrawable(R.drawable.logout))
+                                        .setActionView(timeElapsed).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+                                    @Override
+                                    public boolean onMenuItemClick(MenuItem item) {
+                                        apiInterface.doGetACarPark(new Integer(booking.getParkingLotId())).enqueue(new Callback<ResponseTemplate>() {
+                                            @Override
+                                            public void onResponse(Call<ResponseTemplate> call, Response<ResponseTemplate> response) {
+                                                Log.d("TAG", response.code() + "");
+                                                Log.d("TAG", response.raw() + "");
+                                                Log.d("TAG", response.body() + "");
+                                                try {
+                                                    selectedLot = (ParkingLot)apiClient.ObjectConverter((response.body().getObjectResponse()), new ParkingLot());
+                                                    AlertDialog.Builder ImageDialog = new AlertDialog.Builder(UserInterfaceActivity.this);
+                                                    showImage = new ImageView(UserInterfaceActivity.this);
+                                                    showImage.setImageBitmap(stringToQRImage(booking.getUrlApiCheckOut(), 500, 500));
+                                                    ImageDialog.setView(showImage);
+                                                    ImageDialog.setTitle("Checkout QR code");
+                                                    ImageDialog.setMessage("You have chosen to book: " + new String(booking.getParkingLotName()) + "\n" +
+                                                            "The car plate number is: " + new String(booking.getPlateNumber()) + "\n" +
+                                                            "The price is: " + String.format("%.0f", new Float(booking.getPrice())) + " VND/h" + "\n" +
+                                                            "Scan this QR code as a check out for the car park" + "\n" +
+                                                            "Payment will be automatically called.");
+                                                    ImageDialog.setNegativeButton("ok", new DialogInterface.OnClickListener() {
+                                                        public void onClick(DialogInterface arg0, int arg1) {
+                                                            getBooking();
+                                                            getParking();
+                                                        }
+                                                    });
+                                                    showDirection(hView);
+                                                    ImageDialog.show();
+                                                } catch (Exception e) {
+                                                    Log.d("TAG", e.toString());
+                                                }
+                                            }
+
+                                            @Override
+                                            public void onFailure(Call<ResponseTemplate> call, Throwable t) {
+                                                String displayResponse = t.toString();
+                                                Log.d("TAG", displayResponse);
+                                            }
+                                        });
+                                        return false;
+                                    }
+                                });
+                                timeElapsed.start();
+                        }
+                    } catch (Exception e) {
+                        Log.d("TAG", e.toString());
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseTemplate> call, Throwable t) {
+                String displayResponse = t.toString();
+                Log.d("TAG", displayResponse);
+            }
+        });
+    }
+
+    public void clearExistTimer(){
+        if(existTimer != null) {
+            if (!existTimer.isEmpty()) {
+                for (int i = 0; i < existTimer.size(); i++) {
+                    existTimer.get(i).cancel();
+                }
+                existTimer.clear();
+            }
+        }
+    }
+
+    public void makeHistory(View view){
+        header.setText(getResources().getString(R.string.history));
+        vf.setDisplayedChild(getResources().getInteger(R.integer.HISTORY_SCREEN));
+        apiInterface.doGetBookByStatus(account.getAccountId(), getResources().getString(R.string.status_finish), getResources().getInteger(R.integer.history_limit)).enqueue(new Callback<ResponseTemplate>() {
+            @Override
+            public void onResponse(Call<ResponseTemplate> call, Response<ResponseTemplate> response) {
+                try {
+                    finishList = new ArrayList<Booking>();
+                    if (response.body().getObjectResponse() != null){
+                        for (int i = 0; i < ((List) response.body().getObjectResponse()).size(); i++) {
+                            finishList.add((Booking) apiClient.ObjectConverter(((List) response.body().getObjectResponse()).get(i), new Booking()));
+                        }
+                    }
+                    historyScrollView.removeAllViews();
+                    TableLayout historyTable = new TableLayout(UserInterfaceActivity.this);
+                    WindowManager.LayoutParams params = new WindowManager.LayoutParams(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.WRAP_CONTENT);
+                    LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                    layoutParams.setMargins(0, 20, 0, 30);
+                    historyTable.setLayoutParams(params);
+                    LinearLayout outerLinear = new LinearLayout(UserInterfaceActivity.this);
+                    outerLinear.setLayoutParams(params);
+                    LinearLayout.LayoutParams iconParams=new LinearLayout.LayoutParams(150, 160);
+                    iconParams.gravity=Gravity.LEFT;
+                    ShapeDrawable sd = new ShapeDrawable();
+                    sd.setShape(new RectShape());
+                    sd.getPaint().setColor(getColor(R.color.foregroundText));
+                    sd.getPaint().setStrokeWidth(1f);
+                    sd.getPaint().setStyle(Paint.Style.STROKE);
+
+                    for(int i = 0; i < finishList.size() ; i++){
+                        TextView currentText = new TextView(UserInterfaceActivity.this);
+                        TextView dateText = new TextView(UserInterfaceActivity.this);
+                        dateText.setGravity(Gravity.RIGHT | Gravity.TOP);
+                        dateText.setTextAlignment(View.TEXT_ALIGNMENT_VIEW_END);
+                        dateText.setTextColor(getColor(R.color.foregroundText));
+                        ImageView navigationImage = new ImageView(UserInterfaceActivity.this);
+                        currentText.setGravity(Gravity.LEFT);
+                        currentText.setTypeface(null, Typeface.BOLD);
+                        navigationImage.setImageDrawable(getDrawable(R.drawable.finder_icon));
+                        navigationImage.setLayoutParams(iconParams);
+                        //currentText.setLayoutParams(params);
+                        currentText.setTextAppearance(R.drawable.button_color);
+                        currentText.setTextAlignment(View.TEXT_ALIGNMENT_TEXT_START);
+                        currentText.setTextColor(getColor(R.color.foregroundText));
+                        currentText.setWidth(400);
+                        dateText.setText(new SimpleDateFormat("MM/dd/yyyy").format(finishList.get(i).getBookingTime()));
+                        currentText.setText(
+                                    finishList.get(i).getParkingLotName() +
+                                            "\n" + (finishList.get(i).getPlateNumber() == null? "N/A": finishList.get(i).getPlateNumber())  +
+                                    "\n\nPrice: " + String.format("%.0f", finishList.get(i).getPrice())
+                                //"\n Used from: " + (finishList.get(i).getTimeStart() != null ?
+                                //new SimpleDateFormat("MM/dd/yyyy HH:mm:ss").format(finishList.get(i).getTimeStart()) : "N/A") +
+                                //"\n Used To: " + (finishList.get(i).getTimeEnd() != null ?
+                                //new SimpleDateFormat("MM/dd/yyyy HH:mm:ss").format(finishList.get(i).getTimeEnd()) : "N/A")
+                        );
+                        final String extraMessage = finishList.get(i).getParkingLotName() +
+                                "\n\nCar number: "+ finishList.get(i).getPlateNumber() +
+                                "\nBooked date: " + (finishList.get(i).getBookingTime() != null ?
+                                new SimpleDateFormat("MM/dd/yyyy HH:mm:ss").format(finishList.get(i).getBookingTime()) : "N/A") +
+                                "\nPrice: " + String.format("%.0f", finishList.get(i).getPrice()) +
+                        "\nUsed from: " + (finishList.get(i).getTimeStart() != null ?
+                        new SimpleDateFormat("MM/dd/yyyy HH:mm:ss").format(finishList.get(i).getTimeStart()) : "N/A") +
+                        "\nUsed To: " + (finishList.get(i).getTimeEnd() != null ?
+                        new SimpleDateFormat("MM/dd/yyyy HH:mm:ss").format(finishList.get(i).getTimeEnd()) : "N/A");
+
+
+                        navigationImage.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+
+                                apiInterface.doGetACarPark(new Integer(booking.getParkingLotId())).enqueue(new Callback<ResponseTemplate>() {
+                                    @Override
+                                    public void onResponse(Call<ResponseTemplate> call, Response<ResponseTemplate> response) {
+                                        try {
+                                            selectedLot = (ParkingLot)apiClient.ObjectConverter((response.body().getObjectResponse()), new ParkingLot());
+                                            if(selectedLot != null) {
+                                                LatLng position = new LatLng(selectedLot.getLatitude(), selectedLot.getLongitude());
+                                                LatLngBounds.Builder builder = new LatLngBounds.Builder();
+                                                builder.include(position);
+                                                LatLngBounds bounds = builder.build();
+                                                backButton(hView);
+                                                map.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 8));
+                                            }
+                                        } catch (Exception e) {
+                                            Log.d("TAG", e.toString());
+                                        }
+                                    }
+
+                                    @Override
+                                    public void onFailure(Call<ResponseTemplate> call, Throwable t) {
+                                        String displayResponse = t.toString();
+                                        Log.d("TAG", displayResponse);
+                                    }
+                                });
+                            }
+                        });
+
+                        currentText.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                AlertDialog.Builder alertDialog = new AlertDialog.Builder(UserInterfaceActivity.this);
+                                alertDialog.setTitle("Order detail");
+                                alertDialog.setMessage(extraMessage);
+                                alertDialog.setNegativeButton("Ok", new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        dialog.cancel();
+                                    }
+                                });
+                                alertDialog.show();
+                            }
+                        });
+                        LinearLayout inTable = new LinearLayout(UserInterfaceActivity.this);
+                        inTable.setLayoutParams(layoutParams);
+                        inTable.addView(navigationImage);
+                        inTable.addView(currentText);
+                        inTable.addView(dateText);
+                        inTable.setBackground(sd);
+                        historyTable.addView(inTable);
+                    }
+                    historyScrollView.addView(historyTable);
+
+                } catch (Exception e) {
+                    Log.d("TAG", e.toString());
+                }
+            }
+            @Override
+            public void onFailure(Call<ResponseTemplate> call, Throwable t) {
+                String displayResponse = t.toString();
+                Log.d("TAG", displayResponse);
+                Log.d("TAG", getResources().getString(R.string.fail_message));
+            }
+        });
+    }
 
 }
 
