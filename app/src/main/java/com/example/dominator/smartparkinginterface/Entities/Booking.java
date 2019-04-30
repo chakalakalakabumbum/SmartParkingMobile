@@ -27,11 +27,12 @@ public class Booking {
     private String parkingLotName;
     private float price;
     private String plateNumber;
+    private float cashToPay;
 
     public Booking() {
     }
 
-    public Booking(Integer bookingId, Integer accountId, Integer parkingLotId, Date bookingTime, Date timeStart, Date timeEnd, String tokenInput, String tokenOutput, String bookingStatus, String urlApiCheckIn, String urlApiCheckOut, String parkingLotName, float price, String plateNumber) {
+    public Booking(Integer bookingId, Integer accountId, Integer parkingLotId, Date bookingTime, Date timeStart, Date timeEnd, String tokenInput, String tokenOutput, String bookingStatus, String urlApiCheckIn, String urlApiCheckOut, String parkingLotName, float price, String plateNumber, float cashToPay) {
         this.bookingId = bookingId;
         this.accountId = accountId;
         this.parkingLotId = parkingLotId;
@@ -46,6 +47,7 @@ public class Booking {
         this.parkingLotName = parkingLotName;
         this.price = price;
         this.plateNumber = plateNumber;
+        this.cashToPay = cashToPay;
     }
 
     public Integer getBookingId() {
@@ -158,5 +160,13 @@ public class Booking {
 
     public void setPlateNumber(String plateNumber) {
         this.plateNumber = plateNumber;
+    }
+
+    public float getCashToPay() {
+        return cashToPay;
+    }
+
+    public void setCashToPay(float cashToPay) {
+        this.cashToPay = cashToPay;
     }
 }

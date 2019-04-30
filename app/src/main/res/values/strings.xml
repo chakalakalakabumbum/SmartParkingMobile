@@ -24,6 +24,7 @@
     <integer name="current_connection">100</integer>
     <string name="main_host">localhost</string>
     <integer name="using_socket">443</integer>
+    <integer name="system_mark">3</integer>
 
     <!--Errors-->
     <string name="empty_field">Some required fields are empty</string>
@@ -78,6 +79,13 @@
         <item name="100">100 000</item>
         <item name="200">200 000</item>
         <item name="500">500 000</item>
+    </string-array>
+
+    <string-array name="get_history_arrays">
+        <item name="10">10</item>
+        <item name="25">25</item>
+        <item name="50">50</item>
+        <item name="100">100</item>
     </string-array>
 
 </resources>

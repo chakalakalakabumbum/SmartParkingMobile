@@ -120,7 +120,7 @@ public class LoginActivity extends AppCompatActivity {
         preventClick();
 //        nextActivity();
         if (!emailText.getText().toString().isEmpty() && !passwordText.getText().toString().isEmpty()) {
-            apiInterface.doCheckLogin(new UserLogin(null, emailText.getText().toString(), passwordText.getText().toString())).enqueue(new Callback<ResponseTemplate>() {
+            apiInterface.doCheckLogin(new UserLogin(null, emailText.getText().toString(), passwordText.getText().toString(), getResources().getInteger(R.integer.system_mark))).enqueue(new Callback<ResponseTemplate>() {
                 @Override
                 public void onResponse(Call<ResponseTemplate> call, Response<ResponseTemplate> response) {
                     Log.d("TAG", response.code() + "");

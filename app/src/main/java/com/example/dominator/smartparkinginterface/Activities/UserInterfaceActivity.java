@@ -255,6 +255,7 @@ public class UserInterfaceActivity
     private List<Booking> bookList;
     private List<Booking> useList;
     private List<Booking> finishList;
+    private Spinner historySpinner;
     String counter = "";
     Menu bookingMenu;
     Menu usingMenu;
@@ -263,6 +264,7 @@ public class UserInterfaceActivity
     int sizeOfABookList;
     int positionInAParkList;
     int sizeOfAParkList;
+    int historyAmount;
     ImageView showImage;
     List<CountDownTimer> existTimer;
     ScrollView historyScrollView;
@@ -921,6 +923,7 @@ public class UserInterfaceActivity
         momoLoading = fbDialogue.findViewById(R.id.momo_loading);
 
         amountSpinner = fbDialogue.findViewById(R.id.amount_input);
+        historySpinner = findViewById(R.id.history_amount_spinner);
         momoPassword = fbDialogue.findViewById(R.id.momo_password);
 
 
@@ -1794,7 +1797,16 @@ public class UserInterfaceActivity
     public void makeHistory(View view){
         header.setText(getResources().getString(R.string.history));
         vf.setDisplayedChild(getResources().getInteger(R.integer.HISTORY_SCREEN));
-        apiInterface.doGetBookByStatus(account.getAccountId(), getResources().getString(R.string.status_finish), getResources().getInteger(R.integer.history_limit)).enqueue(new Callback<ResponseTemplate>() {
+        try {
+            historyAmount = Integer.valueOf(historySpinner.getSelectedItem().toString().trim().replaceAll("\\s+", ""));
+            if (historyAmount <= 0) {
+                historyAmount = 10;
+            }
+        }
+        catch (Exception e){
+            historyAmount = 10;
+        }
+        apiInterface.doGetBookByStatus(account.getAccountId(), getResources().getString(R.string.status_finish), historyAmount).enqueue(new Callback<ResponseTemplate>() {
             @Override
             public void onResponse(Call<ResponseTemplate> call, Response<ResponseTemplate> response) {
                 try {
@@ -1813,7 +1825,7 @@ public class UserInterfaceActivity
                     historyTable.setLayoutParams(params);
                     LinearLayout outerLinear = new LinearLayout(UserInterfaceActivity.this);
                     outerLinear.setLayoutParams(params);
-                    LinearLayout.LayoutParams iconParams=new LinearLayout.LayoutParams(150, 160);
+                    LinearLayout.LayoutParams iconParams=new LinearLayout.LayoutParams(100, 100);
                     iconParams.gravity=Gravity.LEFT;
                     ShapeDrawable sd = new ShapeDrawable();
                     sd.setShape(new RectShape());
@@ -1823,39 +1835,48 @@ public class UserInterfaceActivity
 
                     for(int i = 0; i < finishList.size() ; i++){
                         TextView currentText = new TextView(UserInterfaceActivity.this);
+                        TextView headerText = new TextView(UserInterfaceActivity.this);
+
                         TextView dateText = new TextView(UserInterfaceActivity.this);
                         dateText.setGravity(Gravity.RIGHT | Gravity.TOP);
                         dateText.setTextAlignment(View.TEXT_ALIGNMENT_VIEW_END);
                         dateText.setTextColor(getColor(R.color.foregroundText));
                         ImageView navigationImage = new ImageView(UserInterfaceActivity.this);
-                        currentText.setGravity(Gravity.LEFT);
-                        currentText.setTypeface(null, Typeface.BOLD);
                         navigationImage.setImageDrawable(getDrawable(R.drawable.finder_icon));
                         navigationImage.setLayoutParams(iconParams);
                         //currentText.setLayoutParams(params);
-                        currentText.setTextAppearance(R.drawable.button_color);
                         currentText.setTextAlignment(View.TEXT_ALIGNMENT_TEXT_START);
+                        headerText.setTextAlignment(View.TEXT_ALIGNMENT_TEXT_START);
                         currentText.setTextColor(getColor(R.color.foregroundText));
+                        headerText.setTextColor(getColor(R.color.foregroundText));
                         currentText.setWidth(400);
-                        dateText.setText(new SimpleDateFormat("MM/dd/yyyy").format(finishList.get(i).getBookingTime()));
-                        currentText.setText(
-                                    finishList.get(i).getParkingLotName() +
-                                            "\n" + (finishList.get(i).getPlateNumber() == null? "N/A": finishList.get(i).getPlateNumber())  +
-                                    "\n\nPrice: " + String.format("%.0f", finishList.get(i).getPrice())
+                        headerText.setWidth(400);
+                        headerText.setTextSize(15);
+                        headerText.setTypeface(null, Typeface.BOLD);
+                        try {
+                            dateText.setText(new SimpleDateFormat("MM/dd/yyyy").format(finishList.get(i).getBookingTime()));
+                        }
+                        catch (Exception e){
+                            dateText.setText("N/A");
+                        }
+                        headerText.setText((finishList.get(i).getParkingLotName()!=null?finishList.get(i).getParkingLotName():"N/A"));
+                        currentText.setText((finishList.get(i).getPlateNumber() == null? "N/A": finishList.get(i).getPlateNumber())  +
+                                    "\n\nTotal: " + (finishList.get(i).getCashToPay() != 0 ? String.format("%.0f", finishList.get(i).getCashToPay()) : "N/A")
                                 //"\n Used from: " + (finishList.get(i).getTimeStart() != null ?
                                 //new SimpleDateFormat("MM/dd/yyyy HH:mm:ss").format(finishList.get(i).getTimeStart()) : "N/A") +
                                 //"\n Used To: " + (finishList.get(i).getTimeEnd() != null ?
                                 //new SimpleDateFormat("MM/dd/yyyy HH:mm:ss").format(finishList.get(i).getTimeEnd()) : "N/A")
                         );
-                        final String extraMessage = finishList.get(i).getParkingLotName() +
-                                "\n\nCar number: "+ finishList.get(i).getPlateNumber() +
+                        final String extraMessage = "Car park: " + (finishList.get(i).getParkingLotName()!=null?finishList.get(i).getParkingLotName():"N/A") +
+                                "\nPrice: " + String.format("%.0f", finishList.get(i).getPrice()) +
+                                "\n\nCar number: "+ (finishList.get(i).getPlateNumber()!=null? finishList.get(i).getPlateNumber() : "N/A") +
                                 "\nBooked date: " + (finishList.get(i).getBookingTime() != null ?
                                 new SimpleDateFormat("MM/dd/yyyy HH:mm:ss").format(finishList.get(i).getBookingTime()) : "N/A") +
-                                "\nPrice: " + String.format("%.0f", finishList.get(i).getPrice()) +
                         "\nUsed from: " + (finishList.get(i).getTimeStart() != null ?
                         new SimpleDateFormat("MM/dd/yyyy HH:mm:ss").format(finishList.get(i).getTimeStart()) : "N/A") +
                         "\nUsed To: " + (finishList.get(i).getTimeEnd() != null ?
-                        new SimpleDateFormat("MM/dd/yyyy HH:mm:ss").format(finishList.get(i).getTimeEnd()) : "N/A");
+                        new SimpleDateFormat("MM/dd/yyyy HH:mm:ss").format(finishList.get(i).getTimeEnd()) : "N/A") +
+                                "\nTotal: " + (finishList.get(i).getCashToPay() != 0 ? String.format("%.0f", finishList.get(i).getCashToPay()) : "N/A");
 
 
                         navigationImage.setOnClickListener(new View.OnClickListener() {
@@ -1904,9 +1925,12 @@ public class UserInterfaceActivity
                             }
                         });
                         LinearLayout inTable = new LinearLayout(UserInterfaceActivity.this);
+                        TableLayout upAndDown = new TableLayout(UserInterfaceActivity.this);
+                        upAndDown.addView(headerText);
+                        upAndDown.addView(currentText);
                         inTable.setLayoutParams(layoutParams);
                         inTable.addView(navigationImage);
-                        inTable.addView(currentText);
+                        inTable.addView(upAndDown);
                         inTable.addView(dateText);
                         inTable.setBackground(sd);
                         historyTable.addView(inTable);
